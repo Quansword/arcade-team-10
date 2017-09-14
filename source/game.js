@@ -8,6 +8,8 @@ window.onload = function ()
 		var keyState;
 		var player;
 		var playerSpeed = 500;
+		var pVelocityX;
+		var pVelocityY;
 
 		var scoreText;
 		function preload()
@@ -29,35 +31,58 @@ window.onload = function ()
 			player.body.collideWorldBounds = true;
 
 			scoreText = game.add.text(5, 3, score);
+
+			pVelocity = velocity;
 		}
 
-		function update()
+		function update(time)
 		{
-			if (keyState.up.isDown)
+			pVelocityX = 0;
+			pVelocityY = 0;
+
+			if ((keyState.up.isDown || keyState.down.isDown) && (keyState.right.isDown || keyState.left.isDown) && !((keyState.up.isDown && keyState.down.isDown) || (keyState.left.isDown && keyState.right.isDown)))
 			{
-				player.body.velocity.y = -playerSpeed;
-			}
-			else if (keyState.down.isDown)
-			{
-				player.body.velocity.y = playerSpeed;
+				if (keyState.up.isDown)
+				{
+					pVelocityY -= Math.sqrt(Math.pow(playerSpeed, 2) / 2);
+				}
+				else
+				{
+					pVelocityY += Math.sqrt(Math.pow(playerSpeed, 2) / 2);
+				}
+
+				if (keyState.left.isDown)
+				{
+					pVelocityX -= Math.sqrt(Math.pow(playerSpeed, 2) / 2);
+				}
+				else
+				{
+					pVelocityX += Math.sqrt(Math.pow(playerSpeed, 2) / 2);
+				}
 			}
 			else
 			{
-				player.body.velocity.y = 0;
+				if (keyState.up.isDown)
+				{
+					pVelocityY -= playerSpeed;
+				}
+				if (keyState.down.isDown)
+				{
+					pVelocityY += playerSpeed;
+				}
+
+				if (keyState.left.isDown)
+				{
+					pVelocityX -= playerSpeed;
+				}
+				if (keyState.right.isDown)
+				{
+					pVelocityX += playerSpeed;
+				}
 			}
 
-			if (keyState.left.isDown)
-			{
-				player.body.velocity.x = -playerSpeed;
-			}
-			else if (keyState.right.isDown)
-			{
-				player.body.velocity.x = playerSpeed;
-			}
-			else
-			{
-				player.body.velocity.x = 0;
-			}
+			player.body.velocity.y = pVelocityY;
+			player.body.velocity.x = pVelocityX;
 		}
 
 		function fullScreen()
