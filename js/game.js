@@ -2,7 +2,7 @@
         //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
         //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
         //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
-        var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create });
+        var game = new Phaser.Game(1600, 900, Phaser.AUTO, '', { preload: preload, create: create });
         function preload () {
             game.load.image('logo', 'phaser.png');
         }
