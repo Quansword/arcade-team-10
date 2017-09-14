@@ -2,11 +2,11 @@
         //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
         //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
         //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
-        var game = new Phaser.Game(1600, 900, Phaser.AUTO, '', { preload: preload, create: create, update: update});
+        var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', { preload: preload, create: create, update: update});
         
         var keyState;
         var player;
-        var playerSpeed = 175;
+        var playerSpeed = 500;
 
         var scoreText;
         function preload () {
@@ -15,6 +15,7 @@
         }
 
         function create () {
+            fullScreen();
             game.physics.startSystem(Phaser.Physics.ARCADE);
 
             keyState = game.input.keyboard.createCursorKeys();
@@ -47,5 +48,12 @@
             else {
                 player.body.velocity.x = 0;
             }
+        }
+
+        function fullScreen(){
+            game.scale.pageAlignHorizontally = true;
+            game.scale.pageAlignVertically = true;
+            game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+            game.scale.setScreenSize(true);
         }
     };
