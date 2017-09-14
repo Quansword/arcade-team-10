@@ -31,8 +31,6 @@ window.onload = function ()
 			player.body.collideWorldBounds = true;
 
 			scoreText = game.add.text(5, 3, score);
-
-			pVelocity = velocity;
 		}
 
 		function update(time)
