@@ -2,37 +2,18 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <title>hello phaser!</title>
-        <script src="//cdn.jsdelivr.net/phaser/2.5.0/phaser.min.js"></script>
+        <title>Arcade Team 10</title>
+        <style type="text/css">
+            body
+            {
+                background: #000000;
+                padding:0px;
+                margin:0px;
+            }
+        </style>
+        <script src="js/phaser.min.js"></script>
+        <script src = "js/game.js"></script>
     </head>
     <body>
-
-    <script type="text/javascript">
-
-    window.onload = function() {
-
-        //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
-        //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
-        //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
-
-        var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create });
-
-        function preload () {
-
-            game.load.image('logo', 'phaser.png');
-
-        }
-
-        function create () {
-
-            var logo = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
-            logo.anchor.setTo(0.5, 0.5);
-
-        }
-
-    };
-
-    </script>
-
     </body>
 </html>
