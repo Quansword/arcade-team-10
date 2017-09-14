@@ -1,4 +1,5 @@
-    window.onload = function() {
+window.onload = function ()
+{
         //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
         //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
         //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
@@ -9,12 +10,14 @@
         var playerSpeed = 500;
 
         var scoreText;
-        function preload () {
+		function preload()
+		{
             game.stage.backgroundColor = '#eee';
             game.load.image('logo', 'asset/phaser.png');
         }
 
-        function create () {
+		function create()
+		{
             fullScreen();
             game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -28,29 +31,37 @@
             scoreText = game.add.text(5, 3, score);
         }
 
-        function update(){
-            if(keyState.up.isDown){
+		function update()
+		{
+			if (keyState.up.isDown)
+			{
                 player.body.velocity.y = -playerSpeed;
             }
-            else if (keyState.down.isDown) {
+			else if (keyState.down.isDown)
+			{
                 player.body.velocity.y = playerSpeed;
             }
-            else {
+			else
+			{
                 player.body.velocity.y = 0;
             }
 
-            if (keyState.left.isDown) {
+			if (keyState.left.isDown)
+			{
                 player.body.velocity.x = -playerSpeed;
             }
-            else if (keyState.right.isDown) {
+			else if (keyState.right.isDown)
+			{
                 player.body.velocity.x = playerSpeed;
             }
-            else {
+			else
+			{
                 player.body.velocity.x = 0;
             }
         }
 
-        function fullScreen(){
+		function fullScreen()
+		{
             game.scale.pageAlignHorizontally = true;
             game.scale.pageAlignVertically = true;
             game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
