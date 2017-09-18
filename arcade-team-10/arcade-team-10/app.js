@@ -41,12 +41,10 @@ window.onload = function () {
         player.pUpdate(deltaTime, keyState, pAim);
     }
     function fullScreen() {
-        //game.scale.pageAlignHorizontally = true;
-        //game.scale.pageAlignVertically = true;
-        //game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        game.scale.height = 720;
-        game.scale.width = 1280;
-        //game.scale.setScreenSize(true);
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVertically = true;
+        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        game.scale.setGameSize(1280, 720);
     }
 };
 var Player = (function (_super) {
