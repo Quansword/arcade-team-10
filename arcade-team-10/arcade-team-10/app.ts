@@ -3,14 +3,16 @@
 	//  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
 	//  Although it will work fine with this tutorial, it's almost certainly not the most current version.
 	//  Be sure to replace it with an updated version before you start experimenting with adding your own code.
-	var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', { preload: preload, create: create, update: update });
-    var background;
-    var walls;
+    var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 	let keyState: Phaser.Keyboard;
 	let player: Player;
 	//let pAim: Phaser.Sprite;
 
+    var walls;
+    let background : Phaser.Sprite;
+
 	var scoreText;
+    var score;
 
 	function preload()
 	{
@@ -26,22 +28,22 @@
         game.load.image('wall', 'assets/wall.png');
 	}
 
-	function create()
-	{
-		fullScreen();
-		game.physics.startSystem(Phaser.Physics.ARCADE);
-        var background = game.add.sprite(0, 0, 'background');
+    function create() {
+        fullScreen();
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        background = game.add.sprite(0, 0, 'background');
         background.scale.setTo(4, 3);
 
         createWalls();
-		player = new Player(game);
-		game.add.existing(player);
+        player = new Player(game);
+        game.add.existing(player);
 
-		//pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
-		//pAim.anchor.setTo(0.5, 0.5);
-		//pAim.scale.setTo(0.2);
+        //pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
+        //pAim.anchor.setTo(0.5, 0.5);
+        //pAim.scale.setTo(0.2);
 
-		//scoreText = game.add.text(5, 3, score);
+        var style =  { font: "bold 32px Arial", fill: '#fff' };
+        scoreText = game.add.text(5, 5, '0', style);
 	}
 
 	function update()
@@ -58,6 +60,8 @@
                                     {
                                         bullet.kill();
                                     });
+        score = 100;
+        scoreText.text = score;
 	}
 
 	function fullScreen()

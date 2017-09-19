@@ -1,24 +1,20 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 window.onload = function () {
     //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
     //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
     //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
     var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', { preload: preload, create: create, update: update });
-    var background;
-    var walls;
     var keyState;
     var player;
     //let pAim: Phaser.Sprite;
+    var walls;
+    var background;
     var scoreText;
+    var score;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.image('pAttack', 'assets/Testchar_side.png');
@@ -33,7 +29,7 @@ window.onload = function () {
     function create() {
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
-        var background = game.add.sprite(0, 0, 'background');
+        background = game.add.sprite(0, 0, 'background');
         background.scale.setTo(4, 3);
         createWalls();
         player = new Player(game);
@@ -41,7 +37,8 @@ window.onload = function () {
         //pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
         //pAim.anchor.setTo(0.5, 0.5);
         //pAim.scale.setTo(0.2);
-        //scoreText = game.add.text(5, 3, score);
+        var style = { font: "bold 32px Arial", fill: '#fff' };
+        scoreText = game.add.text(5, 5, '0', style);
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -51,6 +48,8 @@ window.onload = function () {
         game.physics.arcade.collide(player.weapon.bullets, walls, function (bullet, wall) {
             bullet.kill();
         });
+        score = 100;
+        scoreText.text = score;
     }
     function fullScreen() {
         game.scale.pageAlignHorizontally = true;
@@ -91,20 +90,19 @@ var Wall = (function () {
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(game) {
-        var _this = _super.call(this, game, screen.width / 2, screen.height / 2, 'pRight') || this;
-        _this.exists = true;
-        _this.anchor.setTo(0.5, 0.5);
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.collideWorldBounds = true;
-        _this.maxHealth = 1;
-        _this.aim = false;
-        _this.pVelocityX = 0;
-        _this.pVelocityY = 0;
-        _this.pSpeed = 500;
-        _this.weapon = game.add.weapon(100, 'testBullet');
-        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 200;
-        return _this;
+        _super.call(this, game, screen.width / 2, screen.height / 2, 'pRight');
+        this.exists = true;
+        this.anchor.setTo(0.5, 0.5);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.collideWorldBounds = true;
+        this.maxHealth = 1;
+        this.aim = false;
+        this.pVelocityX = 0;
+        this.pVelocityY = 0;
+        this.pSpeed = 500;
+        this.weapon = game.add.weapon(100, 'testBullet');
+        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.weapon.bulletSpeed = 200;
     }
     Player.prototype.pUpdate = function (time, keyState) {
         this.pVelocityX = 0;
@@ -216,4 +214,3 @@ var Player = (function (_super) {
     };
     return Player;
 }(Phaser.Sprite));
-//# sourceMappingURL=app.js.map
