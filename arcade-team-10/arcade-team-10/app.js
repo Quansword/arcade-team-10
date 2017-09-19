@@ -48,6 +48,9 @@ window.onload = function () {
         keyState = game.input.keyboard;
         player.pUpdate(deltaTime, keyState);
         game.physics.arcade.collide(walls, player);
+        game.physics.arcade.collide(player.weapon.bullets, walls, function (bullet, wall) {
+            bullet.kill();
+        });
     }
     function fullScreen() {
         game.scale.pageAlignHorizontally = true;

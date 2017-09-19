@@ -11,6 +11,7 @@
 	//let pAim: Phaser.Sprite;
 
 	var scoreText;
+
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -51,6 +52,12 @@
 
 		player.pUpdate(deltaTime, keyState);
         game.physics.arcade.collide(walls, player);
+        game.physics.arcade.collide(player.weapon.bullets,
+                                    walls,
+                                    function (bullet, wall)
+                                    {
+                                        bullet.kill();
+                                    });
 	}
 
 	function fullScreen()
