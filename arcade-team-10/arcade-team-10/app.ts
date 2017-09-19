@@ -4,7 +4,7 @@
 	//  Although it will work fine with this tutorial, it's almost certainly not the most current version.
 	//  Be sure to replace it with an updated version before you start experimenting with adding your own code.
 	var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', { preload: preload, create: create, update: update });
-
+    var background;
 	let keyState: Phaser.Keyboard;
 	let player: Player;
 	//let pAim: Phaser.Sprite;
@@ -19,12 +19,16 @@
 		game.load.image('pDown', 'assets/Testchar_down.png');
 		game.load.image('pAim', 'assets/phaser.png');
 		game.load.image('testBullet', 'assets/temp.png');
+
+        game.load.image('background', 'assets/Maze1.png');
 	}
 
 	function create()
 	{
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
+        var background = game.add.sprite(0, 0, 'background');
+        background.scale.setTo(4, 3);
 
 		player = new Player(game);
 		game.add.existing(player);

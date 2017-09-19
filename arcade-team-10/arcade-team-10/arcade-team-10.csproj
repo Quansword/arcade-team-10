@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app.css" />
+    <Content Include="assets\Maze1.png" />
     <Content Include="assets\phaser.png" />
     <Content Include="assets\Testchar_down.png" />
     <Content Include="assets\Testchar_left.png" />
