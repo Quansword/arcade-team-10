@@ -98,28 +98,28 @@ window.onload = function () {
     }
     function createWalls() {
         walls = game.add.physicsGroup();
-        var wall1 = new Wall(145, 35, 400, 10, game, walls);
-        var wall2 = new Wall(735, 35, 400, 10, game, walls);
-        var wall3 = new Wall(735, 650, 400, 10, game, walls);
-        var wall4 = new Wall(145, 650, 400, 10, game, walls);
-        var wall5 = new Wall(145, 240, 220, 10, game, walls);
-        var wall6 = new Wall(735, 240, 400, 10, game, walls);
-        var wall7 = new Wall(145, 450, 220, 10, game, walls);
-        var wall8 = new Wall(145, 35, 10, 200, game, walls);
-        var wall9 = new Wall(145, 450, 10, 200, game, walls);
-        var wall10 = new Wall(735, 450, 10, 200, game, walls);
-        var wall11 = new Wall(1120, 450, 10, 200, game, walls);
-        var wall12 = new Wall(1120, 35, 10, 200, game, walls);
-        var wall13 = new Wall(530, 250, 10, 200, game, walls);
-        var wall14 = new Wall(530, 440, 220, 10, game, walls);
+        var wall1 = new Barrier(145, 35, 400, 10, game, walls, 'wall');
+        var wall2 = new Barrier(735, 35, 400, 10, game, walls, 'wall');
+        var wall3 = new Barrier(735, 650, 400, 10, game, walls, 'wall');
+        var wall4 = new Barrier(145, 650, 400, 10, game, walls, 'wall');
+        var wall5 = new Barrier(145, 240, 220, 10, game, walls, 'wall');
+        var wall6 = new Barrier(735, 240, 400, 10, game, walls, 'wall');
+        var wall7 = new Barrier(145, 450, 220, 10, game, walls, 'wall');
+        var wall8 = new Barrier(145, 35, 10, 200, game, walls, 'wall');
+        var wall9 = new Barrier(145, 450, 10, 200, game, walls, 'wall');
+        var wall10 = new Barrier(735, 450, 10, 200, game, walls, 'wall');
+        var wall11 = new Barrier(1120, 450, 10, 200, game, walls, 'wall');
+        var wall12 = new Barrier(1120, 35, 10, 200, game, walls, 'wall');
+        var wall13 = new Barrier(530, 250, 10, 200, game, walls, 'wall');
+        var wall14 = new Barrier(530, 440, 220, 10, game, walls, 'wall');
         walls.enableBody = true;
     }
     function createGates() {
         gates = game.add.physicsGroup();
-        gate1 = new Gate(540, 35, 200, 10, game, gates);
-        gate2 = new Gate(540, 650, 200, 10, game, gates);
-        gate3 = new Gate(145, 250, 10, 190, game, gates);
-        gate4 = new Gate(1120, 250, 10, 190, game, gates);
+        gate1 = new Barrier(540, 35, 200, 10, game, gates, 'gate');
+        gate2 = new Barrier(540, 650, 200, 10, game, gates, 'gate');
+        gate3 = new Barrier(145, 250, 10, 190, game, gates, 'gate');
+        gate4 = new Barrier(1120, 250, 10, 190, game, gates, 'gate');
         gates.enableBody = true;
     }
     function screenTransition(player, gate) {
@@ -167,29 +167,18 @@ window.onload = function () {
         bullet.kill();
     }
 };
-var Wall = (function () {
-    function Wall(xPos, yPos, width, height, game, walls) {
-        var wall = game.add.sprite(xPos, yPos, 'wall');
-        wall.scale.setTo(width, height);
-        game.physics.arcade.enable(wall);
-        wall.body.immovable = true;
-        wall.renderable = false;
-        walls.add(wall);
-    }
-    return Wall;
-}());
-var Gate = (function (_super) {
-    __extends(Gate, _super);
-    function Gate(xPos, yPos, width, height, game, gates) {
-        var _this = _super.call(this, game, xPos, yPos, 'gate') || this;
+var Barrier = (function (_super) {
+    __extends(Barrier, _super);
+    function Barrier(xPos, yPos, width, height, game, group, type) {
+        var _this = _super.call(this, game, xPos, yPos, type) || this;
         _this.scale.setTo(width, height);
         game.physics.arcade.enable(_this);
         _this.body.immovable = true;
         _this.renderable = false;
-        gates.add(_this);
+        group.add(_this);
         return _this;
     }
-    return Gate;
+    return Barrier;
 }(Phaser.Sprite));
 var Player = (function (_super) {
     __extends(Player, _super);

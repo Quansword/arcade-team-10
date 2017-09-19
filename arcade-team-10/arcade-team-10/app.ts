@@ -11,10 +11,10 @@
 
 	let walls: Phaser.Group;
 	var gates;
-	let gate1: Gate;
-	let gate2: Gate;
-	let gate3: Gate;
-	let gate4: Gate;
+	let gate1: Barrier;
+	let gate2: Barrier;
+	let gate3: Barrier;
+	let gate4: Barrier;
 	let background: Phaser.Sprite;
 
 	let scoreText: Phaser.Text;
@@ -123,20 +123,20 @@
 	{
 		walls = game.add.physicsGroup();
 
-		var wall1 = new Wall(145, 35, 400, 10, game, walls);
-		var wall2 = new Wall(735, 35, 400, 10, game, walls);
-		var wall3 = new Wall(735, 650, 400, 10, game, walls);
-		var wall4 = new Wall(145, 650, 400, 10, game, walls);
-		var wall5 = new Wall(145, 240, 220, 10, game, walls);
-		var wall6 = new Wall(735, 240, 400, 10, game, walls);
-		var wall7 = new Wall(145, 450, 220, 10, game, walls);
-		var wall8 = new Wall(145, 35, 10, 200, game, walls);
-		var wall9 = new Wall(145, 450, 10, 200, game, walls);
-		var wall10 = new Wall(735, 450, 10, 200, game, walls);
-		var wall11 = new Wall(1120, 450, 10, 200, game, walls);
-		var wall12 = new Wall(1120, 35, 10, 200, game, walls);
-		var wall13 = new Wall(530, 250, 10, 200, game, walls);
-		var wall14 = new Wall(530, 440, 220, 10, game, walls);
+		var wall1 = new Barrier(145, 35, 400, 10, game, walls, 'wall');
+		var wall2 = new Barrier(735, 35, 400, 10, game, walls, 'wall');
+		var wall3 = new Barrier(735, 650, 400, 10, game, walls, 'wall');
+		var wall4 = new Barrier(145, 650, 400, 10, game, walls, 'wall');
+		var wall5 = new Barrier(145, 240, 220, 10, game, walls, 'wall');
+		var wall6 = new Barrier(735, 240, 400, 10, game, walls, 'wall');
+		var wall7 = new Barrier(145, 450, 220, 10, game, walls, 'wall');
+		var wall8 = new Barrier(145, 35, 10, 200, game, walls, 'wall');
+		var wall9 = new Barrier(145, 450, 10, 200, game, walls, 'wall');
+		var wall10 = new Barrier(735, 450, 10, 200, game, walls, 'wall');
+		var wall11 = new Barrier(1120, 450, 10, 200, game, walls, 'wall');
+		var wall12 = new Barrier(1120, 35, 10, 200, game, walls, 'wall');
+		var wall13 = new Barrier(530, 250, 10, 200, game, walls, 'wall');
+		var wall14 = new Barrier(530, 440, 220, 10, game, walls, 'wall');
 
 		walls.enableBody = true;
 	}
@@ -145,15 +145,15 @@
 	{
 		gates = game.add.physicsGroup();
 
-		gate1 = new Gate(540, 35, 200, 10, game, gates);
-		gate2 = new Gate(540, 650, 200, 10, game, gates);
-		gate3 = new Gate(145, 250, 10, 190, game, gates);
-		gate4 = new Gate(1120, 250, 10, 190, game, gates);
+		gate1 = new Barrier(540, 35, 200, 10, game, gates, 'gate');
+		gate2 = new Barrier(540, 650, 200, 10, game, gates, 'gate');
+		gate3 = new Barrier(145, 250, 10, 190, game, gates, 'gate');
+		gate4 = new Barrier(1120, 250, 10, 190, game, gates, 'gate');
 
 		gates.enableBody = true;
 	}
 
-	function screenTransition(player: Player, gate: Gate)
+	function screenTransition(player: Player, gate: Barrier)
 	{
 		gates.forEach(function (item)
 		{
@@ -186,7 +186,7 @@
 		}
 	}
 
-	function killPlayer(player: Player, wall: Wall)
+	function killPlayer(player: Player, wall: Barrier)
 	{
 		var life = lives.getFirstAlive();
 
@@ -210,37 +210,22 @@
 		score += 50;
 	}
 
-	function killBullet(bullet: Phaser.Bullet, wall: Wall)
+	function killBullet(bullet: Phaser.Bullet, wall: Barrier)
 	{
 		bullet.kill();
 	}
 };
 
-class Wall
+class Barrier extends Phaser.Sprite 
 {
-	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game, walls)
+	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game, group : Phaser.Group, type : string)
 	{
-		var wall = game.add.sprite(xPos, yPos, 'wall');
-		wall.scale.setTo(width, height);
-		game.physics.arcade.enable(wall);
-		wall.body.immovable = true;
-		wall.renderable = false;
-		walls.add(wall);
-	}
-}
-
-class Gate extends Phaser.Sprite
-{
-	direction: number;
-
-	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game, gates)
-	{
-		super(game, xPos, yPos, 'gate');
+		super(game, xPos, yPos, type);
 		this.scale.setTo(width, height);
 		game.physics.arcade.enable(this);
 		this.body.immovable = true;
 		this.renderable = false;
-		gates.add(this);
+		group.add(this);
 	}
 }
 
