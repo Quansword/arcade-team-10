@@ -44,6 +44,7 @@
 
         var style =  { font: "bold 32px Arial", fill: '#fff' };
         scoreText = game.add.text(5, 5, '0', style);
+        score = 0;
 	}
 
 	function update()
@@ -60,7 +61,6 @@
                                     {
                                         bullet.kill();
                                     });
-        score = 100;
         scoreText.text = score;
 	}
 
@@ -92,6 +92,11 @@
         var wall14 = new Wall(530, 440, 220, 10, game, walls);
 
         walls.enableBody = true;
+    }
+
+    function destroyMonster()
+    {
+        score += 50;
     }
 };
 
