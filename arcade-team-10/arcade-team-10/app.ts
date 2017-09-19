@@ -7,7 +7,7 @@
 
 	let keyState: Phaser.Keyboard;
 	let player: Player;
-	let enemies: Phaser.Group;
+	var enemies;
 	let enemyBullets: Phaser.Group;
 
 	let walls: Phaser.Group;
@@ -79,11 +79,6 @@
 
 		keyState = game.input.keyboard;
 
-		game.physics.arcade.collide(player, enemies);
-		game.physics.arcade.collide(enemies, enemies);
-		game.physics.arcade.overlap(enemyBullets, player, bulletHitPlayer, null, this); // -----------------------------------------------------Enemy code
-		game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this); // -----------------------------------------------------Enemy code
-
 		player.pUpdate(deltaTime, keyState);
 		enemies.forEach(function (enemy)
 		{
@@ -93,8 +88,18 @@
 		game.physics.arcade.collide(player, walls, killPlayer);
 		game.physics.arcade.collide(enemies, walls);
 		game.physics.arcade.collide(player, gates, screenTransition);
+
 		game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
 		game.physics.arcade.collide(enemyBullets, walls, killBullet);
+
+		game.physics.arcade.collide(player, enemies);
+		game.physics.arcade.collide(enemies, enemies);
+
+		game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
+		for (var i = 0; i < enemies.children.length; i++)
+		{
+			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
+		}
 
 		scoreText.text = score;
 	}
