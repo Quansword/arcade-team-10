@@ -45,14 +45,15 @@
         //pAim.anchor.setTo(0.5, 0.5);
         //pAim.scale.setTo(0.2);
 
-        var style =  { font: "bold 64px Arial", fill: '#fff' };
-        scoreText = game.add.text(game.world.width - 300, 5, '0', style);
+        var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
+        scoreText = game.add.text(game.world.width - 100, 5, '0', style);
+        scoreText.setTextBounds(-50, 0, 100, 100);
         score = 0;
 
         lives = game.add.group();
-        for (var i = 0; i < 3; i++)
+        for (var i = 0; i < player.lives; i++)
         {
-            var life = lives.create(50 + (30 * i), 30, 'life');
+            var life = lives.create(20 + (30 * i), 30, 'life');
             life.anchor.setTo(0.5, 0.5);
         }
 	}
@@ -102,7 +103,20 @@
 
     function killPlayer(player, wall)
     {
+        var life = lives.getFirstAlive();
 
+        if (life)
+        {
+            life.kill();
+            player.lives--;
+            player.body.position.x = 300;
+            player.body.position.y = 300;
+        }
+
+        if (player.lives < 1)
+        {
+            score = "Game Over";
+        }
     }
 
     function killEnemy()
@@ -135,6 +149,7 @@ class Player extends Phaser.Sprite
 	pVelocityY: number;
 	pSpeed: number;
 	weapon: Phaser.Weapon;
+    lives: number;
 
 	constructor(xPos : number, yPos : number, game: Phaser.Game)
 	{
@@ -155,6 +170,8 @@ class Player extends Phaser.Sprite
 		this.weapon = game.add.weapon(100, 'testBullet');
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 200;
+
+        this.lives = 3;
 	}
 
 	pUpdate(time: number, keyState: Phaser.Keyboard)
