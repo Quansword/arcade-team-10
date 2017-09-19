@@ -15,6 +15,7 @@ window.onload = function () {
     var background;
     var scoreText;
     var score;
+    var lives;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.image('pAttack', 'assets/Testchar_side.png');
@@ -25,6 +26,7 @@ window.onload = function () {
         game.load.image('testBullet', 'assets/temp.png');
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
+        game.load.image('life', 'assets/life.png');
     }
     function create() {
         fullScreen();
@@ -37,9 +39,15 @@ window.onload = function () {
         //pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
         //pAim.anchor.setTo(0.5, 0.5);
         //pAim.scale.setTo(0.2);
-        var style = { font: "bold 32px Arial", fill: '#fff' };
-        scoreText = game.add.text(5, 5, '0', style);
+        var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
+        scoreText = game.add.text(game.world.width - 100, 5, '0', style);
+        scoreText.setTextBounds(-50, 0, 100, 100);
         score = 0;
+        lives = game.add.group();
+        for (var i = 0; i < player.lives; i++) {
+            var life = lives.create(20 + (30 * i), 30, 'life');
+            life.anchor.setTo(0.5, 0.5);
+        }
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -74,6 +82,16 @@ window.onload = function () {
         walls.enableBody = true;
     }
     function killPlayer(player, wall) {
+        var life = lives.getFirstAlive();
+        if (life) {
+            life.kill();
+            player.lives--;
+            player.body.position.x = 300;
+            player.body.position.y = 300;
+        }
+        if (player.lives < 1) {
+            score = "Game Over";
+        }
     }
     function killEnemy() {
         score += 50;
@@ -110,6 +128,7 @@ var Player = (function (_super) {
         this.weapon = game.add.weapon(100, 'testBullet');
         this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         this.weapon.bulletSpeed = 200;
+        this.lives = 3;
     }
     Player.prototype.pUpdate = function (time, keyState) {
         this.pVelocityX = 0;
