@@ -7,6 +7,7 @@
 
 	let keyState: Phaser.Keyboard;
 	let player: Player;
+	let enemy: Enemy; // -----------------------------------------------------Enemy code
 
 	let walls: Phaser.Group;
 	var gates;
@@ -48,6 +49,9 @@
 		player = new Player(300, 350, game);
 		game.add.existing(player);
 
+		enemy = new Enemy(500, 500, game); // -----------------------------------------------------Enemy code
+		game.add.existing(enemy); // -----------------------------------------------------Enemy code
+
 		var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
 		scoreText = game.add.text(game.world.width - 100, 5, '0', style);
 		scoreText.setTextBounds(-50, 0, 100, 100);
@@ -67,6 +71,9 @@
 
 		keyState = game.input.keyboard;
 
+		game.physics.arcade.overlap(enemy.weapon.bullets, player, bulletHitPlayer, null, this); // -----------------------------------------------------Enemy code
+		game.physics.arcade.overlap(player.weapon.bullets, enemy, bulletHitEnemy, null, this); // -----------------------------------------------------Enemy code
+
 		player.pUpdate(deltaTime, keyState);
 		game.physics.arcade.collide(player, walls, killPlayer);
 		game.physics.arcade.collide(player, gates, screenTransition);
@@ -81,6 +88,35 @@
 		game.scale.pageAlignVertically = true;
 		game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 		game.scale.setGameSize(1280, 720);
+	}
+
+	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
+	{
+		bullet.kill();
+		var life = lives.getFirstAlive();
+
+		if (life)
+		{
+			life.kill();
+			player.kill();
+			player.lives--;
+			player.reset(300, 300, 1);
+		}
+
+		if (player.lives < 1)
+		{
+			score = "Game Over";
+			player.kill();
+		}
+	}
+
+	function bulletHitEnemy(enemy: Enemy, bullet: Phaser.Bullet) // -----------------------------------------------------Enemy code
+	{
+		bullet.kill();
+
+		enemy.kill();
+		killEnemy();
+		enemy.reset(1000, 300, 1);
 	}
 
 	function createWalls()
@@ -377,6 +413,188 @@ class Player extends Phaser.Sprite
 
 		this.body.velocity.y = this.pVelocityY * time;
 		this.body.velocity.x = this.pVelocityX * time;
+
+		this.aim = false;
+	}
+}
+
+class Enemy extends Phaser.Sprite // -----------------------------------------------------Enemy code
+{
+	aim: boolean;
+	eVelocityX: number;
+	eVelocityY: number;
+	eSpeed: number;
+	weapon: Phaser.Weapon;
+
+	eMoveUp: boolean;
+	eMoveDown: boolean;
+	eMoveLeft: boolean;
+	eMoveRight: boolean;
+	eAim: boolean;
+
+	constructor(xPos: number, yPos: number, game: Phaser.Game)
+	{
+		super(game, xPos, yPos, 'pDown');
+		this.scale.setTo(0.5, 0.5);
+		this.exists = true;
+		this.anchor.setTo(0.5, 0.5);
+
+		this.game.physics.enable(this, Phaser.Physics.ARCADE);
+		this.body.collideWorldBounds = true;
+		this.maxHealth = 1;
+
+		this.aim = false;
+		this.eVelocityX = 0;
+		this.eVelocityY = 0;
+		this.eSpeed = 300;
+
+		this.weapon = game.add.weapon(100, 'testBullet');
+		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.weapon.bulletSpeed = 200;
+		this.weapon.fireRate = 500;
+	}
+
+	ePathfinding(player: Player, walls: Phaser.Group)
+	{
+
+	}
+
+	eUpdate(time: number, keyState: Phaser.Keyboard)
+	{
+		this.eVelocityX = 0;
+		this.eVelocityY = 0;
+
+		if (this.eAim)
+		{
+			this.aim = true;
+		}
+
+		this.weapon.trackSprite(this, 0, 0);
+		this.weapon.fireAngle = 0;
+
+		if (!this.aim)
+		{
+			if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight)))
+			{
+				if (this.eMoveUp)
+				{
+					this.eVelocityY -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
+				}
+				else
+				{
+					this.eVelocityY += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
+				}
+
+				if (this.eMoveLeft)
+				{
+					this.eVelocityX -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
+				}
+				else
+				{
+					this.eVelocityX += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
+				}
+			}
+			else
+			{
+				if (this.eMoveUp)
+				{
+					this.eVelocityY -= this.eSpeed;
+				}
+				if (this.eMoveDown)
+				{
+					this.eVelocityY += this.eSpeed;
+					this.weapon.fireAngle = 90;
+				}
+
+				if (this.eMoveLeft)
+				{
+					this.eVelocityX -= this.eSpeed;
+					this.weapon.fireAngle = 180;
+				}
+				if (this.eMoveRight)
+				{
+					this.eVelocityX += this.eSpeed;
+					this.weapon.fireAngle = 0;
+				}
+			}
+		}
+		else
+		{
+			if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight)))
+			{
+				if (this.eMoveUp)
+				{
+					this.weapon.trackOffset.y = -this.height / 2;
+					this.weapon.fireAngle = 270;
+				}
+				else
+				{
+					this.weapon.trackOffset.y = this.height / 2;
+					this.weapon.fireAngle = 90;
+				}
+
+				if (this.eMoveLeft)
+				{
+					this.weapon.trackOffset.x = -this.width / 2;
+					if (this.weapon.fireAngle > 180)
+					{
+						this.weapon.fireAngle -= 45;
+					}
+					else
+					{
+						this.weapon.fireAngle += 45;
+					}
+				}
+				else
+				{
+					this.weapon.trackOffset.x = this.width / 2;
+					if (this.weapon.fireAngle > 180)
+					{
+						this.weapon.fireAngle += 45;
+					}
+					else
+					{
+						this.weapon.fireAngle -= 45;
+					}
+				}
+			}
+			else
+			{
+				if (this.eMoveUp)
+				{
+					this.weapon.trackOffset.y -= this.height / 2;
+					this.weapon.fireAngle = 270;
+				}
+				if (this.eMoveDown)
+				{
+					this.weapon.trackOffset.y += this.height / 2;
+					if (this.weapon.fireAngle == 270)
+					{
+						this.weapon.fireAngle = 0;
+					}
+					else
+					{
+						this.weapon.fireAngle = 90;
+					}
+				}
+
+				if (this.eMoveLeft)
+				{
+					this.weapon.trackOffset.x -= this.width / 2;
+					this.weapon.fireAngle = 180;
+				}
+				if (this.eMoveRight)
+				{
+					this.weapon.trackOffset.x += this.width / 2;
+					this.weapon.fireAngle = 0;
+				}
+			}
+			this.weapon.bulletAngleOffset = 90;
+			this.weapon.fire();
+		}
+
+		this.body.velocity.y = this.eVelocityY * time;
+		this.body.velocity.x = this.eVelocityX * time;
 
 		this.aim = false;
 	}
