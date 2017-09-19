@@ -7,10 +7,11 @@
 
 	let keyState: Phaser.Keyboard;
 	let player: Player;
-	let enemy: Enemy; // -----------------------------------------------------Enemy code
+    let enemies: Phaser.Group;
+    let enemyBullets: Phaser.Group;
 
 	let walls: Phaser.Group;
-	var gates;
+    var gates: Phaser.Group;
 	let gate1: Barrier;
 	let gate2: Barrier;
 	let gate3: Barrier;
@@ -49,8 +50,13 @@
 		player = new Player(300, 350, game);
 		game.add.existing(player);
 
-		enemy = new Enemy(500, 500, game); // -----------------------------------------------------Enemy code
-		game.add.existing(enemy); // -----------------------------------------------------Enemy code
+	    enemies = game.add.group();
+	    enemies.enableBody = true;
+        enemies.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    enemyBullets = game.add.group();
+
+	    createEnemies();
 
 		var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
 		scoreText = game.add.text(game.world.width - 100, 5, '0', style);
@@ -71,13 +77,20 @@
 
 		keyState = game.input.keyboard;
 
-		game.physics.arcade.overlap(enemy.weapon.bullets, player, bulletHitPlayer, null, this); // -----------------------------------------------------Enemy code
-		game.physics.arcade.overlap(player.weapon.bullets, enemy, bulletHitEnemy, null, this); // -----------------------------------------------------Enemy code
+		//game.physics.arcade.overlap(enemy.weapon.bullets, player, bulletHitPlayer, null, this); // -----------------------------------------------------Enemy code
+		game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this); // -----------------------------------------------------Enemy code
 
 		player.pUpdate(deltaTime, keyState);
+        enemies.forEach(function (enemy)
+        {
+	        enemy.eUpdate(deltaTime);
+	    }, this);
+
 		game.physics.arcade.collide(player, walls, killPlayer);
+		game.physics.arcade.collide(enemies, walls);
 		game.physics.arcade.collide(player, gates, screenTransition);
 		game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
+		game.physics.arcade.collide(enemyBullets, player, bulletHitPlayer);
 
 		scoreText.text = score;
 	}
@@ -115,10 +128,23 @@
 		bullet.kill();
 
 		enemy.kill();
-		killEnemy();
-		enemy.reset(1000, 300, 1);
+		score += 50;
 	}
 
+    function createEnemies()
+    {
+		var enemy1 = new Enemy(300, 550, game, player); 
+        enemies.add(enemy1);
+        enemyBullets.add(enemy1.weapon.bullets);
+
+		var enemy2 = new Enemy(1000, 500, game, player); 
+        enemies.add(enemy2);
+        enemyBullets.add(enemy2.weapon.bullets);
+
+		var enemy3 = new Enemy(1000, 200, game, player); 
+        enemies.add(enemy3);
+        enemyBullets.add(enemy3.weapon.bullets);
+    }
 	function createWalls()
 	{
 		walls = game.add.physicsGroup();
@@ -158,7 +184,7 @@
 		gates.forEach(function (item)
 		{
 			item.renderable = false;
-		});
+		}, this);
 
 		if (player.body.touching.left && gate4.renderable != true)
 		{
@@ -184,6 +210,10 @@
 			player.body.position.y = 500;
 			gate2.renderable = true;
 		}
+
+        enemies.removeAll();
+	    enemyBullets.removeAll();
+        createEnemies();
 	}
 
 	function killPlayer(player: Player, wall: Barrier)
@@ -203,11 +233,6 @@
 			score = "Game Over";
 			player.kill();
 		}
-	}
-
-	function killEnemy()
-	{
-		score += 50;
 	}
 
 	function killBullet(bullet: Phaser.Bullet, wall: Barrier)
@@ -410,6 +435,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	eVelocityY: number;
 	eSpeed: number;
 	weapon: Phaser.Weapon;
+    player: Player;
 
 	eMoveUp: boolean;
 	eMoveDown: boolean;
@@ -417,7 +443,9 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	eMoveRight: boolean;
 	eAim: boolean;
 
-	constructor(xPos: number, yPos: number, game: Phaser.Game)
+    fireTimer: number;
+
+	constructor(xPos: number, yPos: number, game: Phaser.Game, player: Player)
 	{
 		super(game, xPos, yPos, 'pDown');
 		this.scale.setTo(0.5, 0.5);
@@ -431,23 +459,52 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.aim = false;
 		this.eVelocityX = 0;
 		this.eVelocityY = 0;
-		this.eSpeed = 300;
+		this.eSpeed = 50;
+        this.fireTimer = this.game.time.now + 3000;
 
 		this.weapon = game.add.weapon(100, 'testBullet');
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 200;
 		this.weapon.fireRate = 500;
+
+	    this.player = player;
+	    game.add.existing(this);
 	}
 
-	ePathfinding(player: Player, walls: Phaser.Group)
-	{
+	ePathfinding() {
+        if (this.position.x < this.player.position.x)
+        {
+	        this.eMoveLeft = false;
+	        this.eMoveRight = true;
+        }
+        else if (this.position.x > this.player.position.x)
+        {
+	        this.eMoveLeft = true;
+	        this.eMoveRight = false;
+        }
 
+        if (this.position.y < this.player.position.y)
+        {
+	        this.eMoveUp = false;
+	        this.eMoveDown = true;
+        }
+        else if (this.position.y > this.player.position.y)
+        {
+	        this.eMoveUp = true;
+	        this.eMoveDown = false;
+        }
 	}
 
-	eUpdate(time: number, keyState: Phaser.Keyboard)
+	eUpdate(time: number)
 	{
 		this.eVelocityX = 0;
 		this.eVelocityY = 0;
+
+        if (this.game.time.now > this.fireTimer)
+        {
+            this.eAim = true;
+            this.fireTimer = this.game.time.now + 2000;
+        }
 
 		if (this.eAim)
 		{
@@ -457,6 +514,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.weapon.trackSprite(this, 0, 0);
 		this.weapon.fireAngle = 0;
 
+        this.ePathfinding();
 		if (!this.aim)
 		{
 			if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight)))
@@ -576,6 +634,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 			}
 			this.weapon.bulletAngleOffset = 90;
 			this.weapon.fire();
+            this.eAim = false;
 		}
 
 		this.body.velocity.y = this.eVelocityY * time;

@@ -15,7 +15,8 @@ window.onload = function () {
     var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', { preload: preload, create: create, update: update });
     var keyState;
     var player;
-    var enemy; // -----------------------------------------------------Enemy code
+    var enemies;
+    var enemyBullets;
     var walls;
     var gates;
     var gate1;
@@ -47,8 +48,11 @@ window.onload = function () {
         createGates();
         player = new Player(300, 350, game);
         game.add.existing(player);
-        enemy = new Enemy(500, 500, game); // -----------------------------------------------------Enemy code
-        game.add.existing(enemy); // -----------------------------------------------------Enemy code
+        enemies = game.add.group();
+        enemies.enableBody = true;
+        enemies.physicsBodyType = Phaser.Physics.ARCADE;
+        enemyBullets = game.add.group();
+        createEnemies();
         var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
         scoreText = game.add.text(game.world.width - 100, 5, '0', style);
         scoreText.setTextBounds(-50, 0, 100, 100);
@@ -62,12 +66,17 @@ window.onload = function () {
     function update() {
         var deltaTime = game.time.elapsed / 10;
         keyState = game.input.keyboard;
-        game.physics.arcade.overlap(enemy.weapon.bullets, player, bulletHitPlayer, null, this); // -----------------------------------------------------Enemy code
-        game.physics.arcade.overlap(player.weapon.bullets, enemy, bulletHitEnemy, null, this); // -----------------------------------------------------Enemy code
+        //game.physics.arcade.overlap(enemy.weapon.bullets, player, bulletHitPlayer, null, this); // -----------------------------------------------------Enemy code
+        game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this); // -----------------------------------------------------Enemy code
         player.pUpdate(deltaTime, keyState);
+        enemies.forEach(function (enemy) {
+            enemy.eUpdate(deltaTime);
+        }, this);
         game.physics.arcade.collide(player, walls, killPlayer);
+        game.physics.arcade.collide(enemies, walls);
         game.physics.arcade.collide(player, gates, screenTransition);
         game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
+        game.physics.arcade.collide(enemyBullets, player, bulletHitPlayer);
         scoreText.text = score;
     }
     function fullScreen() {
@@ -93,8 +102,18 @@ window.onload = function () {
     function bulletHitEnemy(enemy, bullet) {
         bullet.kill();
         enemy.kill();
-        killEnemy();
-        enemy.reset(1000, 300, 1);
+        score += 50;
+    }
+    function createEnemies() {
+        var enemy1 = new Enemy(300, 550, game, player);
+        enemies.add(enemy1);
+        enemyBullets.add(enemy1.weapon.bullets);
+        var enemy2 = new Enemy(1000, 500, game, player);
+        enemies.add(enemy2);
+        enemyBullets.add(enemy2.weapon.bullets);
+        var enemy3 = new Enemy(1000, 200, game, player);
+        enemies.add(enemy3);
+        enemyBullets.add(enemy3.weapon.bullets);
     }
     function createWalls() {
         walls = game.add.physicsGroup();
@@ -125,7 +144,7 @@ window.onload = function () {
     function screenTransition(player, gate) {
         gates.forEach(function (item) {
             item.renderable = false;
-        });
+        }, this);
         if (player.body.touching.left && gate4.renderable != true) {
             player.body.position.x = 1000;
             player.body.position.y = 300;
@@ -146,6 +165,9 @@ window.onload = function () {
             player.body.position.y = 500;
             gate2.renderable = true;
         }
+        enemies.removeAll();
+        enemyBullets.removeAll();
+        createEnemies();
     }
     function killPlayer(player, wall) {
         var life = lives.getFirstAlive();
@@ -159,9 +181,6 @@ window.onload = function () {
             score = "Game Over";
             player.kill();
         }
-    }
-    function killEnemy() {
-        score += 50;
     }
     function killBullet(bullet, wall) {
         bullet.kill();
@@ -305,7 +324,7 @@ var Player = (function (_super) {
 }(Phaser.Sprite));
 var Enemy = (function (_super) {
     __extends(Enemy, _super); // -----------------------------------------------------Enemy code
-    function Enemy(xPos, yPos, game) {
+    function Enemy(xPos, yPos, game, player) {
         var _this = _super.call(this, game, xPos, yPos, 'pDown') || this;
         _this.scale.setTo(0.5, 0.5);
         _this.exists = true;
@@ -316,23 +335,47 @@ var Enemy = (function (_super) {
         _this.aim = false;
         _this.eVelocityX = 0;
         _this.eVelocityY = 0;
-        _this.eSpeed = 300;
+        _this.eSpeed = 50;
+        _this.fireTimer = _this.game.time.now + 3000;
         _this.weapon = game.add.weapon(100, 'testBullet');
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         _this.weapon.bulletSpeed = 200;
         _this.weapon.fireRate = 500;
+        _this.player = player;
+        game.add.existing(_this);
         return _this;
     }
-    Enemy.prototype.ePathfinding = function (player, walls) {
+    Enemy.prototype.ePathfinding = function () {
+        if (this.position.x < this.player.position.x) {
+            this.eMoveLeft = false;
+            this.eMoveRight = true;
+        }
+        else if (this.position.x > this.player.position.x) {
+            this.eMoveLeft = true;
+            this.eMoveRight = false;
+        }
+        if (this.position.y < this.player.position.y) {
+            this.eMoveUp = false;
+            this.eMoveDown = true;
+        }
+        else if (this.position.y > this.player.position.y) {
+            this.eMoveUp = true;
+            this.eMoveDown = false;
+        }
     };
-    Enemy.prototype.eUpdate = function (time, keyState) {
+    Enemy.prototype.eUpdate = function (time) {
         this.eVelocityX = 0;
         this.eVelocityY = 0;
+        if (this.game.time.now > this.fireTimer) {
+            this.eAim = true;
+            this.fireTimer = this.game.time.now + 2000;
+        }
         if (this.eAim) {
             this.aim = true;
         }
         this.weapon.trackSprite(this, 0, 0);
         this.weapon.fireAngle = 0;
+        this.ePathfinding();
         if (!this.aim) {
             if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight))) {
                 if (this.eMoveUp) {
@@ -420,6 +463,7 @@ var Enemy = (function (_super) {
             }
             this.weapon.bulletAngleOffset = 90;
             this.weapon.fire();
+            this.eAim = false;
         }
         this.body.velocity.y = this.eVelocityY * time;
         this.body.velocity.x = this.eVelocityX * time;
