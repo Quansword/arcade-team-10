@@ -9,6 +9,11 @@
 	//let pAim: Phaser.Sprite;
 
     var walls;
+    var gates;
+    let gate1: Gate;
+    let gate2: Gate;
+    let gate3: Gate;
+    let gate4: Gate;
     let background : Phaser.Sprite;
 
 	var scoreText;
@@ -29,6 +34,7 @@
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
         game.load.image('life', 'assets/life.png');
+        game.load.image('gate', 'assets/gate.png');
 	}
 
     function create() {
@@ -38,6 +44,7 @@
         background.scale.setTo(4, 3);
 
         createWalls();
+        createGates();
         player = new Player(300, 350, game);
         game.add.existing(player);
 
@@ -66,6 +73,7 @@
 
         player.pUpdate(deltaTime, keyState);
         game.physics.arcade.collide(player, walls, killPlayer);
+        game.physics.arcade.collide(player, gates, screenTransition);
         game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
 
         scoreText.text = score;
@@ -100,6 +108,50 @@
 
         walls.enableBody = true;
     }
+
+    function createGates()
+    {
+        gates = game.add.physicsGroup();
+
+        gate1 = new Gate(540, 35, 200, 10, game, gates);
+        gate2 = new Gate(540, 650, 200, 10, game, gates);
+        gate3 = new Gate(145, 250, 10, 190, game, gates);
+        gate4 = new Gate(1120, 250, 10, 190, game, gates);
+
+        gates.enableBody = true;
+    }
+
+    function screenTransition(player, gate)
+    {
+        gates.forEach(  function (item)
+                        {
+                            item.renderable = false;
+                        });
+
+        if (player.body.touching.left && gate4.renderable != true) {
+            player.body.position.x = 1000;
+            player.body.position.y = 300;
+            gate4.renderable = true;
+        }
+        else if (player.body.touching.right && gate3.renderable != true) {
+            player.body.position.x = 300;
+            player.body.position.y = 300;
+            gate3.renderable = true;
+        }
+        else if (player.body.touching.down && gate1.renderable != true)
+        {
+            player.body.position.x = 600;
+            player.body.position.y = 100;
+            gate1.renderable = true;
+        }
+        else if(player.body.touching.up && gate2.renderable != true)
+        {
+            player.body.position.x = 600;
+            player.body.position.y = 500;
+            gate2.renderable = true;
+        }
+    }
+
 
     function killPlayer(player, wall)
     {
@@ -142,6 +194,20 @@ class Wall
         walls.add(wall);
     }
 }
+
+class Gate extends Phaser.Sprite
+{
+    direction: number;
+    constructor(xPos: number, yPos: number, width: number, height: number, game : Phaser.Game, gates)
+    {
+        super(game, xPos, yPos, 'gate');
+        this.scale.setTo(width, height);
+        game.physics.arcade.enable(this);
+        this.body.immovable = true;
+        this.renderable = false;
+        gates.add(this);
+    }
+}
 class Player extends Phaser.Sprite
 {
 	aim: boolean;
@@ -156,7 +222,7 @@ class Player extends Phaser.Sprite
         super(game, xPos, yPos, 'pRight');
         this.scale.setTo(0.5, 0.5);
 		this.exists = true;
-		this.anchor.setTo(0.5, 0.5);
+        this.anchor.setTo(0.5, 0.5);
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
 		this.body.collideWorldBounds = true;
