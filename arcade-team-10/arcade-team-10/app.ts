@@ -14,6 +14,8 @@
 	var scoreText;
     var score;
 
+    var lives;
+
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -26,6 +28,7 @@
 
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
+        game.load.image('life', 'assets/life.png');
 	}
 
     function create() {
@@ -42,9 +45,16 @@
         //pAim.anchor.setTo(0.5, 0.5);
         //pAim.scale.setTo(0.2);
 
-        var style =  { font: "bold 32px Arial", fill: '#fff' };
-        scoreText = game.add.text(5, 5, '0', style);
+        var style =  { font: "bold 64px Arial", fill: '#fff' };
+        scoreText = game.add.text(game.world.width - 300, 5, '0', style);
         score = 0;
+
+        lives = game.add.group();
+        for (var i = 0; i < 3; i++)
+        {
+            var life = lives.create(50 + (30 * i), 30, 'life');
+            life.anchor.setTo(0.5, 0.5);
+        }
 	}
 
 	function update()

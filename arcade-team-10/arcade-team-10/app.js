@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 window.onload = function () {
     //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
     //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
@@ -15,6 +20,7 @@ window.onload = function () {
     var background;
     var scoreText;
     var score;
+    var lives;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.image('pAttack', 'assets/Testchar_side.png');
@@ -25,6 +31,7 @@ window.onload = function () {
         game.load.image('testBullet', 'assets/temp.png');
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
+        game.load.image('life', 'assets/life.png');
     }
     function create() {
         fullScreen();
@@ -37,9 +44,14 @@ window.onload = function () {
         //pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
         //pAim.anchor.setTo(0.5, 0.5);
         //pAim.scale.setTo(0.2);
-        var style = { font: "bold 32px Arial", fill: '#fff' };
-        scoreText = game.add.text(5, 5, '0', style);
+        var style = { font: "bold 64px Arial", fill: '#fff' };
+        scoreText = game.add.text(game.world.width - 300, 5, '0', style);
         score = 0;
+        lives = game.add.group();
+        for (var i = 0; i < 3; i++) {
+            var life = lives.create(50 + (30 * i), 30, 'life');
+            life.anchor.setTo(0.5, 0.5);
+        }
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -96,20 +108,21 @@ var Wall = (function () {
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(xPos, yPos, game) {
-        _super.call(this, game, xPos, yPos, 'pRight');
-        this.scale.setTo(0.5, 0.5);
-        this.exists = true;
-        this.anchor.setTo(0.5, 0.5);
-        this.game.physics.enable(this, Phaser.Physics.ARCADE);
-        this.body.collideWorldBounds = true;
-        this.maxHealth = 1;
-        this.aim = false;
-        this.pVelocityX = 0;
-        this.pVelocityY = 0;
-        this.pSpeed = 300;
-        this.weapon = game.add.weapon(100, 'testBullet');
-        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        this.weapon.bulletSpeed = 200;
+        var _this = _super.call(this, game, xPos, yPos, 'pRight') || this;
+        _this.scale.setTo(0.5, 0.5);
+        _this.exists = true;
+        _this.anchor.setTo(0.5, 0.5);
+        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+        _this.body.collideWorldBounds = true;
+        _this.maxHealth = 1;
+        _this.aim = false;
+        _this.pVelocityX = 0;
+        _this.pVelocityY = 0;
+        _this.pSpeed = 300;
+        _this.weapon = game.add.weapon(100, 'testBullet');
+        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.weapon.bulletSpeed = 200;
+        return _this;
     }
     Player.prototype.pUpdate = function (time, keyState) {
         this.pVelocityX = 0;
@@ -221,3 +234,4 @@ var Player = (function (_super) {
     };
     return Player;
 }(Phaser.Sprite));
+//# sourceMappingURL=app.js.map
