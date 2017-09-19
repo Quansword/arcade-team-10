@@ -54,7 +54,9 @@
 	    enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    enemyBullets = game.add.group();
+	    enemyBullets = game.add.physicsGroup();
+        enemyBullets.enableBody = true;
+	    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
 
 	    createEnemies();
 
@@ -90,7 +92,8 @@
 		game.physics.arcade.collide(enemies, walls);
 		game.physics.arcade.collide(player, gates, screenTransition);
 		game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
-		game.physics.arcade.collide(enemyBullets, player, bulletHitPlayer);
+		game.physics.arcade.collide(enemyBullets, walls, killBullet);
+		game.physics.arcade.collide(player, enemyBullets, killPlayer);
 
 		scoreText.text = score;
 	}
@@ -126,7 +129,6 @@
 	function bulletHitEnemy(enemy: Enemy, bullet: Phaser.Bullet) // -----------------------------------------------------Enemy code
 	{
 		bullet.kill();
-
 		enemy.kill();
 		score += 50;
 	}
@@ -444,6 +446,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	eAim: boolean;
 
     fireTimer: number;
+    dead: boolean;
 
 	constructor(xPos: number, yPos: number, game: Phaser.Game, player: Player)
 	{
@@ -472,25 +475,34 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	}
 
 	ePathfinding() {
-        if (this.position.x < this.player.position.x)
+        if (this.position.x < this.player.position.x - 10)
         {
 	        this.eMoveLeft = false;
 	        this.eMoveRight = true;
         }
-        else if (this.position.x > this.player.position.x)
+        else if (this.position.x > this.player.position.x + 10)
         {
 	        this.eMoveLeft = true;
 	        this.eMoveRight = false;
         }
+        else
+        {
+	        this.eMoveLeft = false;
+	        this.eMoveRight = false;
+        }
 
-        if (this.position.y < this.player.position.y)
+        if (this.position.y < this.player.position.y - 10)
         {
 	        this.eMoveUp = false;
 	        this.eMoveDown = true;
         }
-        else if (this.position.y > this.player.position.y)
+        else if (this.position.y > this.player.position.y + 10) {
+            this.eMoveUp = true;
+            this.eMoveDown = false;
+        }
+        else
         {
-	        this.eMoveUp = true;
+	        this.eMoveUp = false;
 	        this.eMoveDown = false;
         }
 	}

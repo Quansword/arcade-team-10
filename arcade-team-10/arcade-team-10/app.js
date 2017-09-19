@@ -51,7 +51,9 @@ window.onload = function () {
         enemies = game.add.group();
         enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
-        enemyBullets = game.add.group();
+        enemyBullets = game.add.physicsGroup();
+        enemyBullets.enableBody = true;
+        enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
         createEnemies();
         var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
         scoreText = game.add.text(game.world.width - 100, 5, '0', style);
@@ -76,7 +78,8 @@ window.onload = function () {
         game.physics.arcade.collide(enemies, walls);
         game.physics.arcade.collide(player, gates, screenTransition);
         game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
-        game.physics.arcade.collide(enemyBullets, player, bulletHitPlayer);
+        game.physics.arcade.collide(enemyBullets, walls, killBullet);
+        game.physics.arcade.collide(player, enemyBullets, killPlayer);
         scoreText.text = score;
     }
     function fullScreen() {
@@ -346,20 +349,28 @@ var Enemy = (function (_super) {
         return _this;
     }
     Enemy.prototype.ePathfinding = function () {
-        if (this.position.x < this.player.position.x) {
+        if (this.position.x < this.player.position.x - 10) {
             this.eMoveLeft = false;
             this.eMoveRight = true;
         }
-        else if (this.position.x > this.player.position.x) {
+        else if (this.position.x > this.player.position.x + 10) {
             this.eMoveLeft = true;
             this.eMoveRight = false;
         }
-        if (this.position.y < this.player.position.y) {
+        else {
+            this.eMoveLeft = false;
+            this.eMoveRight = false;
+        }
+        if (this.position.y < this.player.position.y - 10) {
             this.eMoveUp = false;
             this.eMoveDown = true;
         }
-        else if (this.position.y > this.player.position.y) {
+        else if (this.position.y > this.player.position.y + 10) {
             this.eMoveUp = true;
+            this.eMoveDown = false;
+        }
+        else {
+            this.eMoveUp = false;
             this.eMoveDown = false;
         }
     };
