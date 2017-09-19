@@ -15,7 +15,6 @@ window.onload = function () {
     var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', { preload: preload, create: create, update: update });
     var keyState;
     var player;
-    //let pAim: Phaser.Sprite;
     var walls;
     var gates;
     var gate1;
@@ -32,7 +31,6 @@ window.onload = function () {
         game.load.image('pRight', 'assets/Testchar_right.png');
         game.load.image('pLeft', 'assets/Testchar_left.png');
         game.load.image('pDown', 'assets/Testchar_down.png');
-        game.load.image('pAim', 'assets/phaser.png');
         game.load.image('testBullet', 'assets/temp.png');
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
@@ -48,9 +46,6 @@ window.onload = function () {
         createGates();
         player = new Player(300, 350, game);
         game.add.existing(player);
-        //pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
-        //pAim.anchor.setTo(0.5, 0.5);
-        //pAim.scale.setTo(0.2);
         var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
         scoreText = game.add.text(game.world.width - 100, 5, '0', style);
         scoreText.setTextBounds(-50, 0, 100, 100);
@@ -131,12 +126,13 @@ window.onload = function () {
         var life = lives.getFirstAlive();
         if (life) {
             life.kill();
+            player.kill();
             player.lives--;
-            player.body.position.x = 300;
-            player.body.position.y = 300;
+            player.reset(300, 300, 1);
         }
         if (player.lives < 1) {
             score = "Game Over";
+            player.kill();
         }
     }
     function killEnemy() {
@@ -187,6 +183,7 @@ var Player = (function (_super) {
         _this.weapon = game.add.weapon(100, 'testBullet');
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         _this.weapon.bulletSpeed = 200;
+        _this.weapon.fireRate = 500;
         _this.lives = 3;
         return _this;
     }
@@ -196,7 +193,6 @@ var Player = (function (_super) {
         if (keyState.isDown(Phaser.KeyCode.SPACEBAR)) {
             this.aim = true;
         }
-        //pAim.position.setTo(this.position.x, this.position.y);
         this.weapon.trackSprite(this, 0, 0);
         this.weapon.fireAngle = 0;
         if (!this.aim) {
@@ -235,17 +231,14 @@ var Player = (function (_super) {
         else {
             if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
                 if (keyState.isDown(Phaser.KeyCode.W)) {
-                    //pAim.position.y = pAim.position.y - this.height / 2;
                     this.weapon.trackOffset.y = -this.height / 2;
                     this.weapon.fireAngle = 270;
                 }
                 else {
-                    //pAim.position.y = pAim.position.y + this.height / 2;
                     this.weapon.trackOffset.y = this.height / 2;
                     this.weapon.fireAngle = 90;
                 }
                 if (keyState.isDown(Phaser.KeyCode.A)) {
-                    //pAim.position.x = pAim.position.x - this.width / 2;
                     this.weapon.trackOffset.x = -this.width / 2;
                     if (this.weapon.fireAngle > 180) {
                         this.weapon.fireAngle -= 45;
@@ -255,7 +248,6 @@ var Player = (function (_super) {
                     }
                 }
                 else {
-                    //pAim.position.x = pAim.position.x + this.width / 2;
                     this.weapon.trackOffset.x = this.width / 2;
                     if (this.weapon.fireAngle > 180) {
                         this.weapon.fireAngle += 45;
@@ -267,12 +259,10 @@ var Player = (function (_super) {
             }
             else {
                 if (keyState.isDown(Phaser.KeyCode.W)) {
-                    //pAim.position.y = pAim.position.y - this.height / 2;
                     this.weapon.trackOffset.y -= this.height / 2;
                     this.weapon.fireAngle = 270;
                 }
                 if (keyState.isDown(Phaser.KeyCode.S)) {
-                    //pAim.position.y = pAim.position.y + this.height / 2;
                     this.weapon.trackOffset.y += this.height / 2;
                     if (this.weapon.fireAngle == 270) {
                         this.weapon.fireAngle = 0;
@@ -282,16 +272,15 @@ var Player = (function (_super) {
                     }
                 }
                 if (keyState.isDown(Phaser.KeyCode.A)) {
-                    //pAim.position.x = pAim.position.x - this.width / 2;
                     this.weapon.trackOffset.x -= this.width / 2;
                     this.weapon.fireAngle = 180;
                 }
                 if (keyState.isDown(Phaser.KeyCode.D)) {
-                    //pAim.position.x = pAim.position.x + this.width / 2;
                     this.weapon.trackOffset.x += this.width / 2;
                     this.weapon.fireAngle = 0;
                 }
             }
+            this.weapon.bulletAngleOffset = 90;
             this.weapon.fire();
         }
         this.body.velocity.y = this.pVelocityY * time;
