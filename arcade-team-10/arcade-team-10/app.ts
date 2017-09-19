@@ -35,7 +35,7 @@
         background.scale.setTo(4, 3);
 
         createWalls();
-        player = new Player(game);
+        player = new Player(300, 350, game);
         game.add.existing(player);
 
         //pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
@@ -126,9 +126,10 @@ class Player extends Phaser.Sprite
 	pSpeed: number;
 	weapon: Phaser.Weapon;
 
-	constructor(game: Phaser.Game)
+	constructor(xPos : number, yPos : number, game: Phaser.Game)
 	{
-		super(game, screen.width / 2, screen.height / 2, 'pRight');
+        super(game, xPos, yPos, 'pRight');
+        this.scale.setTo(0.5, 0.5);
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
 
@@ -139,7 +140,7 @@ class Player extends Phaser.Sprite
 		this.aim = false;
 		this.pVelocityX = 0;
 		this.pVelocityY = 0;
-		this.pSpeed = 500;
+		this.pSpeed = 300;
 
 		this.weapon = game.add.weapon(100, 'testBullet');
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;

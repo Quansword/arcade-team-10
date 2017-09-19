@@ -32,7 +32,7 @@ window.onload = function () {
         background = game.add.sprite(0, 0, 'background');
         background.scale.setTo(4, 3);
         createWalls();
-        player = new Player(game);
+        player = new Player(300, 350, game);
         game.add.existing(player);
         //pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
         //pAim.anchor.setTo(0.5, 0.5);
@@ -95,8 +95,9 @@ var Wall = (function () {
 }());
 var Player = (function (_super) {
     __extends(Player, _super);
-    function Player(game) {
-        _super.call(this, game, screen.width / 2, screen.height / 2, 'pRight');
+    function Player(xPos, yPos, game) {
+        _super.call(this, game, xPos, yPos, 'pRight');
+        this.scale.setTo(0.5, 0.5);
         this.exists = true;
         this.anchor.setTo(0.5, 0.5);
         this.game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -105,7 +106,7 @@ var Player = (function (_super) {
         this.aim = false;
         this.pVelocityX = 0;
         this.pVelocityY = 0;
-        this.pSpeed = 500;
+        this.pSpeed = 300;
         this.weapon = game.add.weapon(100, 'testBullet');
         this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         this.weapon.bulletSpeed = 200;
