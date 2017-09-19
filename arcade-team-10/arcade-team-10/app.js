@@ -13,6 +13,8 @@ window.onload = function () {
     //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
     //  Be sure to replace it with an updated version before you start experimenting with adding your own code.
     var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+    var background;
+    var walls;
     var keyState;
     var player;
     //let pAim: Phaser.Sprite;
@@ -25,10 +27,15 @@ window.onload = function () {
         game.load.image('pDown', 'assets/Testchar_down.png');
         game.load.image('pAim', 'assets/phaser.png');
         game.load.image('testBullet', 'assets/temp.png');
+        game.load.image('background', 'assets/Maze1.png');
+        game.load.image('wall', 'assets/wall.png');
     }
     function create() {
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
+        var background = game.add.sprite(0, 0, 'background');
+        background.scale.setTo(4, 3);
+        createWalls();
         player = new Player(game);
         game.add.existing(player);
         //pAim = game.add.sprite(player.x + player.width / 2, player.y, 'pAim');
@@ -40,6 +47,10 @@ window.onload = function () {
         var deltaTime = game.time.elapsed / 10;
         keyState = game.input.keyboard;
         player.pUpdate(deltaTime, keyState);
+        game.physics.arcade.collide(walls, player);
+        game.physics.arcade.collide(player.weapon.bullets, walls, function (bullet, wall) {
+            bullet.kill();
+        });
     }
     function fullScreen() {
         game.scale.pageAlignHorizontally = true;
@@ -47,7 +58,36 @@ window.onload = function () {
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.setGameSize(1280, 720);
     }
+    function createWalls() {
+        walls = game.add.physicsGroup();
+        var wall1 = new Wall(145, 35, 400, 10, game, walls);
+        var wall2 = new Wall(735, 35, 400, 10, game, walls);
+        var wall3 = new Wall(735, 650, 400, 10, game, walls);
+        var wall4 = new Wall(145, 650, 400, 10, game, walls);
+        var wall5 = new Wall(145, 240, 220, 10, game, walls);
+        var wall6 = new Wall(735, 240, 400, 10, game, walls);
+        var wall7 = new Wall(145, 450, 220, 10, game, walls);
+        var wall8 = new Wall(145, 35, 10, 200, game, walls);
+        var wall9 = new Wall(145, 450, 10, 200, game, walls);
+        var wall10 = new Wall(735, 450, 10, 200, game, walls);
+        var wall11 = new Wall(1120, 450, 10, 200, game, walls);
+        var wall12 = new Wall(1120, 35, 10, 200, game, walls);
+        var wall13 = new Wall(530, 250, 10, 200, game, walls);
+        var wall14 = new Wall(530, 440, 220, 10, game, walls);
+        walls.enableBody = true;
+    }
 };
+var Wall = (function () {
+    function Wall(xPos, yPos, width, height, game, walls) {
+        var wall = game.add.sprite(xPos, yPos, 'wall');
+        wall.scale.setTo(width, height);
+        game.physics.arcade.enable(wall);
+        wall.body.immovable = true;
+        wall.renderable = false;
+        walls.add(wall);
+    }
+    return Wall;
+}());
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(game) {
