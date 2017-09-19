@@ -53,14 +53,10 @@
 
 		keyState = game.input.keyboard;
 
-		player.pUpdate(deltaTime, keyState);
-        game.physics.arcade.collide(walls, player);
-        game.physics.arcade.collide(player.weapon.bullets,
-                                    walls,
-                                    function (bullet, wall)
-                                    {
-                                        bullet.kill();
-                                    });
+        player.pUpdate(deltaTime, keyState);
+        game.physics.arcade.collide(player, walls, killPlayer);
+        game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
+
         scoreText.text = score;
 	}
 
@@ -94,9 +90,19 @@
         walls.enableBody = true;
     }
 
-    function destroyMonster()
+    function killPlayer(player, wall)
+    {
+
+    }
+
+    function killEnemy()
     {
         score += 50;
+    }
+
+    function killBullet(bullet, wall)
+    {
+        bullet.kill();
     }
 };
 
