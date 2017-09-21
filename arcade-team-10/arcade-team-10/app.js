@@ -27,6 +27,7 @@ window.onload = function () {
     var scoreText;
     var score;
     var lives;
+    var hud;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.image('pAttack', 'assets/Testchar_side.png');
@@ -38,6 +39,7 @@ window.onload = function () {
         game.load.image('wall', 'assets/wall.png');
         game.load.image('life', 'assets/life.png');
         game.load.image('gate', 'assets/gate.png');
+        game.load.image('heart', 'assets/Heart.png');
     }
     function create() {
         fullScreen();
@@ -55,15 +57,22 @@ window.onload = function () {
         enemyBullets.enableBody = true;
         enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
         createEnemies();
+        hud = game.add.group();
+        hud.enableBody = false;
+        for (var i = 0; i < player.maxHealth; i++) {
+            hud.add(new Phaser.Sprite(game, 0, 0, 'heart'));
+            hud.children[i].position.set((hud.children[i].width * i) + (hud.children[i].width / 2), hud.children[i].height / 2);
+        }
         var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
         scoreText = game.add.text(game.world.width - 100, 5, '0', style);
         scoreText.setTextBounds(-50, 0, 100, 100);
         score = 0;
-        lives = game.add.group();
-        for (var i = 0; i < player.lives; i++) {
-            var life = lives.create(20 + (30 * i), 30, 'life');
-            life.anchor.setTo(0.5, 0.5);
-        }
+        //lives = game.add.group();
+        //for (var i = 0; i < player.lives; i++)
+        //{
+        //	var life = lives.create(20 + (30 * i), 30, 'life');
+        //	life.anchor.setTo(0.5, 0.5);
+        //}
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -72,13 +81,12 @@ window.onload = function () {
         enemies.forEach(function (enemy) {
             enemy.eUpdate(deltaTime);
         }, this);
-        game.physics.arcade.collide(player, walls, killPlayer);
+        game.physics.arcade.collide(player, walls);
         game.physics.arcade.collide(enemies, walls);
         game.physics.arcade.collide(player, gates, screenTransition);
         game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
         game.physics.arcade.collide(enemyBullets, walls, killBullet);
-        game.physics.arcade.collide(player, enemies);
-        game.physics.arcade.collide(enemies, enemies);
+        game.physics.arcade.overlap(player, enemies, enemyHitPlayer);
         game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
         for (var i = 0; i < enemies.children.length; i++) {
             game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
@@ -93,17 +101,35 @@ window.onload = function () {
     }
     function bulletHitPlayer(player, bullet) {
         bullet.kill();
-        var life = lives.getFirstAlive();
-        if (life) {
-            life.kill();
-            player.kill();
-            player.lives--;
-            player.reset(300, 300, 1);
+        damagePlayer(player, 1);
+    }
+    function enemyHitPlayer(player, enemy) {
+        damagePlayer(player, 1);
+    }
+    function damagePlayer(player, dNum) {
+        if (player.canDamage) {
+            player.damage(dNum);
+            hud.children[player.health].visible = false;
+            playerInvuln();
+            playerVisible();
+            game.time.events.repeat(200, 3, playerVisible, this);
+            game.time.events.add(800, playerInvuln, this);
         }
-        if (player.lives < 1) {
-            score = "Game Over";
-            player.kill();
-        }
+    }
+    function playerVisible() {
+        player.visible = !player.visible;
+    }
+    function playerInvuln() {
+        player.canDamage = !player.canDamage;
+    }
+    function healPlayer(player, hNum) {
+        hud.children[player.health].visible = true;
+        player.heal(hNum);
+    }
+    function increaseHealth(player) {
+        player.maxHealth += 1;
+        player.heal(1);
+        hud.add(new Phaser.Sprite(game, (hud.children[0].width * (player.maxHealth - 1)) + (hud.children[0].width / 2), hud.children[0].height / 2, 'heart'));
     }
     function bulletHitEnemy(enemy, bullet) {
         bullet.kill();
@@ -175,7 +201,7 @@ window.onload = function () {
         enemyBullets.removeAll();
         createEnemies();
     }
-    function killPlayer(player, wall) {
+    function killPlayer(player) {
         var life = lives.getFirstAlive();
         if (life) {
             life.kill();
@@ -214,7 +240,9 @@ var Player = (function (_super) {
         _this.anchor.setTo(0.5, 0.5);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
         _this.body.collideWorldBounds = true;
-        _this.maxHealth = 1;
+        _this.maxHealth = 5;
+        _this.health = _this.maxHealth;
+        _this.canDamage = true;
         _this.aim = false;
         _this.pVelocityX = 0;
         _this.pVelocityY = 0;
@@ -223,7 +251,7 @@ var Player = (function (_super) {
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         _this.weapon.bulletSpeed = 200;
         _this.weapon.fireRate = 500;
-        _this.lives = 3;
+        _this.lives = 1;
         return _this;
     }
     Player.prototype.pUpdate = function (time, keyState) {

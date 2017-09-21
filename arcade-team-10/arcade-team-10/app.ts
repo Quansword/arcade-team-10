@@ -22,6 +22,7 @@
 	var score;
 
 	let lives: Phaser.Group;
+	var hud;
 
 	function preload()
 	{
@@ -36,6 +37,8 @@
 		game.load.image('wall', 'assets/wall.png');
 		game.load.image('life', 'assets/life.png');
 		game.load.image('gate', 'assets/gate.png');
+
+		game.load.image('heart', 'assets/Heart.png');
 	}
 
 	function create()
@@ -60,17 +63,25 @@
 
 		createEnemies();
 
+		hud = game.add.group();
+		hud.enableBody = false;
+		for (var i = 0; i < player.maxHealth; i++)
+		{
+			hud.add(new Phaser.Sprite(game, 0, 0, 'heart'));
+			hud.children[i].position.set((hud.children[i].width * i) + (hud.children[i].width / 2), hud.children[i].height / 2);
+		}
+
 		var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
 		scoreText = game.add.text(game.world.width - 100, 5, '0', style);
 		scoreText.setTextBounds(-50, 0, 100, 100);
 		score = 0;
 
-		lives = game.add.group();
-		for (var i = 0; i < player.lives; i++)
-		{
-			var life = lives.create(20 + (30 * i), 30, 'life');
-			life.anchor.setTo(0.5, 0.5);
-		}
+		//lives = game.add.group();
+		//for (var i = 0; i < player.lives; i++)
+		//{
+		//	var life = lives.create(20 + (30 * i), 30, 'life');
+		//	life.anchor.setTo(0.5, 0.5);
+		//}
 	}
 
 	function update()
@@ -85,15 +96,14 @@
 			enemy.eUpdate(deltaTime);
 		}, this);
 
-		game.physics.arcade.collide(player, walls, killPlayer);
+		game.physics.arcade.collide(player, walls);
 		game.physics.arcade.collide(enemies, walls);
 		game.physics.arcade.collide(player, gates, screenTransition);
 
 		game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
 		game.physics.arcade.collide(enemyBullets, walls, killBullet);
 
-		game.physics.arcade.collide(player, enemies);
-		game.physics.arcade.collide(enemies, enemies);
+		game.physics.arcade.overlap(player, enemies, enemyHitPlayer);
 
 		game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
 		for (var i = 0; i < enemies.children.length; i++)
@@ -115,21 +125,48 @@
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
 	{
 		bullet.kill();
-		var life = lives.getFirstAlive();
+		damagePlayer(player, 1);
+	}
 
-		if (life)
-		{
-			life.kill();
-			player.kill();
-			player.lives--;
-			player.reset(300, 300, 1);
-		}
+	function enemyHitPlayer(player: Player, enemy: Enemy)
+	{
+		damagePlayer(player, 1);
+	}
 
-		if (player.lives < 1)
+	function damagePlayer(player: Player, dNum: number)
+	{
+		if (player.canDamage)
 		{
-			score = "Game Over";
-			player.kill();
+			player.damage(dNum);
+			hud.children[player.health].visible = false;
+			playerInvuln();
+			playerVisible();
+			game.time.events.repeat(200, 3, playerVisible, this);
+			game.time.events.add(800, playerInvuln, this);
 		}
+	}
+
+	function playerVisible()
+	{
+		player.visible = !player.visible;
+	}
+
+	function playerInvuln()
+	{
+		player.canDamage = !player.canDamage;
+	}
+
+	function healPlayer(player: Player, hNum: number)
+	{
+		hud.children[player.health].visible = true;
+		player.heal(hNum);
+	}
+
+	function increaseHealth(player: Player)
+	{
+		player.maxHealth += 1;
+		player.heal(1);
+		hud.add(new Phaser.Sprite(game, (hud.children[0].width * (player.maxHealth - 1)) + (hud.children[0].width / 2), hud.children[0].height / 2, 'heart'));
 	}
 
 	function bulletHitEnemy(enemy: Enemy, bullet: Phaser.Bullet) // -----------------------------------------------------Enemy code
@@ -225,7 +262,7 @@
 		createEnemies();
 	}
 
-	function killPlayer(player: Player, wall: Barrier)
+	function killPlayer(player: Player)
 	{
 		var life = lives.getFirstAlive();
 
@@ -271,6 +308,7 @@ class Player extends Phaser.Sprite
 	pSpeed: number;
 	weapon: Phaser.Weapon;
 	lives: number;
+	canDamage: boolean;
 
 	constructor(xPos: number, yPos: number, game: Phaser.Game)
 	{
@@ -281,7 +319,9 @@ class Player extends Phaser.Sprite
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
 		this.body.collideWorldBounds = true;
-		this.maxHealth = 1;
+		this.maxHealth = 5;
+		this.health = this.maxHealth;
+		this.canDamage = true;
 
 		this.aim = false;
 		this.pVelocityX = 0;
@@ -293,7 +333,7 @@ class Player extends Phaser.Sprite
 		this.weapon.bulletSpeed = 200;
 		this.weapon.fireRate = 500;
 
-		this.lives = 3;
+		this.lives = 1;
 	}
 
 	pUpdate(time: number, keyState: Phaser.Keyboard)
