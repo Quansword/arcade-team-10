@@ -314,6 +314,7 @@ class Player extends Phaser.Sprite
 	{
 		super(game, xPos, yPos, 'pRight');
 		this.scale.setTo(0.5, 0.5);
+		this.smoothed = false;
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
 
@@ -499,6 +500,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	{
 		super(game, xPos, yPos, 'pDown');
 		this.scale.setTo(0.5, 0.5);
+		this.smoothed = false;
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
 

@@ -236,6 +236,7 @@ var Player = (function (_super) {
     function Player(xPos, yPos, game) {
         var _this = _super.call(this, game, xPos, yPos, 'pRight') || this;
         _this.scale.setTo(0.5, 0.5);
+        _this.smoothed = false;
         _this.exists = true;
         _this.anchor.setTo(0.5, 0.5);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
@@ -361,6 +362,7 @@ var Enemy = (function (_super) {
     function Enemy(xPos, yPos, game, player) {
         var _this = _super.call(this, game, xPos, yPos, 'pDown') || this;
         _this.scale.setTo(0.5, 0.5);
+        _this.smoothed = false;
         _this.exists = true;
         _this.anchor.setTo(0.5, 0.5);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
