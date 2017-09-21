@@ -1,27 +1,30 @@
 var Berzerk = {};
 
-Berzerk.boot = function(game){};
+Berzerk.boot = function(game)
+{
+	this.game = game;
+};
 	
 Berzerk.boot.prototype = 
 {
 	init: function()
 	{
-		this.scale.pageAlignHorizontally = true;
-        this.scale.pageAlignVertically = true;
-        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        this.scale.setScreenSize(true);
+		this.game.scale.pageAlignHorizontally = true;
+        this.game.scale.pageAlignVertically = true;
+        this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        this.game.scale.setScreenSize(true);
 	},
 
 	preload: function()	
 	{
-		this.load.image('loadingBar', 'assets/images/loading/loading-bar.png');
-		this.load.image('loadingBarBg', 'assets/images/loading/loading-bar-bg.png');
+		this.game.load.image('loadingBar', 'assets/images/loading/loading-bar.png');
+		this.game.load.image('loadingBarBg', 'assets/images/loading/loading-bar-bg.png');
 
-		this.load.script('load', 'src/load.js');
+		this.game.load.script('load', 'src/load.js');
 	},
 
 	update: function ()
 	{
-		this.state.start('preloader');
+		this.game.state.start('preloader');
 	},
 };

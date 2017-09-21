@@ -1,12 +1,13 @@
 Berzerk.load = function(game, parent)
 {
+	this.game = game;
 	Phaser.Group.call(this, game, parent);
 
-	this.background = game.add.sprite(game.world.centerX, game.world.centerY, 'loadingBarBg');
+	this.background = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'loadingBarBg');
 	this.background.anchor.setTo(0.5, 0.5);
 	this.add(this.background);
 
-	this.bar = game.add.sprite(game.world.centerx - 175, game.world.centerY - 16, 'loadingBar');
+	this.bar = this.game.add.sprite(this.game.world.centerx - 175, this.game.world.centerY - 16, 'loadingBar');
 	this.add(this.bar);
 };
 

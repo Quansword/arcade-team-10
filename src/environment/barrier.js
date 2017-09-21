@@ -1,18 +1,26 @@
 Berzerk.barrier = function(xPos, yPos, width, height, game, group, type)
 {
-	Phaser.Sprite.call(this);
-	this.scale.setTo(width, height);
-	game.physics.arcade.enable(this);
-	this.body.immovable = true;
-	this.renderable = false;
-	group.add(this);
+	this.game = game;
+	this.group = group;
+
+	this.xPos = xPos;
+	this.yPos = yPos;
+	this.type = type;
+
+	this.initialize = function()
+	{
+		var barrier = this.game.add.sprite(this.xPos, this.yPos, this.type);
+		barrier.scale.setTo(width, height);
+		this.game.physics.arcade.enable(barrier);
+		barrier.body.immovable = true;
+		barrier.renderable = true;
+		this.group.add(barrier);
+	};
 };
 
 Berzerk.barrier.prototype =
 {
 
 };
-
-Berzerk.barrier.prototype = Object.create(Phaser.Sprite.prototype);
 
 Berzerk.barrier.prototype.constructor = Berzerk.barrier;

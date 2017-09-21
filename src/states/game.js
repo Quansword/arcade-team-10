@@ -26,27 +26,28 @@ Berzerk.game.prototype =
 {
     preload: function()
     {
-        this.load.image('pAttack', 'assets/images/placeholder/character/Testchar_side.png');
-        this.load.image('pRight', 'assets/images/placeholder/character/Testchar_right.png');
-        this.load.image('pLeft', 'assets/images/placeholder/character/Testchar_left.png');
-        this.load.image('pDown', 'assets/images/placeholder/character/Testchar_down.png');
-        this.load.image('testBullet', 'assets/images/placeholder/temp.png');
+        this.game.load.image('pAttack', 'assets/images/placeholder/character/Testchar_side.png');
+        this.game.load.image('pRight', 'assets/images/placeholder/character/Testchar_right.png');
+        this.game.load.image('pLeft', 'assets/images/placeholder/character/Testchar_left.png');
+        this.game.load.image('pDown', 'assets/images/placeholder/character/Testchar_down.png');
+        this.game.load.image('testBullet', 'assets/images/placeholder/temp.png');
 
-        this.load.image('background', 'assets/images/placeholder/environment/Maze1.png');
-        this.load.image('wall', 'assets/images/placeholder/environment/wall.png');
-        this.load.image('gate', 'assets/images/placeholder/environment/gate.png');
-        this.load.image('life', 'assets/images/placeholder/life.png');
+        this.game.load.image('background', 'assets/images/placeholder/environment/Maze1.png');
+        this.game.load.image('wall', 'assets/images/placeholder/environment/wall.png');
+        this.game.load.image('gate', 'assets/images/placeholder/environment/gate.png');
+        this.game.load.image('life', 'assets/images/placeholder/life.png');
     },
 
     create: function()
     {
-        this.physics.startSystem(Phaser.Physics.ARCADE);
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
         background = this.add.sprite(0, 0, 'background');
         background.scale.setTo(6, 4.6);
 
 
-        this.createWalls();/*
+        this.createWalls();
         this.createGates();
+        /*
         player = new Berzerk.player(300, 350, this);
         this.add.existing(player);
 
@@ -132,7 +133,7 @@ Berzerk.game.prototype =
         bullet.kill();
         enemy.kill();
         score += 50;
-},
+    },
 
     createEnemies: function()
     {
@@ -151,24 +152,39 @@ Berzerk.game.prototype =
 
     createWalls: function()
     {
-        walls = game.add.physicsGroup();
+        this.walls = this.game.add.physicsGroup();
 
-        var wall1 = new Berzerk.barrier(145, 35, 400, 10, this, walls, 'wall');
-        var wall2 = new Berzerk.barrier(735, 35, 400, 10, this, walls, 'wall');
-        var wall3 = new Berzerk.barrier(735, 650, 400, 10, this, walls, 'wall');
-        var wall4 = new Berzerk.barrier(145, 650, 400, 10, this, walls, 'wall');
-        var wall5 = new Berzerk.barrier(145, 240, 220, 10, this, walls, 'wall');
-        var wall6 = new Berzerk.barrier(735, 240, 400, 10, this, walls, 'wall');
-        var wall7 = new Berzerk.barrier(145, 450, 220, 10, this, walls, 'wall');
-        var wall8 = new Berzerk.barrier(145, 35, 10, 200, this, walls, 'wall');
-        var wall9 = new Berzerk.barrier(145, 450, 10, 200, this, walls, 'wall');
-        var wall10 = new Berzerk.barrier(735, 450, 10, 200, this, walls, 'wall');
-        var wall11 = new Berzerk.barrier(1120, 450, 10, 200, this, walls, 'wall');
-        var wall12 = new Berzerk.barrier(1120, 35, 10, 200, this, walls, 'wall');
-        var wall13 = new Berzerk.barrier(530, 250, 10, 200, this, walls, 'wall');
-        var wall14 = new Berzerk.barrier(530, 440, 220, 10, this, walls, 'wall');
+        var wall1 = new Berzerk.barrier(145, 35, 400, 10, this.game, this.walls, 'wall');
+        wall1.initialize();
+        
+        var wall2 = new Berzerk.barrier(735, 35, 400, 10, this.game, this.walls, 'wall');
+        wall2.initialize();
+        var wall3 = new Berzerk.barrier(735, 650, 400, 10, this.game, this.walls, 'wall');
+        wall3.initialize();
+        var wall4 = new Berzerk.barrier(145, 650, 400, 10, this.game, this.walls, 'wall');
+        wall4.initialize();
+        var wall5 = new Berzerk.barrier(145, 240, 220, 10, this.game, this.walls, 'wall');
+        wall5.initialize();
+        var wall6 = new Berzerk.barrier(735, 240, 400, 10, this.game, this.walls, 'wall');
+        wall6.initialize();
+        var wall7 = new Berzerk.barrier(145, 450, 220, 10, this.game, this.walls, 'wall');
+        wall7.initialize();
+        var wall8 = new Berzerk.barrier(145, 35, 10, 200, this.game, this.walls, 'wall');
+        wall8.initialize();
+        var wall9 = new Berzerk.barrier(145, 450, 10, 200, this.game, this.walls, 'wall');
+        wall9.initialize();
+        var wall10 = new Berzerk.barrier(735, 450, 10, 200, this.game, this.walls, 'wall');
+        wall10.initialize();
+        var wall11 = new Berzerk.barrier(1120, 450, 10, 200, this.game, this.walls, 'wall');
+        wall11.initialize();
+        var wall12 = new Berzerk.barrier(1120, 35, 10, 200, this.game, this.walls, 'wall');
+        wall12.initialize();
+        var wall13 = new Berzerk.barrier(530, 250, 10, 200, this.game, this.walls, 'wall');
+        wall13.initialize();
+        var wall14 = new Berzerk.barrier(530, 440, 220, 10, this.game, this.walls, 'wall');
+        wall14.initialize();
 
-        walls.enableBody = true;
+        this.walls.enableBody = true;
     },
 
     createGates: function()
