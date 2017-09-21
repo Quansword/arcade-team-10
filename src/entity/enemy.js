@@ -1,24 +1,57 @@
 Berzerk.enemy = function(xPos, yPos, game, player)
 {
-	aim = null;
-	eVelocityX = null;
-	eVelocityY = null;
-	eSpeed = null;
-	weapon = null;
-	player = null;
+	this.game = game;
+	this.player = player;
+	this.xPos = xPos;
+	this.yPos = yPos;
 
-	eMoveUp = null;
-	eMoveDown = null;
-	eMoveLeft = null;
-	eMoveRight = null;
-	eAim = null;
+	this.aim = null;
+	this.eVelocityX = null;
+	this.eVelocityY = null;
+	this.eSpeed = null;
+	this.weapon = null;
+	this.player = null;
 
-	fireTimer = null;
-	dead = null;
+	this.eMoveUp = null;
+	this.eMoveDown = null;
+	this.eMoveLeft = null;
+	this.eMoveRight = null;
+	this.eAim = null;
+
+	this.fireTimer = null;
+	this.dead = null;
+
+	this.sprite = null;
 };
 
-Berzerk.barrier.prototype =
+Berzerk.enemy.prototype =
 {
+	initialize: function()
+	{
+		this.sprite = this.game.add.sprite(this.xPos, this.yPos, 'pDown');
+
+		this.sprite.scale.setTo(0.5, 0.5);
+		this.sprite.smoothed = false;
+		this.sprite.exists = true;
+		this.sprite.anchor.setTo(0.5, 0.5);
+
+		this.game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
+		this.sprite.body.collideWorldBounds = true;
+
+		this.aim = false;
+		this.eVelocityX = 0;
+		this.eVelocityY = 0;
+		this.eSpeed = 50;
+		this.fireTimer = this.game.time.now + 3000;
+
+		this.weapon = this.game.add.weapon(100, 'testBullet');
+		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.weapon.bulletSpeed = 200;
+		this.weapon.fireRate = 500;
+
+		this.game.add.existing(this.sprite);
+	},
+
 	ePathfinding: function()
 	{
 		if (this.alive)
@@ -208,7 +241,5 @@ Berzerk.barrier.prototype =
 		}
 	}
 };
-
-Berzerk.barrier.prototype = Object.create(Phaser.Sprite.prototype);
 
 Berzerk.barrier.prototype.constructor = Berzerk.barrier;

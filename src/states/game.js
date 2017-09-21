@@ -41,33 +41,33 @@ Berzerk.game.prototype =
     create: function()
     {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
-        background = this.add.sprite(0, 0, 'background');
-        background.scale.setTo(6, 4.6);
+        this.background = this.game.add.sprite(0, 0, 'background');
+        this.background.scale.setTo(6, 4.6);
 
 
         this.createWalls();
         this.createGates();
-        /*
-        player = new Berzerk.player(300, 350, this);
-        this.add.existing(player);
 
-        enemies = this.add.group();
-        enemies.enableBody = true;
-        enemies.physicsBodyType = Phaser.Physics.ARCADE;
+        this.player = new Berzerk.player(500, 500, this.game);
+        this.player.initialize();
 
-        enemyBullets = this.add.physicsGroup();
-        enemyBullets.enableBody = true;
-        enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
+        this.enemies = this.add.physicsGroup();
+        this.enemies.enableBody = true;
+        this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
+
+        this.enemyBullets = this.add.physicsGroup();
+        this.enemyBullets.enableBody = true;
+        this.enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
 
         this.createEnemies();
-
+/*
         var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
-        scoreText = this.add.text(game.world.width - 100, 5, '0', style);
+        scoreText = this.add.text(this.game.world.width - 100, 5, '0', style);
         scoreText.setTextBounds(-50, 0, 100, 100);
         score = 0;
 
         lives = this.add.group();
-        for (var i = 0; i < player.lives; i++)
+        for (var i = 0; i < this.player.lives; i++)
         {
             var life = lives.create(20 + (30 * i), 30, 'life');
             life.anchor.setTo(0.5, 0.5);
@@ -77,16 +77,17 @@ Berzerk.game.prototype =
 
     update: function()
     {
+        
+        var deltatime = this.time.elapsed / 10;
+
+        this.keystate = this.game.input.keyboard;
+
+        this.player.pUpdate(deltatime, this.keystate);
         /*
-        deltatime = this.time.elapsed / 10;
-
-        keystate = this.input.keyboard;
-
-        player.pupdate(deltatime, keystate);
         enemies.foreach(function (enemy)
         {
-            enemy.eupdate(deltatime);
-        }, this);
+            enemy.eUpdate(deltatime);
+        }, this.game);
 
         this.physics.arcade.collide(player, walls, killplayer);
         this.physics.arcade.collide(enemies, walls);
@@ -137,17 +138,21 @@ Berzerk.game.prototype =
 
     createEnemies: function()
     {
-        var enemy1 = new Berzerk.enemy(300, 550, this, player);
-        enemies.add(enemy1);
-        enemyBullets.add(enemy1.weapon.bullets);
-
-        var enemy2 = new Berzerk.enemy(1000, 500, this, player);
-        enemies.add(enemy2);
+        var enemy1 = new Berzerk.enemy(300, 550, this.game, this.player);
+        enemy1.initialize();
+        this.enemies.add(enemy1);
+        this.enemyBullets.add(enemy1.weapon.bullets);
+/*
+        var enemy2 = new Berzerk.enemy(1000, 500, this.game, this.player);
+        enemy2.initialize();
+        this.enemies.add(enemy2);
         enemyBullets.add(enemy2.weapon.bullets);
 
-        var enemy3 = new Berzerk.enemy(1000, 200, this, player);
-        enemies.add(enemy3);
+        var enemy3 = new Berzerk.enemy(1000, 200, this.game, this.player);
+        enemy3.initialize();
+        this.enemies.add(enemy3);
         enemyBullets.add(enemy3.weapon.bullets);
+        */
     },
 
     createWalls: function()

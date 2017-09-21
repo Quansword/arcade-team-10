@@ -1,39 +1,42 @@
 Berzerk.player = function(xPos, yPos, game)
 {
-	Phaser.Sprite.call(this);
-	aim = null;
-	pVelocityX = null;
-	pVelocityY = null;
-	pSpeed = null;
-	weapon = null;
-	lives = null;
+	this.xPos = xPos;
+	this.yPos = yPos;
+	this.game = game;
+
+	this.aim = null;
+	this.pVelocityX = null;
+	this.pVelocityY = null;
+	this.pSpeed = null;
+	this.weapon = null;
+	this.lives = null;
+
+	this.player = null;
 };
 
 Berzerk.player.prototype =
 {
-	init: function()
+	initialize: function()
 	{
-		this.scale.setTo(0.5, 0.5);
-		this.exists = true;
-		this.anchor.setTo(0.5, 0.5);
+		this.player = this.game.add.sprite(this.xPos, this.yPos, 'pRight');
+		this.player.scale.setTo(0.5, 0.5);
+		this.player.exists = true;
+		this.player.anchor.setTo(0.5, 0.5);
 
-		this.game.physics.enable(this, Phaser.Physics.ARCADE);
-		this.body.collideWorldBounds = true;
-		this.maxHealth = 1;
+		this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
+		this.player.body.collideWorldBounds = true;
 
 		this.aim = false;
-		this.eVelocityX = 0;
-		this.eVelocityY = 0;
-		this.eSpeed = 50;
-		this.fireTimer = this.game.time.now + 3000;
+		this.pVelocityX = 0;
+		this.pVelocityY = 0;
+		this.pSpeed = 50;
 
-		this.weapon = game.add.weapon(100, 'testBullet');
+		this.weapon = this.game.add.weapon(100, 'testBullet');
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 200;
 		this.weapon.fireRate = 500;
 
-		this.player = player;
-		this.game.add.existing(this);
+		this.game.add.existing(this.player);
 	},
 
 	pUpdate: function(time, keyState)
@@ -170,13 +173,11 @@ Berzerk.player.prototype =
 			this.weapon.fire();
 		}
 
-		this.body.velocity.y = this.pVelocityY * time;
-		this.body.velocity.x = this.pVelocityX * time;
+		this.player.body.velocity.y = this.pVelocityY * time;
+		this.player.body.velocity.x = this.pVelocityX * time;
 
 		this.aim = false;
 	}
 };
-
-Berzerk.player.prototype = Object.create(Phaser.Sprite.prototype);
 
 Berzerk.player.prototype.constructor = Berzerk.player;
