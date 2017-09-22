@@ -45,8 +45,8 @@ Berzerk.game.prototype =
         this.background.scale.setTo(6, 4.6);
 
 
-        this.createWalls();
-        this.createGates();
+        //this.createWalls();
+        //this.createGates();
 
         this.player = new Berzerk.player(500, 500, this.game);
         this.player.initialize();
