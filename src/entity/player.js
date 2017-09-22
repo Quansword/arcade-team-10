@@ -19,7 +19,7 @@ Berzerk.player.prototype =
 	initialize: function()
 	{
 		this.player = this.game.add.sprite(this.xPos, this.yPos, 'pRight');
-		this.player.scale.setTo(0.5, 0.5);
+		this.player.scale.setTo(1, 1);
 		this.player.exists = true;
 		this.player.anchor.setTo(0.5, 0.5);
 
@@ -29,14 +29,13 @@ Berzerk.player.prototype =
 		this.aim = false;
 		this.pVelocityX = 0;
 		this.pVelocityY = 0;
-		this.pSpeed = 50;
+		this.pSpeed = 500;
 
 		this.weapon = this.game.add.weapon(100, 'testBullet');
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 200;
 		this.weapon.fireRate = 500;
 
-		this.game.add.existing(this.player);
 	},
 
 	pUpdate: function(time, keyState)
@@ -49,7 +48,7 @@ Berzerk.player.prototype =
 			this.aim = true;
 		}
 
-		this.weapon.trackSprite(this, 0, 0);
+		this.weapon.trackSprite(this.player, 0, 0);
 		this.weapon.fireAngle = 0;
 
 		if (!this.aim)

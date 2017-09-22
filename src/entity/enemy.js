@@ -1,9 +1,10 @@
-Berzerk.enemy = function(xPos, yPos, game, player)
+Berzerk.enemy = function(xPos, yPos, game, player, group)
 {
 	this.game = game;
 	this.player = player;
 	this.xPos = xPos;
 	this.yPos = yPos;
+	this.group = group;
 
 	this.aim = null;
 	this.eVelocityX = null;
@@ -21,22 +22,22 @@ Berzerk.enemy = function(xPos, yPos, game, player)
 	this.fireTimer = null;
 	this.dead = null;
 
-	this.sprite = null;
+	this.enemy= null;
 };
 
 Berzerk.enemy.prototype =
 {
 	initialize: function()
 	{
-		this.sprite = this.game.add.sprite(this.xPos, this.yPos, 'pDown');
+		this.enemy= this.game.add.sprite(this.xPos, this.yPos, 'pDown');
 
-		this.sprite.scale.setTo(0.5, 0.5);
-		this.sprite.smoothed = false;
-		this.sprite.exists = true;
-		this.sprite.anchor.setTo(0.5, 0.5);
+		this.enemy.scale.setTo(0.5, 0.5);
+		this.enemy.smoothed = false;
+		this.enemy.exists = true;
+		this.enemy.anchor.setTo(0.5, 0.5);
 
-		this.game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
-		this.sprite.body.collideWorldBounds = true;
+		this.game.physics.enable(this.enemy, Phaser.Physics.ARCADE);
+		this.enemy.body.collideWorldBounds = true;
 
 		this.aim = false;
 		this.eVelocityX = 0;
@@ -49,19 +50,19 @@ Berzerk.enemy.prototype =
 		this.weapon.bulletSpeed = 200;
 		this.weapon.fireRate = 500;
 
-		this.game.add.existing(this.sprite);
+		this.group.add(this.enemy);
 	},
 
 	ePathfinding: function()
 	{
 		if (this.alive)
 		{
-			if (this.position.x < this.player.position.x - 10)
+			if (this.enemy.position.x < this.player.position.x - 10)
 			{
 				this.eMoveLeft = false;
 				this.eMoveRight = true;
 			}
-			else if (this.position.x > this.player.position.x + 10)
+			else if (this.enemy.position.x > this.player.position.x + 10)
 			{
 				this.eMoveLeft = true;
 				this.eMoveRight = false;
@@ -72,12 +73,12 @@ Berzerk.enemy.prototype =
 				this.eMoveRight = false;
 			}
 
-			if (this.position.y < this.player.position.y - 10)
+			if (this.enemy.position.y < this.player.position.y - 10)
 			{
 				this.eMoveUp = false;
 				this.eMoveDown = true;
 			}
-			else if (this.position.y > this.player.position.y + 10)
+			else if (this.enemy.position.y > this.player.position.y + 10)
 			{
 				this.eMoveUp = true;
 				this.eMoveDown = false;
@@ -234,12 +235,12 @@ Berzerk.enemy.prototype =
 				this.eAim = false;
 			}
 
-			this.body.velocity.y = this.eVelocityY * time;
-			this.body.velocity.x = this.eVelocityX * time;
+			this.enemy.body.velocity.y = this.eVelocityY * time;
+			this.enemy.body.velocity.x = this.eVelocityX * time;
 
 			this.aim = false;
 		}
 	}
 };
 
-Berzerk.barrier.prototype.constructor = Berzerk.barrier;
+Berzerk.enemy.prototype.constructor = Berzerk.enemy;

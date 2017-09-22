@@ -51,62 +51,54 @@ Berzerk.game.prototype =
         this.player = new Berzerk.player(500, 500, this.game);
         this.player.initialize();
 
-        this.enemies = this.add.physicsGroup();
-        this.enemies.enableBody = true;
-        this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
-
-        this.enemyBullets = this.add.physicsGroup();
-        this.enemyBullets.enableBody = true;
-        this.enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
-
         this.createEnemies();
-/*
-        var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
-        scoreText = this.add.text(this.game.world.width - 100, 5, '0', style);
-        scoreText.setTextBounds(-50, 0, 100, 100);
-        score = 0;
 
-        lives = this.add.group();
+        var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
+        this.scoreText = this.game.add.text(this.game.world.width - 100, 5, '0', style);
+        
+
+        this.scoreText.setTextBounds(-50, 0, 100, 100);
+        this.score = 0;
+
+        this.lives = this.game.add.group();
         for (var i = 0; i < this.player.lives; i++)
         {
-            var life = lives.create(20 + (30 * i), 30, 'life');
+            var life = this.lives.create(20 + (30 * i), 30, 'life');
             life.anchor.setTo(0.5, 0.5);
-        }
-        */
+        }  
     },
 
     update: function()
     {
-        
         var deltatime = this.time.elapsed / 10;
 
         this.keystate = this.game.input.keyboard;
 
         this.player.pUpdate(deltatime, this.keystate);
-        /*
-        enemies.foreach(function (enemy)
+  /*     
+        this.enemies.forEach(function (enemy)
         {
             enemy.eUpdate(deltatime);
         }, this.game);
+*/
+        this.game.physics.arcade.collide(this.player.player, this.walls, this.killplayer);
+        this.game.physics.arcade.collide(this.enemies, this.walls);
+        this.game.physics.arcade.collide(this.player.player, this.gates, this.screentransition);
 
-        this.physics.arcade.collide(player, walls, killplayer);
-        this.physics.arcade.collide(enemies, walls);
-        this.physics.arcade.collide(player, gates, screentransition);
+        this.game.physics.arcade.collide(this.player.weapon.bullets, this.walls, this.killbullet);
+        this.game.physics.arcade.collide(this.enemybullets, this.walls, this.killbullet);
 
-        this.physics.arcade.collide(player.weapon.bullets, walls, killbullet);
-        this.physics.arcade.collide(enemybullets, walls, killbullet);
+        this.game.physics.arcade.collide(this.player.player, this.enemies);
+        this.game.physics.arcade.collide(this.enemies, this.enemies);
 
-        this.physics.arcade.collide(player, enemies);
-        this.physics.arcade.collide(enemies, enemies);
-
-        this.physics.arcade.overlap(player.weapon.bullets, enemies, bullethitenemy, null, this);
-        for (var i = 0; i < enemies.children.length; i++)
+        this.game.physics.arcade.overlap(this.player.weapon.bullets, this.enemies, this.bullethitenemy, null, this);
+   /*     for (var i = 0; i < this.enemies.children.length; i++)
         {
-            this.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bullethitplayer, null, this);
+            this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player, this.bullethitplayer, null, this);
         }
-
-        scoretext.text = score;
-        */
+*/
+        this.scoreText.text = this.score;
+        
     },
 
     bulletHitPlayer: function(player, bullet)
@@ -138,21 +130,25 @@ Berzerk.game.prototype =
 
     createEnemies: function()
     {
-        var enemy1 = new Berzerk.enemy(300, 550, this.game, this.player);
-        enemy1.initialize();
-        this.enemies.add(enemy1);
-        this.enemyBullets.add(enemy1.weapon.bullets);
-/*
-        var enemy2 = new Berzerk.enemy(1000, 500, this.game, this.player);
-        enemy2.initialize();
-        this.enemies.add(enemy2);
-        enemyBullets.add(enemy2.weapon.bullets);
+        this.enemies = this.add.physicsGroup();
+        this.enemies.enableBody = true;
+        this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
-        var enemy3 = new Berzerk.enemy(1000, 200, this.game, this.player);
+        this.enemyBullets = this.add.physicsGroup();
+        this.enemyBullets.enableBody = true;
+        this.enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
+
+        var enemy1 = new Berzerk.enemy(300, 550, this.game, this.player, this.enemies);
+        enemy1.initialize();
+        this.enemyBullets.add(enemy1.weapon.bullets);
+
+        var enemy2 = new Berzerk.enemy(1000, 500, this.game, this.player, this.enemies);
+        enemy2.initialize();
+        this.enemyBullets.add(enemy2.weapon.bullets);
+
+        var enemy3 = new Berzerk.enemy(1000, 200, this.game, this.player, this.enemies);
         enemy3.initialize();
-        this.enemies.add(enemy3);
-        enemyBullets.add(enemy3.weapon.bullets);
-        */
+        this.enemyBullets.add(enemy3.weapon.bullets);
     },
 
     createWalls: function()
@@ -194,14 +190,14 @@ Berzerk.game.prototype =
 
     createGates: function()
     {
-        gates = this.add.physicsGroup();
+        this.gates = this.add.physicsGroup();
 
-        gate1 = new Berzerk.barrier(540, 35, 200, 10, this, gates, 'gate');
-        gate2 = new Berzerk.barrier(540, 650, 200, 10, this, gates, 'gate');
-        gate3 = new Berzerk.barrier(145, 250, 10, 190, this, gates, 'gate');
-        gate4 = new Berzerk.barrier(1120, 250, 10, 190, this, gates, 'gate');
+        this.gate1 = new Berzerk.barrier(540, 35, 200, 10, this.game, this.gates, 'gate');
+        this.gate2 = new Berzerk.barrier(540, 650, 200, 10, this.game, this.gates, 'gate');
+        this.gate3 = new Berzerk.barrier(145, 250, 10, 190, this.game, this.gates, 'gate');
+        this.gate4 = new Berzerk.barrier(1120, 250, 10, 190, this.game, this.gates, 'gate');
 
-        gates.enableBody = true;
+        this.gates.enableBody = true;
     },
 
     screenTransition: function(player, gate)
@@ -211,38 +207,39 @@ Berzerk.game.prototype =
             item.renderable = false;
         }, this);
 
-        if (player.body.touching.left && gate4.renderable != true)
+        if (this.player.body.touching.left && this.gate4.renderable != true)
         {
-            player.body.position.x = 1000;
-            player.body.position.y = 300;
-            gate4.renderable = true;
+            this.player.body.position.x = 1000;
+            this.player.body.position.y = 300;
+            this.gate4.renderable = true;
         }
-        else if (player.body.touching.right && gate3.renderable != true)
+        else if (this.player.body.touching.right && this.gate3.renderable != true)
         {
-            player.body.position.x = 300;
-            player.body.position.y = 300;
-            gate3.renderable = true;
+            this.player.body.position.x = 300;
+            this.player.body.position.y = 300;
+            this.gate3.renderable = true;
         }
-        else if (player.body.touching.down && gate1.renderable != true)
+        else if (this.player.body.touching.down && this.gate1.renderable != true)
         {
-            player.body.position.x = 600;
-            player.body.position.y = 100;
-            gate1.renderable = true;
+            this.player.body.position.x = 600;
+            this.player.body.position.y = 100;
+            this.gate1.renderable = true;
         }
-        else if (player.body.touching.up && gate2.renderable != true)
+        else if (this.player.body.touching.up && this.gate2.renderable != true)
         {
-            player.body.position.x = 600;
-            player.body.position.y = 500;
-            gate2.renderable = true;
+            this.player.body.position.x = 600;
+            this.player.body.position.y = 500;
+            this.gate2.renderable = true;
         }
 
-        enemies.removeAll();
-        enemyBullets.removeAll();
+        this.enemies.removeAll();
+        this.enemyBullets.removeAll();
         createEnemies();
     },
 
     killPlayer: function(player, wall)
     {
+        window.alert('test');
         var life = lives.getFirstAlive();
 
         if (life)
