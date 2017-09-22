@@ -19,7 +19,7 @@ Berzerk.game = function(game)
     this.scoreText = null;
     this.score = null;
 
-    this.lives = null;
+    this.hud = null;
 };
 
 Berzerk.game.prototype = 
@@ -35,7 +35,7 @@ Berzerk.game.prototype =
         this.game.load.image('background', 'assets/images/placeholder/environment/Maze1.png');
         this.game.load.image('wall', 'assets/images/placeholder/environment/wall.png');
         this.game.load.image('gate', 'assets/images/placeholder/environment/gate.png');
-        this.game.load.image('life', 'assets/images/placeholder/life.png');
+        this.game.load.image('heart', 'assets/images/ui/Heart.png'); 
     },
 
     create: function()
@@ -53,19 +53,20 @@ Berzerk.game.prototype =
 
         this.createEnemies();
 
+        this.hud = this.game.add.group();
+        this.hud.enableBody = false;
+        for (var i = 0; i < this.player.maxHealth; i++)
+        {
+            this.hud.add(new Phaser.Sprite(this.game, 0, 0, 'heart'));
+            this.hud.children[i].position.set((this.hud.children[i].width * i) + (this.hud.children[i].width / 2), this.hud.children[i].height / 2);
+        }
+
         var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
         this.scoreText = this.game.add.text(this.game.world.width - 100, 5, '0', style);
         
 
         this.scoreText.setTextBounds(-50, 0, 100, 100);
         this.score = 0;
-
-        this.lives = this.game.add.group();
-        for (var i = 0; i < this.player.lives; i++)
-        {
-            var life = this.lives.create(20 + (30 * i), 30, 'life');
-            life.anchor.setTo(0.5, 0.5);
-        }  
     },
 
     update: function()
@@ -81,15 +82,14 @@ Berzerk.game.prototype =
             enemy.eUpdate(deltatime);
         }, this.game);
 
-        this.game.physics.arcade.collide(this.player, this.walls, this.killPlayer, null, this);
+        this.game.physics.arcade.collide(this.player, this.walls);
         this.game.physics.arcade.collide(this.enemies, this.walls);
         this.game.physics.arcade.collide(this.player, this.gates, this.screenTransition, null, this);
 
         this.game.physics.arcade.collide(this.player.weapon.bullets, this.walls, this.killBullet);
         this.game.physics.arcade.collide(this.enemybullets, this.walls, this.killBullet);
 
-        this.game.physics.arcade.collide(this.player, this.enemies);
-        this.game.physics.arcade.collide(this.enemies, this.enemies);
+        this.game.physics.arcade.collide(this.player, this.enemies, this.enemyHitPlayer, null, this);
 
         this.game.physics.arcade.overlap(this.player.weapon.bullets, this.enemies, this.bulletHitEnemy, null, this);
         for (var i = 0; i < this.enemies.children.length; i++)
@@ -101,10 +101,15 @@ Berzerk.game.prototype =
         
     },
 
+    enemyHitPlayer: function(player, enemy)
+    {
+        this.damagePlayer(player, 1);
+    },
+
     bulletHitPlayer: function(player, bullet)
     {
         bullet.kill();
-        this.killPlayer(player, bullet);
+        this.damagePlayer(player, 1); 
     },
 
     bulletHitEnemy: function(enemy, bullet) // -----------------------------------------------------Enemy code
@@ -112,6 +117,42 @@ Berzerk.game.prototype =
         bullet.kill();
         enemy.kill();
         this.score += 50;
+    },
+
+    damagePlayer: function(player, dNum)
+    {
+        if (this.player.canDamage)
+        {
+            this.player.damage(dNum);
+            this.hud.children[this.player.health].visible = false;
+            this.playerInvuln();
+            this.playerVisible();
+            this.game.time.events.repeat(200, 3, this.playerVisible, this);
+            this.game.time.events.add(800, this.playerInvuln, this);
+        }
+    },
+
+    playerVisible: function()
+    {
+        this.player.visible = !this.player.visible;
+    },
+
+    playerInvuln: function()
+    {
+        this.player.canDamage = !this.player.canDamage;
+    },
+
+    healPlayer: function(player, hNum)
+    {
+        this.hud.children[this.player.health].visible = true;
+        this.player.heal(hNum);
+    },
+
+    increaseHealth: function(player)
+    {
+        this.player.maxHealth += 1;
+        this.player.heal(1);
+        this.hud.add(new Phaser.Sprite(this.game, (this.hud.children[0].width * (this.player.maxHealth - 1)) + (this.hud.children[0].width / 2), this.hud.children[0].height / 2, 'heart'));
     },
 
     createEnemies: function()
@@ -203,7 +244,7 @@ Berzerk.game.prototype =
         this.createEnemies();
     },
 
-    killPlayer: function(player, wall)
+    killPlayer: function(player)
     {
         var life = this.lives.getFirstAlive();
         if (life)

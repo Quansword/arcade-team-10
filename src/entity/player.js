@@ -11,6 +11,11 @@ Berzerk.player = function(xPos, yPos, game)
 	this.pSpeed = null;
 	this.weapon = null;
 	this.lives = null;
+	this.canDamage = null;
+	this.maxHealth = null;
+	this.health = null;
+
+	this.lives = null;
 
 	this.game.add.existing(this);
 };
@@ -22,6 +27,9 @@ Berzerk.player.initialize = function()
 	this.exists = true;
 	this.anchor.setTo(0.5, 0.5);
 	this.lives = 3;
+	this.maxHealth = 5;
+	this.health = this.maxHealth;
+	this.canDamage = true;
 
 	this.game.physics.enable(this, Phaser.Physics.ARCADE);
 	this.body.collideWorldBounds = true;
@@ -35,6 +43,8 @@ Berzerk.player.initialize = function()
 	this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 	this.weapon.bulletSpeed = 200;
 	this.weapon.fireRate = 500;
+
+	this.lives = 1;
 };
 
 Berzerk.player.pUpdate = function(time, keyState)
