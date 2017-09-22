@@ -81,14 +81,14 @@ Berzerk.game.prototype =
             enemy.eUpdate(deltatime);
         }, this.game);
 */
-        this.game.physics.arcade.collide(this.player.player, this.walls, this.killPlayer, null, this);
+        this.game.physics.arcade.collide(this.player, this.walls, this.killPlayer, null, this);
         this.game.physics.arcade.collide(this.enemies, this.walls);
-        this.game.physics.arcade.collide(this.player.player, this.gates, this.screenTransition);
+        this.game.physics.arcade.collide(this.player, this.gates, this.screenTransition);
 
         this.game.physics.arcade.collide(this.player.weapon.bullets, this.walls, this.killBullet);
         this.game.physics.arcade.collide(this.enemybullets, this.walls, this.killBullet);
 
-        this.game.physics.arcade.collide(this.player.player, this.enemies);
+        this.game.physics.arcade.collide(this.player, this.enemies);
         this.game.physics.arcade.collide(this.enemies, this.enemies);
 
         this.game.physics.arcade.overlap(this.player.weapon.bullets, this.enemies, this.bulletHitEnemy, null, this);
@@ -218,15 +218,15 @@ Berzerk.game.prototype =
         if (life)
         {
             life.kill();
-            this.player.player.kill();
+            this.player.kill();
             this.player.lives--;
-            this.player.player.reset(300, 300, 1);
+            this.player.reset(300, 300, 1);
         }
 
         if (this.player.lives < 1)
         {
             this.score = "Game Over";
-            this.player.player.kill();
+            this.player.kill();
         }
     },
 
