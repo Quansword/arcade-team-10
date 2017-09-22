@@ -91,11 +91,10 @@ Berzerk.game.prototype =
         this.game.physics.arcade.collide(this.player.player, this.enemies);
         this.game.physics.arcade.collide(this.enemies, this.enemies);
 
-        this.game.physics.arcade.overlap(this.player.weapon.bullets, this.enemies, this.bullethitenemy, null, this);
+        this.game.physics.arcade.overlap(this.player.weapon.bullets, this.enemies, this.bulletHitEnemy, null, this);
         for (var i = 0; i < this.enemies.children.length; i++)
         {
             //this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player, this.bullethitplayer, null, this);
-            this.game.physics.arcade.collide(this.enemies.children[i], this.walls);
         }
 
         this.scoreText.text = this.score;
@@ -126,7 +125,7 @@ Berzerk.game.prototype =
     {
         bullet.kill();
         enemy.kill();
-        score += 50;
+        this.score += 50;
     },
 
     createEnemies: function()
