@@ -31,7 +31,7 @@ Berzerk.enemy.prototype =
 	{
 		this.enemy= this.game.add.sprite(this.xPos, this.yPos, 'pDown');
 
-		this.enemy.scale.setTo(0.5, 0.5);
+		this.enemy.scale.setTo(1, 1);
 		this.enemy.smoothed = false;
 		this.enemy.exists = true;
 		this.enemy.anchor.setTo(0.5, 0.5);

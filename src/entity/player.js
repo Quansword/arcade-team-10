@@ -22,6 +22,7 @@ Berzerk.player.prototype =
 		this.player.scale.setTo(1, 1);
 		this.player.exists = true;
 		this.player.anchor.setTo(0.5, 0.5);
+		this.lives = 3;
 
 		this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
 		this.player.body.collideWorldBounds = true;

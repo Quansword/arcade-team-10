@@ -19,7 +19,7 @@ Berzerk.game = function(game)
     this.scoreText = null;
     this.score = null;
 
-    lives = null;
+    this.lives = null;
 };
 
 Berzerk.game.prototype = 
@@ -81,22 +81,23 @@ Berzerk.game.prototype =
             enemy.eUpdate(deltatime);
         }, this.game);
 */
-        this.game.physics.arcade.collide(this.player.player, this.walls, this.killplayer);
+        this.game.physics.arcade.collide(this.player.player, this.walls, this.killPlayer, null, this);
         this.game.physics.arcade.collide(this.enemies, this.walls);
-        this.game.physics.arcade.collide(this.player.player, this.gates, this.screentransition);
+        this.game.physics.arcade.collide(this.player.player, this.gates, this.screenTransition);
 
-        this.game.physics.arcade.collide(this.player.weapon.bullets, this.walls, this.killbullet);
-        this.game.physics.arcade.collide(this.enemybullets, this.walls, this.killbullet);
+        this.game.physics.arcade.collide(this.player.weapon.bullets, this.walls, this.killBullet);
+        this.game.physics.arcade.collide(this.enemybullets, this.walls, this.killBullet);
 
         this.game.physics.arcade.collide(this.player.player, this.enemies);
         this.game.physics.arcade.collide(this.enemies, this.enemies);
 
         this.game.physics.arcade.overlap(this.player.weapon.bullets, this.enemies, this.bullethitenemy, null, this);
-   /*     for (var i = 0; i < this.enemies.children.length; i++)
+        for (var i = 0; i < this.enemies.children.length; i++)
         {
-            this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player, this.bullethitplayer, null, this);
+            //this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player, this.bullethitplayer, null, this);
+            this.game.physics.arcade.collide(this.enemies.children[i], this.walls);
         }
-*/
+
         this.scoreText.text = this.score;
         
     },
@@ -157,33 +158,8 @@ Berzerk.game.prototype =
 
         var wall1 = new Berzerk.barrier(145, 35, 400, 10, this.game, this.walls, 'wall');
         wall1.initialize();
-        
         var wall2 = new Berzerk.barrier(735, 35, 400, 10, this.game, this.walls, 'wall');
         wall2.initialize();
-        var wall3 = new Berzerk.barrier(735, 650, 400, 10, this.game, this.walls, 'wall');
-        wall3.initialize();
-        var wall4 = new Berzerk.barrier(145, 650, 400, 10, this.game, this.walls, 'wall');
-        wall4.initialize();
-        var wall5 = new Berzerk.barrier(145, 240, 220, 10, this.game, this.walls, 'wall');
-        wall5.initialize();
-        var wall6 = new Berzerk.barrier(735, 240, 400, 10, this.game, this.walls, 'wall');
-        wall6.initialize();
-        var wall7 = new Berzerk.barrier(145, 450, 220, 10, this.game, this.walls, 'wall');
-        wall7.initialize();
-        var wall8 = new Berzerk.barrier(145, 35, 10, 200, this.game, this.walls, 'wall');
-        wall8.initialize();
-        var wall9 = new Berzerk.barrier(145, 450, 10, 200, this.game, this.walls, 'wall');
-        wall9.initialize();
-        var wall10 = new Berzerk.barrier(735, 450, 10, 200, this.game, this.walls, 'wall');
-        wall10.initialize();
-        var wall11 = new Berzerk.barrier(1120, 450, 10, 200, this.game, this.walls, 'wall');
-        wall11.initialize();
-        var wall12 = new Berzerk.barrier(1120, 35, 10, 200, this.game, this.walls, 'wall');
-        wall12.initialize();
-        var wall13 = new Berzerk.barrier(530, 250, 10, 200, this.game, this.walls, 'wall');
-        wall13.initialize();
-        var wall14 = new Berzerk.barrier(530, 440, 220, 10, this.game, this.walls, 'wall');
-        wall14.initialize();
 
         this.walls.enableBody = true;
     },
@@ -239,21 +215,19 @@ Berzerk.game.prototype =
 
     killPlayer: function(player, wall)
     {
-        window.alert('test');
-        var life = lives.getFirstAlive();
-
+        var life = this.lives.getFirstAlive();
         if (life)
         {
             life.kill();
-            player.kill();
-            player.lives--;
-            player.reset(300, 300, 1);
+            this.player.player.kill();
+            this.player.lives--;
+            this.player.player.reset(300, 300, 1);
         }
 
-        if (player.lives < 1)
+        if (this.player.lives < 1)
         {
-            score = "Game Over";
-            player.kill();
+            this.score = "Game Over";
+            this.player.player.kill();
         }
     },
 
