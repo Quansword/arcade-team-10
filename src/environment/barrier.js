@@ -18,7 +18,7 @@ Berzerk.barrier.initialize = function()
 	this.scale.setTo(this.width, this.height);
 	this.game.physics.arcade.enable(this);
 	this.body.immovable = true;
-	this.renderable = true;
+	this.renderable = false;
 	this.group.add(this);
 };
 

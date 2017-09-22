@@ -75,15 +75,15 @@ Berzerk.game.prototype =
         this.keystate = this.game.input.keyboard;
 
         this.player.pUpdate(deltatime, this.keystate);
-  /*     
+
         this.enemies.forEach(function (enemy)
         {
             enemy.eUpdate(deltatime);
         }, this.game);
-*/
+
         this.game.physics.arcade.collide(this.player, this.walls, this.killPlayer, null, this);
         this.game.physics.arcade.collide(this.enemies, this.walls);
-        this.game.physics.arcade.collide(this.player, this.gates, this.screenTransition);
+        this.game.physics.arcade.collide(this.player, this.gates, this.screenTransition, null, this);
 
         this.game.physics.arcade.collide(this.player.weapon.bullets, this.walls, this.killBullet);
         this.game.physics.arcade.collide(this.enemybullets, this.walls, this.killBullet);
@@ -94,8 +94,8 @@ Berzerk.game.prototype =
         this.game.physics.arcade.overlap(this.player.weapon.bullets, this.enemies, this.bulletHitEnemy, null, this);
         for (var i = 0; i < this.enemies.children.length; i++)
         {
-            //this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player, this.bullethitplayer, null, this);
-        }
+            this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player, this.bulletHitPlayer, null, this);
+    }
 
         this.scoreText.text = this.score;
         
@@ -104,21 +104,7 @@ Berzerk.game.prototype =
     bulletHitPlayer: function(player, bullet)
     {
         bullet.kill();
-        var life = lives.getFirstAlive();
-
-        if (life)
-        {
-            life.kill();
-            player.kill();
-            player.lives--;
-            player.reset(300, 300, 1);
-        }
-
-        if (player.lives < 1)
-        {
-            score = "Game Over";
-            player.kill();
-        }
+        this.killPlayer(player, bullet);
     },
 
     bulletHitEnemy: function(enemy, bullet) // -----------------------------------------------------Enemy code
@@ -165,19 +151,24 @@ Berzerk.game.prototype =
 
     createGates: function()
     {
-        this.gates = this.add.physicsGroup();
+        this.gates = this.game.add.physicsGroup();
 
         this.gate1 = new Berzerk.barrier(540, 35, 200, 10, this.game, this.gates, 'gate');
+        this.gate1.initialize();
         this.gate2 = new Berzerk.barrier(540, 650, 200, 10, this.game, this.gates, 'gate');
+        this.gate2.initialize();
         this.gate3 = new Berzerk.barrier(145, 250, 10, 190, this.game, this.gates, 'gate');
+        this.gate3.initialize();
         this.gate4 = new Berzerk.barrier(1120, 250, 10, 190, this.game, this.gates, 'gate');
+        this.gate4.initialize();
 
         this.gates.enableBody = true;
+        this.gates.physicsBodyType = Phaser.Physics.ARCADE;
     },
 
     screenTransition: function(player, gate)
     {
-        gates.forEach(function (item)
+        this.gates.forEach(function (item)
         {
             item.renderable = false;
         }, this);
@@ -209,7 +200,7 @@ Berzerk.game.prototype =
 
         this.enemies.removeAll();
         this.enemyBullets.removeAll();
-        createEnemies();
+        this.createEnemies();
     },
 
     killPlayer: function(player, wall)
