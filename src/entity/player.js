@@ -18,6 +18,7 @@ Berzerk.player = function(xPos, yPos, game)
 Berzerk.player.initialize = function()
 {
 	this.scale.setTo(1, 1);
+	this.smoothed = false;
 	this.exists = true;
 	this.anchor.setTo(0.5, 0.5);
 	this.lives = 3;
