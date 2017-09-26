@@ -13,12 +13,6 @@ Berzerk.preloader.prototype =
 
 		this.game.loadingBar.background.tint = 0x7edcfc;
 		this.game.loadingBar.bar.tint = 0xdcfc7e;
-
-		var i = 2500;
-		while(i--)
-		{
-			this.game.load.image('image' + i, 'assets/images/loading/loading-bar.png');
-		}
 	},
 
 	create: function()
