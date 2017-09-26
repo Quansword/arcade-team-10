@@ -526,6 +526,34 @@ class Player extends Phaser.Sprite
 			}
 		}
 
+		if (this.pVelocityX == 0 && this.pVelocityY == 0)
+		{
+			if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135)
+			{
+				this.newPFrame = this.pDirEnum.DOWN;
+			}
+			else if (this.weapon.fireAngle == 0)
+			{
+				this.newPFrame = this.pDirEnum.RIGHT;
+			}
+			else if (this.weapon.fireAngle == 180)
+			{
+				this.newPFrame = this.pDirEnum.LEFT;
+			}
+			else if (this.weapon.fireAngle == 270)
+			{
+				this.newPFrame = this.pDirEnum.UP;
+			}
+			else if (this.weapon.fireAngle == 225)
+			{
+				this.newPFrame = this.pDirEnum.UPLEFT;
+			}
+			else if (this.weapon.fireAngle == 315)
+			{
+				this.newPFrame = this.pDirEnum.UPRIGHT;
+			}
+		}
+
 		if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT)
 		{
 			this.newPFrame = this.pDirEnum.DOWN;
