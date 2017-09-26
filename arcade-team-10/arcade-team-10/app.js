@@ -305,15 +305,15 @@ var Player = (function (_super) {
         else {
             if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
                 if (keyState.isDown(Phaser.KeyCode.W)) {
-                    this.weapon.trackOffset.y = -this.height / 2;
+                    //this.weapon.trackOffset.y = -this.height / 2;
                     this.weapon.fireAngle = 270;
                 }
                 else {
-                    this.weapon.trackOffset.y = this.height / 2;
+                    //this.weapon.trackOffset.y = this.height / 2;
                     this.weapon.fireAngle = 90;
                 }
                 if (keyState.isDown(Phaser.KeyCode.A)) {
-                    this.weapon.trackOffset.x = -this.width / 2;
+                    //this.weapon.trackOffset.x = -this.width / 2;
                     if (this.weapon.fireAngle > 180) {
                         this.weapon.fireAngle -= 45;
                     }
@@ -322,7 +322,7 @@ var Player = (function (_super) {
                     }
                 }
                 else {
-                    this.weapon.trackOffset.x = this.width / 2;
+                    //this.weapon.trackOffset.x = this.width / 2;
                     if (this.weapon.fireAngle > 180) {
                         this.weapon.fireAngle += 45;
                     }
@@ -333,11 +333,11 @@ var Player = (function (_super) {
             }
             else {
                 if (keyState.isDown(Phaser.KeyCode.W)) {
-                    this.weapon.trackOffset.y -= this.height / 2;
+                    //this.weapon.trackOffset.y -= this.height / 2;
                     this.weapon.fireAngle = 270;
                 }
                 if (keyState.isDown(Phaser.KeyCode.S)) {
-                    this.weapon.trackOffset.y += this.height / 2;
+                    //this.weapon.trackOffset.y += this.height / 2;
                     if (this.weapon.fireAngle == 270) {
                         this.weapon.fireAngle = 0;
                     }
@@ -346,16 +346,16 @@ var Player = (function (_super) {
                     }
                 }
                 if (keyState.isDown(Phaser.KeyCode.A)) {
-                    this.weapon.trackOffset.x -= this.width / 2;
+                    //this.weapon.trackOffset.x -= this.width / 2;
                     this.weapon.fireAngle = 180;
                 }
                 if (keyState.isDown(Phaser.KeyCode.D)) {
-                    this.weapon.trackOffset.x += this.width / 2;
+                    //this.weapon.trackOffset.x += this.width / 2;
                     this.weapon.fireAngle = 0;
                 }
             }
             this.weapon.bulletAngleOffset = 90;
-            this.weapon.fire();
+            this.weapon.fire(this.body.center);
         }
         // ----------------------------------------------------- Determining new direction
         if (this.pVelocityX > 0) {
