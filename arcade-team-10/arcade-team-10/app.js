@@ -89,6 +89,11 @@ window.onload = function () {
             game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
         }
         scoreText.text = score;
+        render();
+    }
+    function render() {
+        game.debug.bodyInfo(player, 32, 32);
+        game.debug.body(player);
     }
     function fullScreen() {
         game.scale.pageAlignHorizontally = true;

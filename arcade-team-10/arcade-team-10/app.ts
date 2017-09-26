@@ -109,6 +109,15 @@
 		}
 
 		scoreText.text = score;
+		render();
+	}
+
+	function render()
+	{
+
+		game.debug.bodyInfo(player, 32, 32);
+		game.debug.body(player);
+
 	}
 
 	function fullScreen()
