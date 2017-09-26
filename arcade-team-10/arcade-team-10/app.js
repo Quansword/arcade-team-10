@@ -30,10 +30,7 @@ window.onload = function () {
     var hud;
     function preload() {
         game.stage.backgroundColor = '#eee';
-        game.load.image('pAttack', 'assets/Testchar_side.png');
-        game.load.image('pRight', 'assets/Testchar_right.png');
-        game.load.image('pLeft', 'assets/Testchar_left.png');
-        game.load.image('pDown', 'assets/Testchar_down.png');
+        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 6, 0, 2);
         game.load.image('testBullet', 'assets/temp.png');
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
@@ -234,12 +231,24 @@ var Barrier = (function (_super) {
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(xPos, yPos, game) {
-        var _this = _super.call(this, game, xPos, yPos, 'pRight') || this;
-        _this.scale.setTo(0.5, 0.5);
+        var _this = _super.call(this, game, xPos, yPos, 'pSprite') || this;
+        _this.pDirEnum = {
+            RIGHT: 0,
+            LEFT: 1,
+            UPRIGHT: 2,
+            UPLEFT: 3,
+            DOWN: 4,
+            UP: 5,
+            DOWNRIGHT: 6,
+            DOWNLEFT: 7
+        };
+        _this.frame = _this.pDirEnum.RIGHT;
+        _this.newPFrame = _this.frame;
         _this.smoothed = false;
         _this.exists = true;
         _this.anchor.setTo(0.5, 0.5);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+        _this.body.setSize(30, 45, 28, 8);
         _this.body.collideWorldBounds = true;
         _this.maxHealth = 5;
         _this.health = _this.maxHealth;
@@ -284,15 +293,12 @@ var Player = (function (_super) {
                 }
                 if (keyState.isDown(Phaser.KeyCode.S)) {
                     this.pVelocityY += this.pSpeed;
-                    this.weapon.fireAngle = 90;
                 }
                 if (keyState.isDown(Phaser.KeyCode.A)) {
                     this.pVelocityX -= this.pSpeed;
-                    this.weapon.fireAngle = 180;
                 }
                 if (keyState.isDown(Phaser.KeyCode.D)) {
                     this.pVelocityX += this.pSpeed;
-                    this.weapon.fireAngle = 0;
                 }
             }
         }
@@ -351,6 +357,44 @@ var Player = (function (_super) {
             this.weapon.bulletAngleOffset = 90;
             this.weapon.fire();
         }
+        // ----------------------------------------------------- Determining new direction
+        if (this.pVelocityX > 0) {
+            if (this.pVelocityY > 0) {
+                this.newPFrame = this.pDirEnum.DOWNRIGHT;
+            }
+            else if (this.pVelocityY < 0) {
+                this.newPFrame = this.pDirEnum.UPRIGHT;
+            }
+            else {
+                this.newPFrame = this.pDirEnum.RIGHT;
+            }
+        }
+        else if (this.pVelocityX < 0) {
+            if (this.pVelocityY > 0) {
+                this.newPFrame = this.pDirEnum.DOWNLEFT;
+            }
+            else if (this.pVelocityY < 0) {
+                this.newPFrame = this.pDirEnum.UPLEFT;
+            }
+            else {
+                this.newPFrame = this.pDirEnum.LEFT;
+            }
+        }
+        else {
+            if (this.pVelocityY > 0) {
+                this.newPFrame = this.pDirEnum.DOWN;
+            }
+            else if (this.pVelocityY < 0) {
+                this.newPFrame = this.pDirEnum.UP;
+            }
+        }
+        if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT) {
+            this.newPFrame = this.pDirEnum.DOWN;
+        }
+        if (this.newPFrame != this.frame) {
+            this.frame = this.newPFrame;
+        }
+        // -----------------------------------------------------
         this.body.velocity.y = this.pVelocityY * time;
         this.body.velocity.x = this.pVelocityX * time;
         this.aim = false;
@@ -360,8 +404,7 @@ var Player = (function (_super) {
 var Enemy = (function (_super) {
     __extends(Enemy, _super); // -----------------------------------------------------Enemy code
     function Enemy(xPos, yPos, game, player) {
-        var _this = _super.call(this, game, xPos, yPos, 'pDown') || this;
-        _this.scale.setTo(0.5, 0.5);
+        var _this = _super.call(this, game, xPos, yPos, 'life') || this;
         _this.smoothed = false;
         _this.exists = true;
         _this.anchor.setTo(0.5, 0.5);

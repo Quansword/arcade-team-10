@@ -27,10 +27,7 @@
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
-		game.load.image('pAttack', 'assets/Testchar_side.png');
-		game.load.image('pRight', 'assets/Testchar_right.png');
-		game.load.image('pLeft', 'assets/Testchar_left.png');
-		game.load.image('pDown', 'assets/Testchar_down.png');
+		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 6, 0, 2);
 		game.load.image('testBullet', 'assets/temp.png');
 
 		game.load.image('background', 'assets/Maze1.png');
@@ -309,16 +306,32 @@ class Player extends Phaser.Sprite
 	weapon: Phaser.Weapon;
 	lives: number;
 	canDamage: boolean;
+	newPFrame;
+
+	pDirEnum =
+	{
+		RIGHT: 0,
+		LEFT: 1,
+		UPRIGHT: 2,
+		UPLEFT: 3,
+		DOWN: 4,
+		UP: 5,
+		DOWNRIGHT: 6,
+		DOWNLEFT: 7
+	};
 
 	constructor(xPos: number, yPos: number, game: Phaser.Game)
 	{
-		super(game, xPos, yPos, 'pRight');
-		this.scale.setTo(0.5, 0.5);
+		super(game, xPos, yPos, 'pSprite');
+
+		this.frame = this.pDirEnum.RIGHT;
+		this.newPFrame = this.frame;
 		this.smoothed = false;
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
+		this.body.setSize(30, 45, 28, 8);
 		this.body.collideWorldBounds = true;
 		this.maxHealth = 5;
 		this.health = this.maxHealth;
@@ -381,18 +394,15 @@ class Player extends Phaser.Sprite
 				if (keyState.isDown(Phaser.KeyCode.S))
 				{
 					this.pVelocityY += this.pSpeed;
-					this.weapon.fireAngle = 90;
 				}
 
 				if (keyState.isDown(Phaser.KeyCode.A))
 				{
 					this.pVelocityX -= this.pSpeed;
-					this.weapon.fireAngle = 180;
 				}
 				if (keyState.isDown(Phaser.KeyCode.D))
 				{
 					this.pVelocityX += this.pSpeed;
-					this.weapon.fireAngle = 0;
 				}
 			}
 		}
@@ -471,6 +481,62 @@ class Player extends Phaser.Sprite
 			this.weapon.fire();
 		}
 
+		// ----------------------------------------------------- Determining new direction
+
+		if (this.pVelocityX > 0)
+		{
+			if (this.pVelocityY > 0)
+			{
+				this.newPFrame = this.pDirEnum.DOWNRIGHT;
+			}
+			else if (this.pVelocityY < 0)
+			{
+				this.newPFrame = this.pDirEnum.UPRIGHT;
+			}
+			else
+			{
+				this.newPFrame = this.pDirEnum.RIGHT;
+			}
+		}
+		else if (this.pVelocityX < 0)
+		{
+			if (this.pVelocityY > 0)
+			{
+				this.newPFrame = this.pDirEnum.DOWNLEFT;
+			}
+			else if (this.pVelocityY < 0)
+			{
+				this.newPFrame = this.pDirEnum.UPLEFT;
+			}
+			else
+			{
+				this.newPFrame = this.pDirEnum.LEFT;
+			}
+		}
+		else
+		{
+			if (this.pVelocityY > 0)
+			{
+				this.newPFrame = this.pDirEnum.DOWN;
+			}
+			else if (this.pVelocityY < 0)
+			{
+				this.newPFrame = this.pDirEnum.UP;
+			}
+		}
+
+		if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT)
+		{
+			this.newPFrame = this.pDirEnum.DOWN;
+		}
+
+		if (this.newPFrame != this.frame)
+		{
+			this.frame = this.newPFrame;
+		}
+
+		// -----------------------------------------------------
+
 		this.body.velocity.y = this.pVelocityY * time;
 		this.body.velocity.x = this.pVelocityX * time;
 
@@ -498,8 +564,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 	constructor(xPos: number, yPos: number, game: Phaser.Game, player: Player)
 	{
-		super(game, xPos, yPos, 'pDown');
-		this.scale.setTo(0.5, 0.5);
+		super(game, xPos, yPos, 'life');
 		this.smoothed = false;
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
