@@ -95,10 +95,26 @@ Berzerk.game.prototype =
         for (var i = 0; i < this.enemies.children.length; i++)
         {
             this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player, this.bulletHitPlayer, null, this);
-    }
+
+            this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player.rightSaber, this.saberHitBullet, null, this);
+            this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player.leftSaber, this.saberHitBullet, null, this);
+            this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player.upSaber, this.saberHitBullet, null, this);
+            this.game.physics.arcade.overlap(this.enemies.children[i].weapon.bullets, this.player.downSaber, this.saberHitBullet, null, this);
+        }
 
         this.scoreText.text = this.score;
         
+    },
+
+    render: function()
+    {
+        this.game.debug.body(this.player.saberHitBoxes);
+    },
+
+    saberHitBullet: function(player, bullet)
+    {
+        bullet.body.velocity.x = -bullet.body.velocity.x;
+        bullet.body.velocity.y = -bullet.body.velocity.y
     },
 
     enemyHitPlayer: function(player, enemy)

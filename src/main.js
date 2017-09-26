@@ -1,6 +1,6 @@
 (function()
 {
-    var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '');
+    var game = new Phaser.Game(1920, 1080, Phaser.CANVAS, '');
 
     game.state.add('boot', Berzerk.boot);
     game.state.add('preloader', Berzerk.preloader);

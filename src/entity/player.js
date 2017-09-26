@@ -17,6 +17,12 @@ Berzerk.player = function(xPos, yPos, game)
 
 	this.lives = null;
 
+	this.saberHitBoxes = null;
+	this.rightSaber = null;
+	this.leftSaber = null;
+	this.upSaber = null;
+	this.downSaber = null;
+
 	this.game.add.existing(this);
 };
 
@@ -45,6 +51,26 @@ Berzerk.player.initialize = function()
 	this.weapon.fireRate = 500;
 
 	this.lives = 1;
+
+	this.saberHitBoxes = this.game.add.group();
+	this.saberHitBoxes.enableBody = true;
+	this.addChild(this.saberHitBoxes);
+
+	this.rightSaber = this.game.add.sprite(100, 0, 'pDown');
+	this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
+	this.addChild(this.rightSaber);
+
+	this.leftSaber = this.game.add.sprite(-100, 0, 'pDown');
+	this.game.physics.enable(this.leftSaber, Phaser.Physics.ARCADE);
+	this.addChild(this.leftSaber);
+
+	this.downSaber = this.game.add.sprite(0, 100, 'pDown');
+	this.game.physics.enable(this.downSaber, Phaser.Physics.ARCADE);
+	this.addChild(this.downSaber);
+
+	this.upSaber = this.game.add.sprite(0, -100, 'pDown');
+	this.game.physics.enable(this.upSaber, Phaser.Physics.ARCADE);
+	this.addChild(this.upSaber);
 };
 
 Berzerk.player.pUpdate = function(time, keyState)
@@ -179,6 +205,21 @@ Berzerk.player.pUpdate = function(time, keyState)
 	this.aim = false;
 };
 
+/*
+// activate a hitbox by namefunction 
+enableHitbox(hitboxName) { // search all the hitboxes     
+        for (var i = 0; i < hitboxes.children.length; i++) { // if we find the hitbox with the "name" specified          
+            if (hitboxes.children[i].name === hitboxName) { // reset it               
+                hitboxes.children[i].reset(0, 0);
+            }
+        }
+    } // disable all active hitboxesfunction 
+disableAllHitboxes() {
+    hitboxes.forEachExists(function(hitbox) {
+        hitbox.kill();
+    });
+}
+*/
 Berzerk.player.prototype = Object.create(Phaser.Sprite.prototype);
 Berzerk.player.prototype.constructor = Berzerk.player;
 Berzerk.player.prototype.initialize = Berzerk.player.initialize;
