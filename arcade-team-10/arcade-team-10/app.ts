@@ -27,7 +27,7 @@
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
-		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 6, 0, 2);
+		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 10, 0, 2);
 		game.load.image('testBullet', 'assets/temp.png');
 
 		game.load.image('background', 'assets/Maze1.png');
@@ -309,13 +309,18 @@ class Barrier extends Phaser.Sprite
 class Player extends Phaser.Sprite
 {
 	aim: boolean;
+	canDamage: boolean;
+
 	pVelocityX: number;
 	pVelocityY: number;
 	pSpeed: number;
-	weapon: Phaser.Weapon;
 	lives: number;
-	canDamage: boolean;
-	newPFrame;
+
+	weapon: Phaser.Weapon;
+
+	newPFrame: number;
+	attacked: boolean;
+	rAttack: Phaser.Animation;
 
 	pDirEnum =
 	{
@@ -332,9 +337,12 @@ class Player extends Phaser.Sprite
 	constructor(xPos: number, yPos: number, game: Phaser.Game)
 	{
 		super(game, xPos, yPos, 'pSprite');
+		this.rAttack = this.animations.add('rAttack', [6, 7, 8, 9], 10);
+		this.attacked = false;
 
 		this.frame = this.pDirEnum.RIGHT;
 		this.newPFrame = this.frame;
+
 		this.smoothed = false;
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
@@ -352,10 +360,10 @@ class Player extends Phaser.Sprite
 		this.pSpeed = 150;
 
 		this.weapon = game.add.weapon(100, 'testBullet');
-		
+
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 200;
-		this.weapon.fireRate = 500;
+		this.weapon.autofire = false;
 
 		this.lives = 1;
 	}
@@ -367,7 +375,7 @@ class Player extends Phaser.Sprite
 			this.pVelocityX = 0;
 			this.pVelocityY = 0;
 
-			if (keyState.isDown(Phaser.KeyCode.SPACEBAR))
+			if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying))
 			{
 				this.aim = true;
 			}
@@ -375,7 +383,7 @@ class Player extends Phaser.Sprite
 			this.weapon.trackSprite(this, 0, 0);
 			this.weapon.fireAngle = 0;
 
-			if (!this.aim)
+			if (!this.aim && !this.attacked)
 			{
 				if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
 				{
@@ -490,7 +498,13 @@ class Player extends Phaser.Sprite
 					}
 				}
 				this.weapon.bulletAngleOffset = 90;
-				this.weapon.fire(this.body.center);
+
+				if (!this.attacked)
+				{
+					this.animations.play('rAttack');
+					this.attacked = true;
+					this.weapon.fire(this.body.center);
+				}
 			}
 
 			// ----------------------------------------------------- Determining new direction
@@ -570,9 +584,13 @@ class Player extends Phaser.Sprite
 				this.newPFrame = this.pDirEnum.DOWN;
 			}
 
-			if (this.newPFrame != this.frame)
+			if (this.newPFrame != this.frame && !(this.rAttack.isPlaying))
 			{
 				this.frame = this.newPFrame;
+			}
+			else if (!keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying))
+			{
+				this.attacked = false;
 			}
 
 			// -----------------------------------------------------

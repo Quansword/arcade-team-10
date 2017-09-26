@@ -30,7 +30,7 @@ window.onload = function () {
     var hud;
     function preload() {
         game.stage.backgroundColor = '#eee';
-        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 6, 0, 2);
+        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 10, 0, 2);
         game.load.image('testBullet', 'assets/temp.png');
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
@@ -247,6 +247,8 @@ var Player = (function (_super) {
             DOWNRIGHT: 6,
             DOWNLEFT: 7
         };
+        _this.rAttack = _this.animations.add('rAttack', [6, 7, 8, 9], 10);
+        _this.attacked = false;
         _this.frame = _this.pDirEnum.RIGHT;
         _this.newPFrame = _this.frame;
         _this.smoothed = false;
@@ -265,7 +267,7 @@ var Player = (function (_super) {
         _this.weapon = game.add.weapon(100, 'testBullet');
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         _this.weapon.bulletSpeed = 200;
-        _this.weapon.fireRate = 500;
+        _this.weapon.autofire = false;
         _this.lives = 1;
         return _this;
     }
@@ -273,12 +275,12 @@ var Player = (function (_super) {
         if (this.alive) {
             this.pVelocityX = 0;
             this.pVelocityY = 0;
-            if (keyState.isDown(Phaser.KeyCode.SPACEBAR)) {
+            if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying)) {
                 this.aim = true;
             }
             this.weapon.trackSprite(this, 0, 0);
             this.weapon.fireAngle = 0;
-            if (!this.aim) {
+            if (!this.aim && !this.attacked) {
                 if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
                     if (keyState.isDown(Phaser.KeyCode.W)) {
                         this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
@@ -361,7 +363,11 @@ var Player = (function (_super) {
                     }
                 }
                 this.weapon.bulletAngleOffset = 90;
-                this.weapon.fire(this.body.center);
+                if (!this.attacked) {
+                    this.animations.play('rAttack');
+                    this.attacked = true;
+                    this.weapon.fire(this.body.center);
+                }
             }
             // ----------------------------------------------------- Determining new direction
             if (this.pVelocityX > 0) {
@@ -417,8 +423,11 @@ var Player = (function (_super) {
             if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT) {
                 this.newPFrame = this.pDirEnum.DOWN;
             }
-            if (this.newPFrame != this.frame) {
+            if (this.newPFrame != this.frame && !(this.rAttack.isPlaying)) {
                 this.frame = this.newPFrame;
+            }
+            else if (!keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying)) {
+                this.attacked = false;
             }
             // -----------------------------------------------------
             this.body.velocity.y = this.pVelocityY * time;
