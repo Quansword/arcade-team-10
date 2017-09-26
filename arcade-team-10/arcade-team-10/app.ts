@@ -535,7 +535,7 @@ class Player extends Phaser.Sprite
 			}
 		}
 
-		if (this.pVelocityX == 0 && this.pVelocityY == 0)
+		if (this.pVelocityX == 0 && this.pVelocityY == 0 && this.aim)
 		{
 			if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135)
 			{

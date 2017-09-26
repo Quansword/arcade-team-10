@@ -393,7 +393,7 @@ var Player = (function (_super) {
                 this.newPFrame = this.pDirEnum.UP;
             }
         }
-        if (this.pVelocityX == 0 && this.pVelocityY == 0) {
+        if (this.pVelocityX == 0 && this.pVelocityY == 0 && this.aim) {
             if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135) {
                 this.newPFrame = this.pDirEnum.DOWN;
             }
