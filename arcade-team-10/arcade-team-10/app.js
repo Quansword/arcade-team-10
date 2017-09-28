@@ -277,7 +277,7 @@ var Player = (function (_super) {
         _this.exists = true;
         _this.anchor.setTo(0.5, 0.5);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(30, 45, 28, 8);
+        _this.body.setSize(24, 42, 34, 10);
         _this.body.collideWorldBounds = true;
         _this.maxHealth = 5;
         _this.health = _this.maxHealth;
