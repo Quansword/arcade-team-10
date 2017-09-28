@@ -113,6 +113,11 @@
 			}
 		}
 
+		for (var j = 0; j < player.saberHitBoxes.children.length; j++)
+        {
+            game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies, saberHitEnemy, null, this);
+        }
+
 		scoreText.text = score;
 		render();
 	}
@@ -140,6 +145,12 @@
 		player.weapon.bullets.add(bullet);
 		bullet.rotation += Math.PI;
 
+	}
+
+	function saberHitEnemy(saber, enemy: Enemy) // -----------------------------------------------------Enemy code
+	{
+		enemy.kill();
+		score += 50;
 	}
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)

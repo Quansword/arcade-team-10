@@ -86,6 +86,9 @@ window.onload = function () {
                 game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
             }
         }
+        for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
+            game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies, saberHitEnemy, null, this);
+        }
         scoreText.text = score;
         render();
     }
@@ -104,6 +107,10 @@ window.onload = function () {
         bullet.body.velocity.y = -bullet.body.velocity.y;
         player.weapon.bullets.add(bullet);
         bullet.rotation += Math.PI;
+    }
+    function saberHitEnemy(saber, enemy) {
+        enemy.kill();
+        score += 50;
     }
     function bulletHitPlayer(player, bullet) {
         bullet.kill();
