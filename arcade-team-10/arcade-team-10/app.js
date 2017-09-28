@@ -87,6 +87,9 @@ window.onload = function () {
         game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
         for (var i = 0; i < enemies.children.length; i++) {
             game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
+            for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
+                game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+            }
         }
         scoreText.text = score;
         render();
@@ -101,15 +104,15 @@ window.onload = function () {
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.setGameSize(1280, 720);
     }
+    function bulletHitSaber(saber, bullet) {
+        bullet.body.velocity.x = -bullet.body.velocity.x;
+        bullet.body.velocity.y = -bullet.body.velocity.y;
+        player.weapon.bullets.add(bullet);
+        bullet.rotation += Math.PI;
+    }
     function bulletHitPlayer(player, bullet) {
-        if (!player.attacked) {
-            bullet.kill();
-            damagePlayer(player, 1);
-        }
-        else {
-            bullet.body.velocity.x = -bullet.body.velocity.x;
-            bullet.body.velocity.y = -bullet.body.velocity.y;
-        }
+        bullet.kill();
+        damagePlayer(player, 1);
     }
     function enemyHitPlayer(player, enemy) {
         damagePlayer(player, 1);
@@ -245,13 +248,6 @@ var Player = (function (_super) {
     __extends(Player, _super);
     function Player(xPos, yPos, game) {
         var _this = _super.call(this, game, xPos, yPos, 'pSprite') || this;
-        //lAttack: Phaser.Animation;
-        //uAttack: Phaser.Animation;
-        //dAttack: Phaser.Animation;
-        //urAttack: Phaser.Animation;
-        //ulAttack: Phaser.Animation;
-        //drAttack: Phaser.Animation;
-        //dlAttack: Phaser.Animation;
         _this.pDirEnum = {
             RIGHT: 0,
             LEFT: 1,
@@ -291,8 +287,29 @@ var Player = (function (_super) {
         _this.weapon.bulletSpeed = 200;
         _this.weapon.autofire = false;
         _this.lives = 1;
+        _this.createSaberHitBoxes();
+        _this.disableHitbox("rightSaber");
         return _this;
     }
+    Player.prototype.createSaberHitBoxes = function () {
+        this.saberHitBoxes = this.game.add.physicsGroup();
+        this.addChild(this.saberHitBoxes);
+        this.rightSaber = this.game.add.sprite(-5, -20, 'bleh');
+        this.rightSaber.scale.setTo(0.8, 1.25);
+        this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.rightSaber);
+        this.saberHitBoxes.enableBody = true;
+    };
+    Player.prototype.disableHitbox = function (name) {
+        if (name == "rightSaber") {
+            this.rightSaber.kill();
+        }
+    };
+    Player.prototype.enableHitbox = function (name) {
+        if (name == "rightSaber") {
+            this.rightSaber.reset(-5, -20);
+        }
+    };
     Player.prototype.pUpdate = function (time, keyState) {
         if (this.alive) {
             this.pVelocityX = 0;
@@ -450,7 +467,7 @@ var Player = (function (_super) {
                     if (!this.attacked) {
                         this.animations.play('rAttack');
                         this.attacked = true;
-                        this.weapon.fire(this.body.center);
+                        this.enableHitbox("rightSaber");
                     }
                 }
                 else if (this.weapon.fireAngle == 180) {
@@ -500,6 +517,9 @@ var Player = (function (_super) {
                 else if (!keyState.isDown(Phaser.KeyCode.SPACEBAR)) {
                     this.attacked = false;
                 }
+            }
+            if (this.animations.currentAnim.isFinished) {
+                this.disableHitbox("rightSaber");
             }
             // -----------------------------------------------------
             this.body.velocity.y = this.pVelocityY * time;

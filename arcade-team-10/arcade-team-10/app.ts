@@ -137,20 +137,15 @@
 	{
         bullet.body.velocity.x = -bullet.body.velocity.x;
         bullet.body.velocity.y = -bullet.body.velocity.y;
+        player.weapon.bullets.add(bullet);
+        bullet.rotation += Math.PI;
+
 	}
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
 	{
-		if (!player.attacked)
-		{
-			bullet.kill();
-			damagePlayer(player, 1);
-		}
-		else
-		{
-			bullet.body.velocity.x = -bullet.body.velocity.x;
-			bullet.body.velocity.y = -bullet.body.velocity.y;
-		}
+        bullet.kill();
+        damagePlayer(player, 1);
 	}
 
 	function enemyHitPlayer(player: Player, enemy: Enemy)
@@ -350,9 +345,9 @@ class Player extends Phaser.Sprite
 	//ulAttack: Phaser.Animation;
 	//drAttack: Phaser.Animation;
 	//dlAttack: Phaser.Animation;
-    saberHitBoxes: Phaser.Group;
 
-    
+    saberHitBoxes: Phaser.Group;
+    rightSaber: Phaser.Sprite;
 
 	pDirEnum =
 	{
@@ -407,6 +402,7 @@ class Player extends Phaser.Sprite
 		this.lives = 1;
 
         this.createSaberHitBoxes();
+            this.disableHitbox("rightSaber");
 	}
 
     createSaberHitBoxes()
@@ -414,12 +410,28 @@ class Player extends Phaser.Sprite
         this.saberHitBoxes = this.game.add.physicsGroup();
         this.addChild(this.saberHitBoxes);
 
-        var rightSaber = this.game.add.sprite(-5, -20, 'bleh');
-        rightSaber.scale.setTo(0.8, 1.25);
-        this.game.physics.enable(rightSaber, Phaser.Physics.ARCADE);
-        this.saberHitBoxes.addChild(rightSaber);
+        this.rightSaber = this.game.add.sprite(-5, -20, 'bleh');
+        this.rightSaber.scale.setTo(0.8, 1.25);
+        this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.rightSaber);
 
         this.saberHitBoxes.enableBody = true;
+    }
+
+    disableHitbox(name: string)
+    {
+        if (name == "rightSaber")
+        {
+            this.rightSaber.kill();
+        }
+    }
+
+    enableHitbox(name: string)
+    {
+        if (name == "rightSaber")
+        {
+            this.rightSaber.reset(-5, -20);
+        }
     }
 
 	pUpdate(time: number, keyState: Phaser.Keyboard)
@@ -637,7 +649,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('rAttack');
 						this.attacked = true;
-						this.weapon.fire(this.body.center);
+                        this.enableHitbox("rightSaber");
 					}
 				}
 				else if (this.weapon.fireAngle == 180)
@@ -697,12 +709,15 @@ class Player extends Phaser.Sprite
 				{
 					this.attacked = false;
 				}
-			}
-
+            }
+            if (this.animations.currentAnim.isFinished)
+            {
+                this.disableHitbox("rightSaber");
+            }
 			// -----------------------------------------------------
 
 			this.body.velocity.y = this.pVelocityY * time;
-			this.body.velocity.x = this.pVelocityX * time;
+            this.body.velocity.x = this.pVelocityX * time;
 
 			this.aim = false;
 		}
