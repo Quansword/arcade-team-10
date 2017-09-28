@@ -349,6 +349,8 @@ class Player extends Phaser.Sprite
     saberHitBoxes: Phaser.Group;
     rightSaber: Phaser.Sprite;
     leftSaber: Phaser.Sprite;
+    topSaber: Phaser.Sprite;
+    bottomSaber: Phaser.Sprite;
 
 	pDirEnum =
 	{
@@ -426,6 +428,22 @@ class Player extends Phaser.Sprite
         this.leftSaber.name = "leftSaber";
         this.disableHitbox("leftSaber");
 
+        this.topSaber = this.game.add.sprite(-20, -30, 'bleh');
+        this.topSaber.anchor.setTo(0.5, 0.5);
+        this.topSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.topSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.topSaber);
+        this.topSaber.name = "topSaber";
+        this.disableHitbox("topSaber");
+
+        this.bottomSaber = this.game.add.sprite(-20, 30, 'bleh');
+        this.bottomSaber.anchor.setTo(0.5, 0.5);
+        this.bottomSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.bottomSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.bottomSaber);
+        this.bottomSaber.name = "bottomSaber";
+        this.disableHitbox("bottomSaber");
+
         this.saberHitBoxes.enableBody = true;
     }
 
@@ -439,6 +457,14 @@ class Player extends Phaser.Sprite
         {
             this.leftSaber.kill();
         }
+        else if (name == "topSaber")
+        {
+            this.topSaber.kill();
+        }
+        else if (name == "bottomSaber")
+        {
+            this.bottomSaber.kill();
+        }
     }
 
     enableHitbox(name: string)
@@ -450,6 +476,14 @@ class Player extends Phaser.Sprite
         else if (name == "leftSaber")
         {
             this.leftSaber.reset(-35, 0);
+        }
+        else if (name == "topSaber")
+        {
+            this.topSaber.reset(-20, -30);
+        }
+        else if (name == "bottomSaber")
+        {
+            this.bottomSaber.reset(-20, 30);
         }
     }
 
@@ -634,16 +668,16 @@ class Player extends Phaser.Sprite
 				if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135)
 				{
 					this.newPFrame = this.pDirEnum.DOWN;
-					//if (!this.attacked)
-					//{
+					if (!this.attacked)
+					{
 					//	this.animations.play('dAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("bottomSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 45)
-				{
-					this.newPFrame = this.pDirEnum.DOWN;
+                {
+                    this.newPFrame = this.pDirEnum.DOWNRIGHT;
 					//if (!this.attacked)
 					//{
 					//	this.animations.play('drAttack');
@@ -652,8 +686,8 @@ class Player extends Phaser.Sprite
 					//}
 				}
 				else if (this.weapon.fireAngle == 135)
-				{
-					this.newPFrame = this.pDirEnum.DOWN;
+                {
+                    this.newPFrame = this.pDirEnum.DOWNLEFT;
 					//if (!this.attacked)
 					//{
 					//	this.animations.play('dlAttack');
@@ -684,12 +718,12 @@ class Player extends Phaser.Sprite
 				else if (this.weapon.fireAngle == 270)
 				{
 					this.newPFrame = this.pDirEnum.UP;
-					//if (!this.attacked)
-					//{
+					if (!this.attacked)
+					{
 					//	this.animations.play('uAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("topSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 225)
 				{
@@ -733,6 +767,8 @@ class Player extends Phaser.Sprite
             {
                 this.disableHitbox("rightSaber");
                 this.disableHitbox("leftSaber");
+                this.disableHitbox("topSaber");
+                this.disableHitbox("bottomSaber");
             }
 			// -----------------------------------------------------
 
