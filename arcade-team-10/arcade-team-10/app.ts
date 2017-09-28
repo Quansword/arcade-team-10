@@ -335,7 +335,7 @@ class Player extends Phaser.Sprite
 
 	weapon: Phaser.Weapon;
 
-	newPFrame: number;
+	newPFrame: number | string;
 	attacked: boolean;
 	rAttack: Phaser.Animation;
 	//lAttack: Phaser.Animation;
@@ -346,8 +346,15 @@ class Player extends Phaser.Sprite
 	//drAttack: Phaser.Animation;
 	//dlAttack: Phaser.Animation;
 
-	saberHitBoxes: Phaser.Group;
-	rightSaber: Phaser.Sprite;
+    saberHitBoxes: Phaser.Group;
+    rightSaber: Phaser.Sprite;
+    leftSaber: Phaser.Sprite;
+    topSaber: Phaser.Sprite;
+    topRightSaber: Phaser.Sprite;
+    topLeftSaber: Phaser.Sprite;
+    bottomSaber: Phaser.Sprite;
+    bottomRightSaber: Phaser.Sprite;
+    bottomLeftSaber: Phaser.Sprite;
 
 	pDirEnum =
 	{
@@ -401,38 +408,152 @@ class Player extends Phaser.Sprite
 
 		this.lives = 1;
 
-		this.createSaberHitBoxes();
-		this.disableHitbox("rightSaber");
+        this.createSaberHitBoxes();
 	}
 
-	createSaberHitBoxes()
-	{
-		this.saberHitBoxes = this.game.add.physicsGroup();
-		this.addChild(this.saberHitBoxes);
+    createSaberHitBoxes()
+    {
+        this.saberHitBoxes = this.game.add.physicsGroup();
+        this.addChild(this.saberHitBoxes);
 
-		this.rightSaber = this.game.add.sprite(-5, -20, 'bleh');
-		this.rightSaber.scale.setTo(0.8, 1.25);
-		this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
-		this.saberHitBoxes.addChild(this.rightSaber);
+        this.rightSaber = this.game.add.sprite(5, 0, 'bleh');
+        this.rightSaber.anchor.setTo(0.5, 0.5);
+        this.rightSaber.scale.setTo(0.8, 1.25);
+        this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.rightSaber);
+        this.rightSaber.name = "rightSaber";
+        this.disableHitbox("rightSaber");
 
-		this.saberHitBoxes.enableBody = true;
-	}
+        this.leftSaber = this.game.add.sprite(-35, 0, 'bleh');
+        this.leftSaber.anchor.setTo(0.5, 0.5);
+        this.leftSaber.scale.setTo(0.8, 1.25);
+        this.game.physics.enable(this.leftSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.leftSaber);
+        this.leftSaber.name = "leftSaber";
+        this.disableHitbox("leftSaber");
 
-	disableHitbox(name: string)
-	{
-		if (name == "rightSaber")
-		{
-			this.rightSaber.kill();
-		}
-	}
+        this.topSaber = this.game.add.sprite(-20, -30, 'bleh');
+        this.topSaber.anchor.setTo(0.5, 0.5);
+        this.topSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.topSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.topSaber);
+        this.topSaber.name = "topSaber";
+        this.disableHitbox("topSaber");
 
-	enableHitbox(name: string)
-	{
-		if (name == "rightSaber")
-		{
-			this.rightSaber.reset(-5, -20);
-		}
-	}
+        this.topRightSaber = this.game.add.sprite(5, -30, 'bleh');
+        this.topRightSaber.anchor.setTo(0.5, 0.5);
+        this.topRightSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.topRightSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.topRightSaber);
+        this.topRightSaber.name = "topRightSaber";
+        this.disableHitbox("topRightSaber");
+
+        this.topLeftSaber = this.game.add.sprite(-35, -30, 'bleh');
+        this.topLeftSaber.anchor.setTo(0.5, 0.5);
+        this.topLeftSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.topLeftSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.topLeftSaber);
+        this.topLeftSaber.name = "topLeftSaber";
+        this.disableHitbox("topLeftSaber");
+
+        this.bottomSaber = this.game.add.sprite(-20, 30, 'bleh');
+        this.bottomSaber.anchor.setTo(0.5, 0.5);
+        this.bottomSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.bottomSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.bottomSaber);
+        this.bottomSaber.name = "bottomSaber";
+        this.disableHitbox("bottomSaber");
+
+        this.bottomRightSaber = this.game.add.sprite(5, 30, 'bleh');
+        this.bottomRightSaber.anchor.setTo(0.5, 0.5);
+        this.bottomRightSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.bottomRightSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.bottomRightSaber);
+        this.bottomRightSaber.name = "bottomRightSaber";
+        this.disableHitbox("bottomRightSaber");
+
+        this.bottomLeftSaber = this.game.add.sprite(-35, 30, 'bleh');
+        this.bottomLeftSaber.anchor.setTo(0.5, 0.5);
+        this.bottomLeftSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.bottomLeftSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.bottomLeftSaber);
+        this.bottomLeftSaber.name = "bottomLeftSaber";
+        this.disableHitbox("bottomLeftSaber");
+
+        this.saberHitBoxes.enableBody = true;
+    }
+
+    disableHitbox(name: string)
+    {
+        if (name == "rightSaber")
+        {
+            this.rightSaber.kill();
+        }
+        else if (name == "leftSaber")
+        {
+            this.leftSaber.kill();
+        }
+        else if (name == "topSaber")
+        {
+            this.topSaber.kill();
+        }
+        else if (name == "topRightSaber")
+        {
+            this.topRightSaber.kill();
+        }
+        else if (name == "topLeftSaber")
+        {
+            this.topLeftSaber.kill();
+        }
+        else if (name == "bottomSaber")
+        {
+            this.bottomSaber.kill();
+        }
+        else if (name == "bottomRightSaber")
+        {
+            this.bottomRightSaber.kill();
+        }
+        else if (name == "bottomLeftSaber")
+        {
+            this.bottomLeftSaber.kill();
+        }
+    }
+
+    enableHitbox(name: string)
+    {
+        if (name == "rightSaber")
+        {
+            this.rightSaber.reset(5, 0);
+        }
+        else if (name == "leftSaber")
+        {
+            this.leftSaber.reset(-35, 0);
+        }
+        else if (name == "topSaber")
+        {
+            this.topSaber.reset(-20, -30);
+        }
+        else if (name == "topRightSaber")
+        {
+            this.topSaber.reset(5, -30);
+        }
+        else if (name == "topLeftSaber")
+        {
+            this.topSaber.reset(-35, -30);
+        }
+        else if (name == "bottomSaber")
+        {
+            this.bottomSaber.reset(-20, 30);
+        }
+        else if (name == "bottomRightSaber")
+        {
+            this.bottomRightSaber.reset(5, 30);
+        }
+        else if (name == "bottomLeftSaber")
+        {
+            this.bottomLeftSaber.reset(-35, 30);
+        }
+    }
 
 	pUpdate(time: number, keyState: Phaser.Keyboard)
 	{
@@ -612,32 +733,32 @@ class Player extends Phaser.Sprite
 				if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135)
 				{
 					this.newPFrame = this.pDirEnum.DOWN;
-					//if (!this.attacked)
-					//{
+					if (!this.attacked)
+					{
 					//	this.animations.play('dAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("bottomSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 45)
-				{
-					this.newPFrame = this.pDirEnum.DOWN;
-					//if (!this.attacked)
-					//{
+                {
+                    this.newPFrame = this.pDirEnum.DOWNRIGHT;
+					if (!this.attacked)
+					{
 					//	this.animations.play('drAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("bottomRightSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 135)
-				{
-					this.newPFrame = this.pDirEnum.DOWN;
-					//if (!this.attacked)
-					//{
+                {
+                    this.newPFrame = this.pDirEnum.DOWNLEFT;
+					if (!this.attacked)
+					{
 					//	this.animations.play('dlAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("bottomLeftSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 0)
 				{
@@ -652,42 +773,42 @@ class Player extends Phaser.Sprite
 				else if (this.weapon.fireAngle == 180)
 				{
 					this.newPFrame = this.pDirEnum.LEFT;
-					//if (!this.attacked)
-					//{
+					if (!this.attacked)
+					{
 					//	this.animations.play('lAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("leftSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 270)
 				{
 					this.newPFrame = this.pDirEnum.UP;
-					//if (!this.attacked)
-					//{
+					if (!this.attacked)
+					{
 					//	this.animations.play('uAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("topSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 225)
 				{
 					this.newPFrame = this.pDirEnum.UPLEFT;
-					//if (!this.attacked)
-					//{
+					if (!this.attacked)
+					{
 					//	this.animations.play('ulAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("topLeftSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 315)
 				{
 					this.newPFrame = this.pDirEnum.UPRIGHT;
-					//if (!this.attacked)
-					//{
+					if (!this.attacked)
+					{
 					//	this.animations.play('urAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("topRightSaber");
+					}
 				}
 			}
 
@@ -706,11 +827,18 @@ class Player extends Phaser.Sprite
 				{
 					this.attacked = false;
 				}
-			}
-			if (this.animations.currentAnim.isFinished)
-			{
-				this.disableHitbox("rightSaber");
-			}
+            }
+            if (this.animations.currentAnim.isFinished)
+            {
+                this.disableHitbox("rightSaber");
+                this.disableHitbox("leftSaber");
+                this.disableHitbox("topSaber");
+                this.disableHitbox("topRightSaber");
+                this.disableHitbox("topLeftSaber");
+                this.disableHitbox("bottomSaber");
+                this.disableHitbox("bottomRightSaber");
+                this.disableHitbox("bottomLeftSaber");
+            }
 			// -----------------------------------------------------
 
 			this.body.velocity.y = this.pVelocityY * time;

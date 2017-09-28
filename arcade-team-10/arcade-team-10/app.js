@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 window.onload = function () {
     //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
     //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
@@ -234,21 +229,20 @@ window.onload = function () {
 var Barrier = (function (_super) {
     __extends(Barrier, _super);
     function Barrier(xPos, yPos, width, height, game, group, type) {
-        var _this = _super.call(this, game, xPos, yPos, type) || this;
-        _this.scale.setTo(width, height);
-        game.physics.arcade.enable(_this);
-        _this.body.immovable = true;
-        _this.renderable = false;
-        group.add(_this);
-        return _this;
+        _super.call(this, game, xPos, yPos, type);
+        this.scale.setTo(width, height);
+        game.physics.arcade.enable(this);
+        this.body.immovable = true;
+        this.renderable = false;
+        group.add(this);
     }
     return Barrier;
 }(Phaser.Sprite));
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(xPos, yPos, game) {
-        var _this = _super.call(this, game, xPos, yPos, 'pSprite') || this;
-        _this.pDirEnum = {
+        _super.call(this, game, xPos, yPos, 'pSprite');
+        this.pDirEnum = {
             RIGHT: 0,
             LEFT: 1,
             UPRIGHT: 2,
@@ -258,7 +252,7 @@ var Player = (function (_super) {
             DOWNRIGHT: 6,
             DOWNLEFT: 7
         };
-        _this.rAttack = _this.animations.add('rAttack', [6, 7, 8, 9], 10);
+        this.rAttack = this.animations.add('rAttack', [6, 7, 8, 9], 10);
         //this.lAttack = this.animations.add('lAttack', [12, 13, 14, 15], 10);
         //this.uAttack = this.animations.add('uAttack', [18, 19, 20, 21], 10);
         //this.dAttack = this.animations.add('dAttack', [24, 25, 26, 27], 10);
@@ -266,48 +260,140 @@ var Player = (function (_super) {
         //this.ulAttack = this.animations.add('ulAttack', [36, 37, 38, 39], 10);
         //this.drAttack = this.animations.add('drAttack', [42, 43, 44, 45], 10);
         //this.dlAttack = this.animations.add('dlAttack', [48, 49, 50, 51], 10);
-        _this.attacked = false;
-        _this.frame = _this.pDirEnum.RIGHT;
-        _this.newPFrame = _this.frame;
-        _this.smoothed = false;
-        _this.exists = true;
-        _this.anchor.setTo(0.5, 0.5);
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(24, 42, 34, 10);
-        _this.body.collideWorldBounds = true;
-        _this.maxHealth = 5;
-        _this.health = _this.maxHealth;
-        _this.canDamage = true;
-        _this.aim = false;
-        _this.pVelocityX = 0;
-        _this.pVelocityY = 0;
-        _this.pSpeed = 150;
-        _this.weapon = game.add.weapon(100, 'testBullet');
-        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 200;
-        _this.weapon.autofire = false;
-        _this.lives = 1;
-        _this.createSaberHitBoxes();
-        _this.disableHitbox("rightSaber");
-        return _this;
+        this.attacked = false;
+        this.frame = this.pDirEnum.RIGHT;
+        this.newPFrame = this.frame;
+        this.smoothed = false;
+        this.exists = true;
+        this.anchor.setTo(0.5, 0.5);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.setSize(24, 42, 34, 10);
+        this.body.collideWorldBounds = true;
+        this.maxHealth = 5;
+        this.health = this.maxHealth;
+        this.canDamage = true;
+        this.aim = false;
+        this.pVelocityX = 0;
+        this.pVelocityY = 0;
+        this.pSpeed = 150;
+        this.weapon = game.add.weapon(100, 'testBullet');
+        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.weapon.bulletSpeed = 200;
+        this.weapon.autofire = false;
+        this.lives = 1;
+        this.createSaberHitBoxes();
     }
     Player.prototype.createSaberHitBoxes = function () {
         this.saberHitBoxes = this.game.add.physicsGroup();
         this.addChild(this.saberHitBoxes);
-        this.rightSaber = this.game.add.sprite(-5, -20, 'bleh');
+        this.rightSaber = this.game.add.sprite(5, 0, 'bleh');
+        this.rightSaber.anchor.setTo(0.5, 0.5);
         this.rightSaber.scale.setTo(0.8, 1.25);
         this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.rightSaber);
+        this.rightSaber.name = "rightSaber";
+        this.disableHitbox("rightSaber");
+        this.leftSaber = this.game.add.sprite(-35, 0, 'bleh');
+        this.leftSaber.anchor.setTo(0.5, 0.5);
+        this.leftSaber.scale.setTo(0.8, 1.25);
+        this.game.physics.enable(this.leftSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.leftSaber);
+        this.leftSaber.name = "leftSaber";
+        this.disableHitbox("leftSaber");
+        this.topSaber = this.game.add.sprite(-20, -30, 'bleh');
+        this.topSaber.anchor.setTo(0.5, 0.5);
+        this.topSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.topSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.topSaber);
+        this.topSaber.name = "topSaber";
+        this.disableHitbox("topSaber");
+        this.topRightSaber = this.game.add.sprite(5, -30, 'bleh');
+        this.topRightSaber.anchor.setTo(0.5, 0.5);
+        this.topRightSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.topRightSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.topRightSaber);
+        this.topRightSaber.name = "topRightSaber";
+        this.disableHitbox("topRightSaber");
+        this.topLeftSaber = this.game.add.sprite(-35, -30, 'bleh');
+        this.topLeftSaber.anchor.setTo(0.5, 0.5);
+        this.topLeftSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.topLeftSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.topLeftSaber);
+        this.topLeftSaber.name = "topLeftSaber";
+        this.disableHitbox("topLeftSaber");
+        this.bottomSaber = this.game.add.sprite(-20, 30, 'bleh');
+        this.bottomSaber.anchor.setTo(0.5, 0.5);
+        this.bottomSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.bottomSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.bottomSaber);
+        this.bottomSaber.name = "bottomSaber";
+        this.disableHitbox("bottomSaber");
+        this.bottomRightSaber = this.game.add.sprite(5, 30, 'bleh');
+        this.bottomRightSaber.anchor.setTo(0.5, 0.5);
+        this.bottomRightSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.bottomRightSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.bottomRightSaber);
+        this.bottomRightSaber.name = "bottomRightSaber";
+        this.disableHitbox("bottomRightSaber");
+        this.bottomLeftSaber = this.game.add.sprite(-35, 30, 'bleh');
+        this.bottomLeftSaber.anchor.setTo(0.5, 0.5);
+        this.bottomLeftSaber.scale.setTo(1.25, 0.8);
+        this.game.physics.enable(this.bottomLeftSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.bottomLeftSaber);
+        this.bottomLeftSaber.name = "bottomLeftSaber";
+        this.disableHitbox("bottomLeftSaber");
         this.saberHitBoxes.enableBody = true;
     };
     Player.prototype.disableHitbox = function (name) {
         if (name == "rightSaber") {
             this.rightSaber.kill();
         }
+        else if (name == "leftSaber") {
+            this.leftSaber.kill();
+        }
+        else if (name == "topSaber") {
+            this.topSaber.kill();
+        }
+        else if (name == "topRightSaber") {
+            this.topRightSaber.kill();
+        }
+        else if (name == "topLeftSaber") {
+            this.topLeftSaber.kill();
+        }
+        else if (name == "bottomSaber") {
+            this.bottomSaber.kill();
+        }
+        else if (name == "bottomRightSaber") {
+            this.bottomRightSaber.kill();
+        }
+        else if (name == "bottomLeftSaber") {
+            this.bottomLeftSaber.kill();
+        }
     };
     Player.prototype.enableHitbox = function (name) {
         if (name == "rightSaber") {
-            this.rightSaber.reset(-5, -20);
+            this.rightSaber.reset(5, 0);
+        }
+        else if (name == "leftSaber") {
+            this.leftSaber.reset(-35, 0);
+        }
+        else if (name == "topSaber") {
+            this.topSaber.reset(-20, -30);
+        }
+        else if (name == "topRightSaber") {
+            this.topSaber.reset(5, -30);
+        }
+        else if (name == "topLeftSaber") {
+            this.topSaber.reset(-35, -30);
+        }
+        else if (name == "bottomSaber") {
+            this.bottomSaber.reset(-20, 30);
+        }
+        else if (name == "bottomRightSaber") {
+            this.bottomRightSaber.reset(5, 30);
+        }
+        else if (name == "bottomLeftSaber") {
+            this.bottomLeftSaber.reset(-35, 30);
         }
     };
     Player.prototype.pUpdate = function (time, keyState) {
@@ -435,30 +521,27 @@ var Player = (function (_super) {
             if (this.aim) {
                 if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135) {
                     this.newPFrame = this.pDirEnum.DOWN;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('dAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        //	this.animations.play('dAttack');
+                        this.attacked = true;
+                        this.enableHitbox("bottomSaber");
+                    }
                 }
                 else if (this.weapon.fireAngle == 45) {
-                    this.newPFrame = this.pDirEnum.DOWN;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('drAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    this.newPFrame = this.pDirEnum.DOWNRIGHT;
+                    if (!this.attacked) {
+                        //	this.animations.play('drAttack');
+                        this.attacked = true;
+                        this.enableHitbox("bottomRightSaber");
+                    }
                 }
                 else if (this.weapon.fireAngle == 135) {
-                    this.newPFrame = this.pDirEnum.DOWN;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('dlAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    this.newPFrame = this.pDirEnum.DOWNLEFT;
+                    if (!this.attacked) {
+                        //	this.animations.play('dlAttack');
+                        this.attacked = true;
+                        this.enableHitbox("bottomLeftSaber");
+                    }
                 }
                 else if (this.weapon.fireAngle == 0) {
                     this.newPFrame = this.pDirEnum.RIGHT;
@@ -470,39 +553,35 @@ var Player = (function (_super) {
                 }
                 else if (this.weapon.fireAngle == 180) {
                     this.newPFrame = this.pDirEnum.LEFT;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('lAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        //	this.animations.play('lAttack');
+                        this.attacked = true;
+                        this.enableHitbox("leftSaber");
+                    }
                 }
                 else if (this.weapon.fireAngle == 270) {
                     this.newPFrame = this.pDirEnum.UP;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('uAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        //	this.animations.play('uAttack');
+                        this.attacked = true;
+                        this.enableHitbox("topSaber");
+                    }
                 }
                 else if (this.weapon.fireAngle == 225) {
                     this.newPFrame = this.pDirEnum.UPLEFT;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('ulAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        //	this.animations.play('ulAttack');
+                        this.attacked = true;
+                        this.enableHitbox("topLeftSaber");
+                    }
                 }
                 else if (this.weapon.fireAngle == 315) {
                     this.newPFrame = this.pDirEnum.UPRIGHT;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('urAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        //	this.animations.play('urAttack');
+                        this.attacked = true;
+                        this.enableHitbox("topRightSaber");
+                    }
                 }
             }
             if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT) {
@@ -518,6 +597,13 @@ var Player = (function (_super) {
             }
             if (this.animations.currentAnim.isFinished) {
                 this.disableHitbox("rightSaber");
+                this.disableHitbox("leftSaber");
+                this.disableHitbox("topSaber");
+                this.disableHitbox("topRightSaber");
+                this.disableHitbox("topLeftSaber");
+                this.disableHitbox("bottomSaber");
+                this.disableHitbox("bottomRightSaber");
+                this.disableHitbox("bottomLeftSaber");
             }
             // -----------------------------------------------------
             this.body.velocity.y = this.pVelocityY * time;
@@ -528,27 +614,26 @@ var Player = (function (_super) {
     return Player;
 }(Phaser.Sprite));
 var Enemy = (function (_super) {
-    __extends(Enemy, _super); // -----------------------------------------------------Enemy code
+    __extends(Enemy, _super);
     function Enemy(xPos, yPos, game, player) {
-        var _this = _super.call(this, game, xPos, yPos, 'life') || this;
-        _this.smoothed = false;
-        _this.exists = true;
-        _this.anchor.setTo(0.5, 0.5);
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.collideWorldBounds = true;
-        _this.maxHealth = 1;
-        _this.aim = false;
-        _this.eVelocityX = 0;
-        _this.eVelocityY = 0;
-        _this.eSpeed = 50;
-        _this.fireTimer = _this.game.time.now + 3000;
-        _this.weapon = game.add.weapon(100, 'testBullet');
-        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 200;
-        _this.weapon.fireRate = 500;
-        _this.player = player;
-        game.add.existing(_this);
-        return _this;
+        _super.call(this, game, xPos, yPos, 'life');
+        this.smoothed = false;
+        this.exists = true;
+        this.anchor.setTo(0.5, 0.5);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.collideWorldBounds = true;
+        this.maxHealth = 1;
+        this.aim = false;
+        this.eVelocityX = 0;
+        this.eVelocityY = 0;
+        this.eSpeed = 50;
+        this.fireTimer = this.game.time.now + 3000;
+        this.weapon = game.add.weapon(100, 'testBullet');
+        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.weapon.bulletSpeed = 200;
+        this.weapon.fireRate = 500;
+        this.player = player;
+        game.add.existing(this);
     }
     Enemy.prototype.ePathfinding = function () {
         if (this.alive) {
@@ -687,6 +772,5 @@ var Enemy = (function (_super) {
         }
     };
     return Enemy;
-}(Phaser.Sprite // -----------------------------------------------------Enemy code
-));
+}(Phaser.Sprite));
 //# sourceMappingURL=app.js.map
