@@ -335,7 +335,7 @@ class Player extends Phaser.Sprite
 
 	weapon: Phaser.Weapon;
 
-	newPFrame: number;
+	newPFrame: number | string;
 	attacked: boolean;
 	rAttack: Phaser.Animation;
 	//lAttack: Phaser.Animation;
@@ -410,12 +410,21 @@ class Player extends Phaser.Sprite
         this.saberHitBoxes = this.game.add.physicsGroup();
         this.addChild(this.saberHitBoxes);
 
-        this.rightSaber = this.game.add.sprite(-5, -20, 'bleh');
+        this.rightSaber = this.game.add.sprite(5, 0, 'bleh');
+        this.rightSaber.anchor.setTo(0.5, 0.5);
         this.rightSaber.scale.setTo(0.8, 1.25);
         this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.rightSaber);
         this.rightSaber.name = "rightSaber";
         this.disableHitbox("rightSaber");
+
+        this.leftSaber = this.game.add.sprite(-35, 0, 'bleh');
+        this.leftSaber.anchor.setTo(0.5, 0.5);
+        this.leftSaber.scale.setTo(0.8, 1.25);
+        this.game.physics.enable(this.leftSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(this.leftSaber);
+        this.leftSaber.name = "leftSaber";
+        this.disableHitbox("leftSaber");
 
         this.saberHitBoxes.enableBody = true;
     }
@@ -426,13 +435,21 @@ class Player extends Phaser.Sprite
         {
             this.rightSaber.kill();
         }
+        else if (name == "leftSaber")
+        {
+            this.leftSaber.kill();
+        }
     }
 
     enableHitbox(name: string)
     {
         if (name == "rightSaber")
         {
-            this.rightSaber.reset(-5, -20);
+            this.rightSaber.reset(5, 0);
+        }
+        else if (name == "leftSaber")
+        {
+            this.leftSaber.reset(-35, 0);
         }
     }
 
@@ -657,12 +674,12 @@ class Player extends Phaser.Sprite
 				else if (this.weapon.fireAngle == 180)
 				{
 					this.newPFrame = this.pDirEnum.LEFT;
-					//if (!this.attacked)
-					//{
+					if (!this.attacked)
+					{
 					//	this.animations.play('lAttack');
-					//	this.attacked = true;
-					//	this.weapon.fire(this.body.center);
-					//}
+						this.attacked = true;
+                        this.enableHitbox("leftSaber");
+					}
 				}
 				else if (this.weapon.fireAngle == 270)
 				{
@@ -715,6 +732,7 @@ class Player extends Phaser.Sprite
             if (this.animations.currentAnim.isFinished)
             {
                 this.disableHitbox("rightSaber");
+                this.disableHitbox("leftSaber");
             }
 			// -----------------------------------------------------
 
