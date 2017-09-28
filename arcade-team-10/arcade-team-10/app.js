@@ -319,8 +319,6 @@ var Player = (function (_super) {
             }
             this.weapon.trackSprite(this, 0, 0);
             this.weapon.fireAngle = 0;
-            //if (!this.aim && !this.attacked)
-            //{
             if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
                 if (keyState.isDown(Phaser.KeyCode.W)) {
                     this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
@@ -349,7 +347,6 @@ var Player = (function (_super) {
                     this.pVelocityX += this.pSpeed;
                 }
             }
-            //}
             if (this.aim) {
                 if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
                     if (keyState.isDown(Phaser.KeyCode.W)) {

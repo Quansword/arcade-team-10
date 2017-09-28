@@ -107,10 +107,10 @@
 		{
 			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
 
-            for (var j = 0; j < player.saberHitBoxes.children.length; j++)
-            {
-                game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
-            }
+			for (var j = 0; j < player.saberHitBoxes.children.length; j++)
+			{
+				game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+			}
 		}
 
 		scoreText.text = score;
@@ -121,7 +121,7 @@
 	{
 
 		game.debug.bodyInfo(player, 32, 32);
-        game.debug.body(player);
+		game.debug.body(player);
 
 	}
 
@@ -135,17 +135,17 @@
 
 	function bulletHitSaber(saber, bullet: Phaser.Bullet)
 	{
-        bullet.body.velocity.x = -bullet.body.velocity.x;
-        bullet.body.velocity.y = -bullet.body.velocity.y;
-        player.weapon.bullets.add(bullet);
-        bullet.rotation += Math.PI;
+		bullet.body.velocity.x = -bullet.body.velocity.x;
+		bullet.body.velocity.y = -bullet.body.velocity.y;
+		player.weapon.bullets.add(bullet);
+		bullet.rotation += Math.PI;
 
 	}
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
 	{
-        bullet.kill();
-        damagePlayer(player, 1);
+		bullet.kill();
+		damagePlayer(player, 1);
 	}
 
 	function enemyHitPlayer(player: Player, enemy: Enemy)
@@ -346,8 +346,8 @@ class Player extends Phaser.Sprite
 	//drAttack: Phaser.Animation;
 	//dlAttack: Phaser.Animation;
 
-    saberHitBoxes: Phaser.Group;
-    rightSaber: Phaser.Sprite;
+	saberHitBoxes: Phaser.Group;
+	rightSaber: Phaser.Sprite;
 
 	pDirEnum =
 	{
@@ -401,38 +401,38 @@ class Player extends Phaser.Sprite
 
 		this.lives = 1;
 
-        this.createSaberHitBoxes();
-            this.disableHitbox("rightSaber");
+		this.createSaberHitBoxes();
+		this.disableHitbox("rightSaber");
 	}
 
-    createSaberHitBoxes()
-    {
-        this.saberHitBoxes = this.game.add.physicsGroup();
-        this.addChild(this.saberHitBoxes);
+	createSaberHitBoxes()
+	{
+		this.saberHitBoxes = this.game.add.physicsGroup();
+		this.addChild(this.saberHitBoxes);
 
-        this.rightSaber = this.game.add.sprite(-5, -20, 'bleh');
-        this.rightSaber.scale.setTo(0.8, 1.25);
-        this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
-        this.saberHitBoxes.addChild(this.rightSaber);
+		this.rightSaber = this.game.add.sprite(-5, -20, 'bleh');
+		this.rightSaber.scale.setTo(0.8, 1.25);
+		this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
+		this.saberHitBoxes.addChild(this.rightSaber);
 
-        this.saberHitBoxes.enableBody = true;
-    }
+		this.saberHitBoxes.enableBody = true;
+	}
 
-    disableHitbox(name: string)
-    {
-        if (name == "rightSaber")
-        {
-            this.rightSaber.kill();
-        }
-    }
+	disableHitbox(name: string)
+	{
+		if (name == "rightSaber")
+		{
+			this.rightSaber.kill();
+		}
+	}
 
-    enableHitbox(name: string)
-    {
-        if (name == "rightSaber")
-        {
-            this.rightSaber.reset(-5, -20);
-        }
-    }
+	enableHitbox(name: string)
+	{
+		if (name == "rightSaber")
+		{
+			this.rightSaber.reset(-5, -20);
+		}
+	}
 
 	pUpdate(time: number, keyState: Phaser.Keyboard)
 	{
@@ -449,50 +449,47 @@ class Player extends Phaser.Sprite
 			this.weapon.trackSprite(this, 0, 0);
 			this.weapon.fireAngle = 0;
 
-			//if (!this.aim && !this.attacked)
-			//{
-				if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
+			if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
+			{
+				if (keyState.isDown(Phaser.KeyCode.W))
 				{
-					if (keyState.isDown(Phaser.KeyCode.W))
-					{
-						this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
-					}
-					else
-					{
-						this.pVelocityY += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
-					}
-
-					if (keyState.isDown(Phaser.KeyCode.A))
-					{
-						this.pVelocityX -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
-					}
-					else
-					{
-						this.pVelocityX += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
-					}
+					this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
 				}
 				else
 				{
-					if (keyState.isDown(Phaser.KeyCode.W))
-					{
-						this.pVelocityY -= this.pSpeed;
-					}
-					if (keyState.isDown(Phaser.KeyCode.S))
-					{
-						this.pVelocityY += this.pSpeed;
-					}
-
-					if (keyState.isDown(Phaser.KeyCode.A))
-					{
-						this.pVelocityX -= this.pSpeed;
-					}
-					if (keyState.isDown(Phaser.KeyCode.D))
-					{
-						this.pVelocityX += this.pSpeed;
-					}
+					this.pVelocityY += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
 				}
-			//}
-			if (this.aim)//else
+
+				if (keyState.isDown(Phaser.KeyCode.A))
+				{
+					this.pVelocityX -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+				}
+				else
+				{
+					this.pVelocityX += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+				}
+			}
+			else
+			{
+				if (keyState.isDown(Phaser.KeyCode.W))
+				{
+					this.pVelocityY -= this.pSpeed;
+				}
+				if (keyState.isDown(Phaser.KeyCode.S))
+				{
+					this.pVelocityY += this.pSpeed;
+				}
+
+				if (keyState.isDown(Phaser.KeyCode.A))
+				{
+					this.pVelocityX -= this.pSpeed;
+				}
+				if (keyState.isDown(Phaser.KeyCode.D))
+				{
+					this.pVelocityX += this.pSpeed;
+				}
+			}
+			if (this.aim)
 			{
 				if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
 				{
@@ -610,7 +607,7 @@ class Player extends Phaser.Sprite
 				}
 			}
 
-			if (/*this.pVelocityX == 0 && this.pVelocityY == 0 &&*/ this.aim)
+			if (this.aim)
 			{
 				if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135)
 				{
@@ -649,7 +646,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('rAttack');
 						this.attacked = true;
-                        this.enableHitbox("rightSaber");
+						this.enableHitbox("rightSaber");
 					}
 				}
 				else if (this.weapon.fireAngle == 180)
@@ -709,15 +706,15 @@ class Player extends Phaser.Sprite
 				{
 					this.attacked = false;
 				}
-            }
-            if (this.animations.currentAnim.isFinished)
-            {
-                this.disableHitbox("rightSaber");
-            }
+			}
+			if (this.animations.currentAnim.isFinished)
+			{
+				this.disableHitbox("rightSaber");
+			}
 			// -----------------------------------------------------
 
 			this.body.velocity.y = this.pVelocityY * time;
-            this.body.velocity.x = this.pVelocityX * time;
+			this.body.velocity.x = this.pVelocityX * time;
 
 			this.aim = false;
 		}
