@@ -39,9 +39,10 @@ window.onload = function () {
         background = game.add.sprite(0, 0, 'background');
         background.scale.setTo(4, 3);
         createWalls();
-        createGates();
         player = new Player(300, 350, game);
         game.add.existing(player);
+        game.world.setBounds(0, 0, 1920, 1920);
+        game.camera.follow(player);
         enemies = game.add.group();
         enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
@@ -50,14 +51,16 @@ window.onload = function () {
         enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
         createEnemies();
         hud = game.add.group();
+        hud.fixedToCamera = true;
         hud.enableBody = false;
         for (var i = 0; i < player.maxHealth; i++) {
             hud.add(new Phaser.Sprite(game, 0, 0, 'heart'));
             hud.children[i].position.set((hud.children[i].width * i) + (hud.children[i].width / 2), hud.children[i].height / 2);
         }
         var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
-        scoreText = game.add.text(game.world.width - 100, 5, '0', style);
-        scoreText.setTextBounds(-50, 0, 100, 100);
+        scoreText = game.add.text(game.camera.width - 150, 5, '0', style);
+        scoreText.setTextBounds(0, 0, 100, 100);
+        scoreText.fixedToCamera = true;
         score = 0;
         //lives = game.add.group();
         //for (var i = 0; i < player.lives; i++)
