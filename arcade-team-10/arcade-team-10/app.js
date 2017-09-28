@@ -30,13 +30,14 @@ window.onload = function () {
     var hud;
     function preload() {
         game.stage.backgroundColor = '#eee';
-        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 128, 10, 0, 2);
+        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 10, 0, 2);
         game.load.image('testBullet', 'assets/temp.png');
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
         game.load.image('life', 'assets/life.png');
         game.load.image('gate', 'assets/gate.png');
         game.load.image('heart', 'assets/Heart.png');
+        game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
     }
     function create() {
         fullScreen();
@@ -97,6 +98,10 @@ window.onload = function () {
     function render() {
         game.debug.bodyInfo(player, 32, 32);
         game.debug.body(player);
+        for (var i = 0; i < enemies.children.length; i++) {
+            game.debug.bodyInfo(enemies.children[i], 32, 32);
+            game.debug.body(enemies.children[i]);
+        }
     }
     function fullScreen() {
         game.scale.pageAlignHorizontally = true;
@@ -150,13 +155,13 @@ window.onload = function () {
         score += 50;
     }
     function createEnemies() {
-        var enemy1 = new Enemy(300, 550, game, 0, player);
+        var enemy1 = new Enemy(300, 550, game, 2, player);
         enemies.add(enemy1);
         enemyBullets.add(enemy1.weapon.bullets);
-        var enemy2 = new Enemy(1000, 500, game, 0, player);
+        var enemy2 = new Enemy(1000, 500, game, 2, player);
         enemies.add(enemy2);
         enemyBullets.add(enemy2.weapon.bullets);
-        var enemy3 = new Enemy(1000, 200, game, 0, player);
+        var enemy3 = new Enemy(1000, 200, game, 2, player);
         enemies.add(enemy3);
         enemyBullets.add(enemy3.weapon.bullets);
     }
@@ -530,24 +535,33 @@ var Player = (function (_super) {
 var Enemy = (function (_super) {
     __extends(Enemy, _super); // -----------------------------------------------------Enemy code
     function Enemy(xPos, yPos, game, enemyType, player) {
-        var _this = _super.call(this, game, xPos, yPos, 'life') || this;
+        var _this = _super.call(this, game, xPos, yPos, 'eSprite') || this;
         _this.enemyTypeEnum = {
             BASE: 0,
-            SHOTGUN: 1,
-            LASER: 2,
-            RAPID: 3
+            RAPID: 1,
+            SHOTGUN: 2,
+            LASER: 3
         };
+        _this.eType = enemyType;
+        if (_this.eType == _this.enemyTypeEnum.RAPID) {
+            _this.frame = 1;
+        }
+        else if (_this.eType == _this.enemyTypeEnum.LASER) {
+            _this.frame = 3;
+        }
+        else if (_this.eType == _this.enemyTypeEnum.SHOTGUN) {
+            _this.frame = 2;
+        }
         _this.smoothed = false;
         _this.exists = true;
         _this.anchor.setTo(0.5, 0.5);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
         _this.body.collideWorldBounds = true;
+        _this.body.setSize(28, 49, 2, 2);
         _this.maxHealth = 1;
-        _this.eType = enemyType;
         _this.aim = false;
         _this.eVelocityX = 0;
         _this.eVelocityY = 0;
-        _this.eSpeed = 50;
         _this.fireTimer = _this.game.time.now + 3000;
         _this.weapon = game.add.weapon(100, 'testBullet');
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
@@ -555,15 +569,19 @@ var Enemy = (function (_super) {
         _this.weapon.fireRate = 500;
         if (_this.eType == _this.enemyTypeEnum.BASE) {
             _this.weapon.fireRate = 2000;
+            _this.eSpeed = 50;
         }
         else if (_this.eType == _this.enemyTypeEnum.RAPID) {
-            _this.weapon.fireRate = 500;
+            _this.weapon.fireRate = 700;
+            _this.eSpeed = 60;
         }
-        else if (_this.eType = _this.enemyTypeEnum.LASER) {
+        else if (_this.eType == _this.enemyTypeEnum.LASER) {
             _this.weapon.fireRate = 100;
+            _this.eSpeed = 35;
         }
         else {
-            _this.weapon.fireRate = 3000;
+            _this.weapon.fireRate = 0;
+            _this.eSpeed = 35;
         }
         _this.player = player;
         game.add.existing(_this);
@@ -571,6 +589,8 @@ var Enemy = (function (_super) {
     }
     Enemy.prototype.ePathfinding = function () {
         if (this.alive) {
+            //if (this.eType = this.enemyTypeEnum.BASE)
+            //{
             if (this.position.x < this.player.position.x - 10) {
                 this.eMoveLeft = false;
                 this.eMoveRight = true;
@@ -595,6 +615,16 @@ var Enemy = (function (_super) {
                 this.eMoveUp = false;
                 this.eMoveDown = false;
             }
+            //else if (this.eType == this.enemyTypeEnum.RAPID)
+            //{
+            //}
+            //else if (this.eType == this.enemyTypeEnum.LASER)
+            //{
+            //}
+            //else
+            //{
+            //}
+            //}
         }
     };
     Enemy.prototype.eUpdate = function (time) {
@@ -602,19 +632,19 @@ var Enemy = (function (_super) {
             this.eVelocityX = 0;
             this.eVelocityY = 0;
             if (this.game.time.now > this.fireTimer) {
-                this.eAim = true;
                 if (this.eType == this.enemyTypeEnum.BASE) {
                     this.fireTimer = this.game.time.now + 2000;
                 }
                 else if (this.eType == this.enemyTypeEnum.RAPID) {
-                    this.fireTimer = this.game.time.now + 500;
+                    this.fireTimer = this.game.time.now + 700;
                 }
-                else if (this.eType = this.enemyTypeEnum.LASER) {
+                else if (this.eType == this.enemyTypeEnum.LASER) {
                     this.fireTimer = this.game.time.now + 100;
                 }
                 else {
-                    this.fireTimer = this.game.time.now + 3000;
+                    this.fireTimer = this.game.time.now + 4000;
                 }
+                this.eAim = true;
             }
             if (this.eAim) {
                 this.aim = true;
@@ -703,7 +733,20 @@ var Enemy = (function (_super) {
                     }
                 }
                 this.weapon.bulletAngleOffset = 90;
-                this.weapon.fire();
+                if (this.eType = this.enemyTypeEnum.SHOTGUN) {
+                    this.weapon.fire();
+                    this.weapon.fireAngle -= 30;
+                    this.weapon.fire();
+                    this.weapon.fireAngle += 15;
+                    this.weapon.fire();
+                    this.weapon.fireAngle += 30;
+                    this.weapon.fire();
+                    this.weapon.fireAngle += 15;
+                    this.weapon.fire();
+                }
+                else {
+                    this.weapon.fire();
+                }
                 this.eAim = false;
             }
             this.body.velocity.y = this.eVelocityY * time;
