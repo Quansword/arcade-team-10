@@ -348,6 +348,7 @@ class Player extends Phaser.Sprite
 
     saberHitBoxes: Phaser.Group;
     rightSaber: Phaser.Sprite;
+    leftSaber: Phaser.Sprite;
 
 	pDirEnum =
 	{
@@ -402,7 +403,6 @@ class Player extends Phaser.Sprite
 		this.lives = 1;
 
         this.createSaberHitBoxes();
-            this.disableHitbox("rightSaber");
 	}
 
     createSaberHitBoxes()
@@ -414,6 +414,8 @@ class Player extends Phaser.Sprite
         this.rightSaber.scale.setTo(0.8, 1.25);
         this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.rightSaber);
+        this.rightSaber.name = "rightSaber";
+        this.disableHitbox("rightSaber");
 
         this.saberHitBoxes.enableBody = true;
     }
