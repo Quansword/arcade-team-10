@@ -319,37 +319,38 @@ var Player = (function (_super) {
             }
             this.weapon.trackSprite(this, 0, 0);
             this.weapon.fireAngle = 0;
-            if (!this.aim && !this.attacked) {
-                if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
-                    if (keyState.isDown(Phaser.KeyCode.W)) {
-                        this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
-                    }
-                    else {
-                        this.pVelocityY += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
-                    }
-                    if (keyState.isDown(Phaser.KeyCode.A)) {
-                        this.pVelocityX -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
-                    }
-                    else {
-                        this.pVelocityX += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
-                    }
+            //if (!this.aim && !this.attacked)
+            //{
+            if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
+                if (keyState.isDown(Phaser.KeyCode.W)) {
+                    this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
                 }
                 else {
-                    if (keyState.isDown(Phaser.KeyCode.W)) {
-                        this.pVelocityY -= this.pSpeed;
-                    }
-                    if (keyState.isDown(Phaser.KeyCode.S)) {
-                        this.pVelocityY += this.pSpeed;
-                    }
-                    if (keyState.isDown(Phaser.KeyCode.A)) {
-                        this.pVelocityX -= this.pSpeed;
-                    }
-                    if (keyState.isDown(Phaser.KeyCode.D)) {
-                        this.pVelocityX += this.pSpeed;
-                    }
+                    this.pVelocityY += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+                }
+                if (keyState.isDown(Phaser.KeyCode.A)) {
+                    this.pVelocityX -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+                }
+                else {
+                    this.pVelocityX += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
                 }
             }
             else {
+                if (keyState.isDown(Phaser.KeyCode.W)) {
+                    this.pVelocityY -= this.pSpeed;
+                }
+                if (keyState.isDown(Phaser.KeyCode.S)) {
+                    this.pVelocityY += this.pSpeed;
+                }
+                if (keyState.isDown(Phaser.KeyCode.A)) {
+                    this.pVelocityX -= this.pSpeed;
+                }
+                if (keyState.isDown(Phaser.KeyCode.D)) {
+                    this.pVelocityX += this.pSpeed;
+                }
+            }
+            //}
+            if (this.aim) {
                 if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
                     if (keyState.isDown(Phaser.KeyCode.W)) {
                         //this.weapon.trackOffset.y = -this.height / 2;
@@ -434,7 +435,7 @@ var Player = (function (_super) {
                     this.newPFrame = this.pDirEnum.UP;
                 }
             }
-            if (this.pVelocityX == 0 && this.pVelocityY == 0 && this.aim) {
+            if (this.aim) {
                 if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135) {
                     this.newPFrame = this.pDirEnum.DOWN;
                     //if (!this.attacked)

@@ -451,8 +451,8 @@ class Player extends Phaser.Sprite
 			this.weapon.trackSprite(this, 0, 0);
 			this.weapon.fireAngle = 0;
 
-			if (!this.aim && !this.attacked)
-			{
+			//if (!this.aim && !this.attacked)
+			//{
 				if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
 				{
 					if (keyState.isDown(Phaser.KeyCode.W))
@@ -493,8 +493,8 @@ class Player extends Phaser.Sprite
 						this.pVelocityX += this.pSpeed;
 					}
 				}
-			}
-			else
+			//}
+			if (this.aim)//else
 			{
 				if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
 				{
@@ -612,7 +612,7 @@ class Player extends Phaser.Sprite
 				}
 			}
 
-			if (this.pVelocityX == 0 && this.pVelocityY == 0 && this.aim)
+			if (/*this.pVelocityX == 0 && this.pVelocityY == 0 &&*/ this.aim)
 			{
 				if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135)
 				{
