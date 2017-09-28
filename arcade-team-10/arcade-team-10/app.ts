@@ -27,7 +27,7 @@
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
-		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 10, 0, 2);
+		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 52, 0, 2);
 		game.load.image('testBullet', 'assets/temp.png');
 
 		game.load.image('background', 'assets/Maze1.png');
@@ -130,8 +130,16 @@
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
 	{
-		bullet.kill();
-		damagePlayer(player, 1);
+		if (!player.attacked)
+		{
+			bullet.kill();
+			damagePlayer(player, 1);
+		}
+		else
+		{
+			bullet.body.velocity.x = -bullet.body.velocity.x;
+			bullet.body.velocity.y = -bullet.body.velocity.y;
+		}
 	}
 
 	function enemyHitPlayer(player: Player, enemy: Enemy)
@@ -145,10 +153,13 @@
 		{
 			player.damage(dNum);
 			hud.children[player.health].visible = false;
-			playerInvuln();
-			playerVisible();
-			game.time.events.repeat(200, 3, playerVisible, this);
-			game.time.events.add(800, playerInvuln, this);
+			if (player.health != 0)
+			{
+				playerInvuln();
+				playerVisible();
+				game.time.events.repeat(200, 3, playerVisible, this);
+				game.time.events.add(800, playerInvuln, this);
+			}
 		}
 	}
 
@@ -321,6 +332,13 @@ class Player extends Phaser.Sprite
 	newPFrame: number;
 	attacked: boolean;
 	rAttack: Phaser.Animation;
+	//lAttack: Phaser.Animation;
+	//uAttack: Phaser.Animation;
+	//dAttack: Phaser.Animation;
+	//urAttack: Phaser.Animation;
+	//ulAttack: Phaser.Animation;
+	//drAttack: Phaser.Animation;
+	//dlAttack: Phaser.Animation;
 
 	pDirEnum =
 	{
@@ -338,6 +356,13 @@ class Player extends Phaser.Sprite
 	{
 		super(game, xPos, yPos, 'pSprite');
 		this.rAttack = this.animations.add('rAttack', [6, 7, 8, 9], 10);
+		//this.lAttack = this.animations.add('lAttack', [12, 13, 14, 15], 10);
+		//this.uAttack = this.animations.add('uAttack', [18, 19, 20, 21], 10);
+		//this.dAttack = this.animations.add('dAttack', [24, 25, 26, 27], 10);
+		//this.urAttack = this.animations.add('urAttack', [30, 31, 32, 33], 10);
+		//this.ulAttack = this.animations.add('ulAttack', [36, 37, 38, 39], 10);
+		//this.drAttack = this.animations.add('drAttack', [42, 43, 44, 45], 10);
+		//this.dlAttack = this.animations.add('dlAttack', [48, 49, 50, 51], 10);
 		this.attacked = false;
 
 		this.frame = this.pDirEnum.RIGHT;
@@ -375,7 +400,7 @@ class Player extends Phaser.Sprite
 			this.pVelocityX = 0;
 			this.pVelocityY = 0;
 
-			if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying))
+			if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying)) //|| this.lAttack.isPlaying || this.uAttack.isPlaying || this.dAttack.isPlaying || this.urAttack.isPlaying || this.ulAttack.isPlaying || this.drAttack.isPlaying || this.dlAttack.isPlaying))
 			{
 				this.aim = true;
 			}
@@ -498,13 +523,6 @@ class Player extends Phaser.Sprite
 					}
 				}
 				this.weapon.bulletAngleOffset = 90;
-
-				if (!this.attacked)
-				{
-					this.animations.play('rAttack');
-					this.attacked = true;
-					this.weapon.fire(this.body.center);
-				}
 			}
 
 			// ----------------------------------------------------- Determining new direction
@@ -556,41 +574,100 @@ class Player extends Phaser.Sprite
 				if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135)
 				{
 					this.newPFrame = this.pDirEnum.DOWN;
+					//if (!this.attacked)
+					//{
+					//	this.animations.play('dAttack');
+					//	this.attacked = true;
+					//	this.weapon.fire(this.body.center);
+					//}
+				}
+				else if (this.weapon.fireAngle == 45)
+				{
+					this.newPFrame = this.pDirEnum.DOWN;
+					//if (!this.attacked)
+					//{
+					//	this.animations.play('drAttack');
+					//	this.attacked = true;
+					//	this.weapon.fire(this.body.center);
+					//}
+				}
+				else if (this.weapon.fireAngle == 135)
+				{
+					this.newPFrame = this.pDirEnum.DOWN;
+					//if (!this.attacked)
+					//{
+					//	this.animations.play('dlAttack');
+					//	this.attacked = true;
+					//	this.weapon.fire(this.body.center);
+					//}
 				}
 				else if (this.weapon.fireAngle == 0)
 				{
 					this.newPFrame = this.pDirEnum.RIGHT;
+					if (!this.attacked)
+					{
+						this.animations.play('rAttack');
+						this.attacked = true;
+						this.weapon.fire(this.body.center);
+					}
 				}
 				else if (this.weapon.fireAngle == 180)
 				{
 					this.newPFrame = this.pDirEnum.LEFT;
+					//if (!this.attacked)
+					//{
+					//	this.animations.play('lAttack');
+					//	this.attacked = true;
+					//	this.weapon.fire(this.body.center);
+					//}
 				}
 				else if (this.weapon.fireAngle == 270)
 				{
 					this.newPFrame = this.pDirEnum.UP;
+					//if (!this.attacked)
+					//{
+					//	this.animations.play('uAttack');
+					//	this.attacked = true;
+					//	this.weapon.fire(this.body.center);
+					//}
 				}
 				else if (this.weapon.fireAngle == 225)
 				{
 					this.newPFrame = this.pDirEnum.UPLEFT;
+					//if (!this.attacked)
+					//{
+					//	this.animations.play('ulAttack');
+					//	this.attacked = true;
+					//	this.weapon.fire(this.body.center);
+					//}
 				}
 				else if (this.weapon.fireAngle == 315)
 				{
 					this.newPFrame = this.pDirEnum.UPRIGHT;
+					//if (!this.attacked)
+					//{
+					//	this.animations.play('urAttack');
+					//	this.attacked = true;
+					//	this.weapon.fire(this.body.center);
+					//}
 				}
 			}
 
-			if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT)
+			if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT) // Extra check just in case, as there is no down right or down left sprite
 			{
 				this.newPFrame = this.pDirEnum.DOWN;
 			}
 
-			if (this.newPFrame != this.frame && !(this.rAttack.isPlaying))
+			if (!(this.rAttack.isPlaying)) //|| this.lAttack.isPlaying || this.uAttack.isPlaying || this.dAttack.isPlaying || this.urAttack.isPlaying || this.ulAttack.isPlaying || this.drAttack.isPlaying || this.dlAttack.isPlaying))
 			{
-				this.frame = this.newPFrame;
-			}
-			else if (!keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying))
-			{
-				this.attacked = false;
+				if (this.newPFrame != this.frame) 
+				{
+					this.frame = this.newPFrame;
+				}
+				else if (!keyState.isDown(Phaser.KeyCode.SPACEBAR))
+				{
+					this.attacked = false;
+				}
 			}
 
 			// -----------------------------------------------------
