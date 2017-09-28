@@ -30,7 +30,7 @@ window.onload = function () {
     var hud;
     function preload() {
         game.stage.backgroundColor = '#eee';
-        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 128, 53, 0, 2);
+        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
         game.load.image('testBullet', 'assets/temp.png');
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
@@ -258,14 +258,14 @@ var Player = (function (_super) {
             DOWNRIGHT: 6,
             DOWNLEFT: 7
         };
-        _this.rAttack = _this.animations.add('rAttack', [6, 7, 8, 9], 10);
-        //this.lAttack = this.animations.add('lAttack', [12, 13, 14, 15], 10);
-        //this.uAttack = this.animations.add('uAttack', [18, 19, 20, 21], 10);
-        //this.dAttack = this.animations.add('dAttack', [24, 25, 26, 27], 10);
-        //this.urAttack = this.animations.add('urAttack', [30, 31, 32, 33], 10);
-        //this.ulAttack = this.animations.add('ulAttack', [36, 37, 38, 39], 10);
-        //this.drAttack = this.animations.add('drAttack', [42, 43, 44, 45], 10);
-        //this.dlAttack = this.animations.add('dlAttack', [48, 49, 50, 51], 10);
+        _this.rAttack = _this.animations.add('rAttack', [6, 7, 8, 9, 10, 11], 10);
+        _this.lAttack = _this.animations.add('lAttack', [12, 13, 14, 15, 16, 17], 10);
+        _this.uAttack = _this.animations.add('uAttack', [18, 19, 20, 21, 22, 23], 10);
+        _this.dAttack = _this.animations.add('dAttack', [24, 25, 26, 27, 28, 29], 10);
+        _this.urAttack = _this.animations.add('urAttack', [30, 31, 32, 33, 34, 35], 10);
+        _this.ulAttack = _this.animations.add('ulAttack', [36, 37, 38, 39, 40, 41], 10);
+        _this.drAttack = _this.animations.add('drAttack', [42, 43, 44, 45, 46, 47], 10);
+        _this.dlAttack = _this.animations.add('dlAttack', [48, 49, 50, 51, 52, 53], 10);
         _this.attacked = false;
         _this.frame = _this.pDirEnum.RIGHT;
         _this.newPFrame = _this.frame;
@@ -273,7 +273,7 @@ var Player = (function (_super) {
         _this.exists = true;
         _this.anchor.setTo(0.5, 0.5);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(24, 42, 34, 10);
+        _this.body.setSize(24, 42, 48, 48);
         _this.body.collideWorldBounds = true;
         _this.maxHealth = 5;
         _this.health = _this.maxHealth;
@@ -314,7 +314,7 @@ var Player = (function (_super) {
         if (this.alive) {
             this.pVelocityX = 0;
             this.pVelocityY = 0;
-            if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying)) {
+            if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying || this.lAttack.isPlaying || this.uAttack.isPlaying || this.dAttack.isPlaying || this.urAttack.isPlaying || this.ulAttack.isPlaying || this.drAttack.isPlaying || this.dlAttack.isPlaying)) {
                 this.aim = true;
             }
             this.weapon.trackSprite(this, 0, 0);
@@ -433,32 +433,26 @@ var Player = (function (_super) {
                 }
             }
             if (this.aim) {
-                if (this.weapon.fireAngle == 90 || this.weapon.fireAngle == 45 || this.weapon.fireAngle == 135) {
+                if (this.weapon.fireAngle == 90) {
                     this.newPFrame = this.pDirEnum.DOWN;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('dAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        this.animations.play('dAttack');
+                        this.attacked = true;
+                    }
                 }
                 else if (this.weapon.fireAngle == 45) {
                     this.newPFrame = this.pDirEnum.DOWN;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('drAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        this.animations.play('drAttack');
+                        this.attacked = true;
+                    }
                 }
                 else if (this.weapon.fireAngle == 135) {
                     this.newPFrame = this.pDirEnum.DOWN;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('dlAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        this.animations.play('dlAttack');
+                        this.attacked = true;
+                    }
                 }
                 else if (this.weapon.fireAngle == 0) {
                     this.newPFrame = this.pDirEnum.RIGHT;
@@ -470,45 +464,37 @@ var Player = (function (_super) {
                 }
                 else if (this.weapon.fireAngle == 180) {
                     this.newPFrame = this.pDirEnum.LEFT;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('lAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        this.animations.play('lAttack');
+                        this.attacked = true;
+                    }
                 }
                 else if (this.weapon.fireAngle == 270) {
                     this.newPFrame = this.pDirEnum.UP;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('uAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        this.animations.play('uAttack');
+                        this.attacked = true;
+                    }
                 }
                 else if (this.weapon.fireAngle == 225) {
                     this.newPFrame = this.pDirEnum.UPLEFT;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('ulAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        this.animations.play('ulAttack');
+                        this.attacked = true;
+                    }
                 }
                 else if (this.weapon.fireAngle == 315) {
                     this.newPFrame = this.pDirEnum.UPRIGHT;
-                    //if (!this.attacked)
-                    //{
-                    //	this.animations.play('urAttack');
-                    //	this.attacked = true;
-                    //	this.weapon.fire(this.body.center);
-                    //}
+                    if (!this.attacked) {
+                        this.animations.play('urAttack');
+                        this.attacked = true;
+                    }
                 }
             }
             if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT) {
                 this.newPFrame = this.pDirEnum.DOWN;
             }
-            if (!(this.rAttack.isPlaying)) {
+            if (!(this.rAttack.isPlaying || this.lAttack.isPlaying || this.uAttack.isPlaying || this.dAttack.isPlaying || this.urAttack.isPlaying || this.ulAttack.isPlaying || this.drAttack.isPlaying || this.dlAttack.isPlaying)) {
                 if (this.newPFrame != this.frame) {
                     this.frame = this.newPFrame;
                 }
