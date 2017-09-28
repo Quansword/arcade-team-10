@@ -382,7 +382,7 @@ class Player extends Phaser.Sprite
 		this.anchor.setTo(0.5, 0.5);
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
-		this.body.setSize(30, 45, 28, 8);
+		this.body.setSize(24, 42, 34, 10);
 		this.body.collideWorldBounds = true;
 		this.maxHealth = 5;
 		this.health = this.maxHealth;
