@@ -27,7 +27,7 @@
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
-		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 128, 53, 0, 2);
+		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 128, 10, 0, 2);
 		game.load.image('testBullet', 'assets/temp.png');
 
 		game.load.image('background', 'assets/Maze1.png');
@@ -201,15 +201,15 @@
 
 	function createEnemies()
 	{
-		var enemy1 = new Enemy(300, 550, game, player);
+		var enemy1 = new Enemy(300, 550, game, 0, player);
 		enemies.add(enemy1);
 		enemyBullets.add(enemy1.weapon.bullets);
 
-		var enemy2 = new Enemy(1000, 500, game, player);
+		var enemy2 = new Enemy(1000, 500, game, 0, player);
 		enemies.add(enemy2);
 		enemyBullets.add(enemy2.weapon.bullets);
 
-		var enemy3 = new Enemy(1000, 200, game, player);
+		var enemy3 = new Enemy(1000, 200, game, 0, player);
 		enemies.add(enemy3);
 		enemyBullets.add(enemy3.weapon.bullets);
 	}
@@ -723,6 +723,7 @@ class Player extends Phaser.Sprite
 
 class Enemy extends Phaser.Sprite // -----------------------------------------------------Enemy code
 {
+	eType: number;
 	aim: boolean;
 	eVelocityX: number;
 	eVelocityY: number;
@@ -739,7 +740,15 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	fireTimer: number;
 	dead: boolean;
 
-	constructor(xPos: number, yPos: number, game: Phaser.Game, player: Player)
+	enemyTypeEnum =
+	{
+		BASE: 0,
+		SHOTGUN: 1,
+		LASER: 2,
+		RAPID:3
+	};
+
+	constructor(xPos: number, yPos: number, game: Phaser.Game, enemyType: number, player: Player)
 	{
 		super(game, xPos, yPos, 'life');
 		this.smoothed = false;
@@ -750,6 +759,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.body.collideWorldBounds = true;
 		this.maxHealth = 1;
 
+		this.eType = enemyType;
 		this.aim = false;
 		this.eVelocityX = 0;
 		this.eVelocityY = 0;
@@ -760,6 +770,23 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 200;
 		this.weapon.fireRate = 500;
+
+		if (this.eType == this.enemyTypeEnum.BASE)
+		{
+			this.weapon.fireRate = 2000;
+		}
+		else if (this.eType == this.enemyTypeEnum.RAPID)
+		{
+			this.weapon.fireRate = 500;
+		}
+		else if (this.eType = this.enemyTypeEnum.LASER)
+		{
+			this.weapon.fireRate = 100;
+		}
+		else
+		{
+			this.weapon.fireRate = 3000;
+		}
 
 		this.player = player;
 		game.add.existing(this);
@@ -813,7 +840,22 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 			if (this.game.time.now > this.fireTimer)
 			{
 				this.eAim = true;
-				this.fireTimer = this.game.time.now + 2000;
+				if (this.eType == this.enemyTypeEnum.BASE)
+				{
+					this.fireTimer = this.game.time.now + 2000;
+				}
+				else if (this.eType == this.enemyTypeEnum.RAPID)
+				{
+					this.fireTimer = this.game.time.now + 500;
+				}
+				else if (this.eType = this.enemyTypeEnum.LASER)
+				{
+					this.fireTimer = this.game.time.now + 100;
+				}
+				else
+				{
+					this.fireTimer = this.game.time.now + 3000;
+				}
 			}
 
 			if (this.eAim)
@@ -825,53 +867,49 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 			this.weapon.fireAngle = 0;
 
 			this.ePathfinding();
-			if (!this.aim)
-			{
-				if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight)))
-				{
-					if (this.eMoveUp)
-					{
-						this.eVelocityY -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
-					}
-					else
-					{
-						this.eVelocityY += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
-					}
 
-					if (this.eMoveLeft)
-					{
-						this.eVelocityX -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
-					}
-					else
-					{
-						this.eVelocityX += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
-					}
+			if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight)))
+			{
+				if (this.eMoveUp)
+				{
+					this.eVelocityY -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
 				}
 				else
 				{
-					if (this.eMoveUp)
-					{
-						this.eVelocityY -= this.eSpeed;
-					}
-					if (this.eMoveDown)
-					{
-						this.eVelocityY += this.eSpeed;
-						this.weapon.fireAngle = 90;
-					}
+					this.eVelocityY += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
+				}
 
-					if (this.eMoveLeft)
-					{
-						this.eVelocityX -= this.eSpeed;
-						this.weapon.fireAngle = 180;
-					}
-					if (this.eMoveRight)
-					{
-						this.eVelocityX += this.eSpeed;
-						this.weapon.fireAngle = 0;
-					}
+				if (this.eMoveLeft)
+				{
+					this.eVelocityX -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
+				}
+				else
+				{
+					this.eVelocityX += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
 				}
 			}
 			else
+			{
+				if (this.eMoveUp)
+				{
+					this.eVelocityY -= this.eSpeed;
+				}
+				if (this.eMoveDown)
+				{
+					this.eVelocityY += this.eSpeed;
+				}
+
+				if (this.eMoveLeft)
+				{
+					this.eVelocityX -= this.eSpeed;
+				}
+				if (this.eMoveRight)
+				{
+					this.eVelocityX += this.eSpeed;
+				}
+			}
+
+			if (this.aim)
 			{
 				if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight)))
 				{
