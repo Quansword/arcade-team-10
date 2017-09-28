@@ -1,8 +1,13 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 window.onload = function () {
     //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
     //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
@@ -25,13 +30,14 @@ window.onload = function () {
     var hud;
     function preload() {
         game.stage.backgroundColor = '#eee';
-        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 52, 0, 2);
+        game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 10, 0, 2);
         game.load.image('testBullet', 'assets/temp.png');
         game.load.image('background', 'assets/Maze1.png');
         game.load.image('wall', 'assets/wall.png');
         game.load.image('life', 'assets/life.png');
         game.load.image('gate', 'assets/gate.png');
         game.load.image('heart', 'assets/Heart.png');
+        game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
     }
     function create() {
         fullScreen();
@@ -62,12 +68,6 @@ window.onload = function () {
         scoreText.setTextBounds(0, 0, 100, 100);
         scoreText.fixedToCamera = true;
         score = 0;
-        //lives = game.add.group();
-        //for (var i = 0; i < player.lives; i++)
-        //{
-        //	var life = lives.create(20 + (30 * i), 30, 'life');
-        //	life.anchor.setTo(0.5, 0.5);
-        //}
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -98,6 +98,10 @@ window.onload = function () {
     function render() {
         game.debug.bodyInfo(player, 32, 32);
         game.debug.body(player);
+        for (var i = 0; i < enemies.children.length; i++) {
+            game.debug.bodyInfo(enemies.children[i], 32, 32);
+            game.debug.body(enemies.children[i]);
+        }
     }
     function fullScreen() {
         game.scale.pageAlignHorizontally = true;
@@ -155,13 +159,13 @@ window.onload = function () {
         score += 50;
     }
     function createEnemies() {
-        var enemy1 = new Enemy(300, 550, game, player);
+        var enemy1 = new Enemy(300, 550, game, 2, player);
         enemies.add(enemy1);
         enemyBullets.add(enemy1.weapon.bullets);
-        var enemy2 = new Enemy(1000, 500, game, player);
+        var enemy2 = new Enemy(1000, 500, game, 2, player);
         enemies.add(enemy2);
         enemyBullets.add(enemy2.weapon.bullets);
-        var enemy3 = new Enemy(1000, 200, game, player);
+        var enemy3 = new Enemy(1000, 200, game, 2, player);
         enemies.add(enemy3);
         enemyBullets.add(enemy3.weapon.bullets);
     }
@@ -239,20 +243,21 @@ window.onload = function () {
 var Barrier = (function (_super) {
     __extends(Barrier, _super);
     function Barrier(xPos, yPos, width, height, game, group, type) {
-        _super.call(this, game, xPos, yPos, type);
-        this.scale.setTo(width, height);
-        game.physics.arcade.enable(this);
-        this.body.immovable = true;
-        this.renderable = false;
-        group.add(this);
+        var _this = _super.call(this, game, xPos, yPos, type) || this;
+        _this.scale.setTo(width, height);
+        game.physics.arcade.enable(_this);
+        _this.body.immovable = true;
+        _this.renderable = false;
+        group.add(_this);
+        return _this;
     }
     return Barrier;
 }(Phaser.Sprite));
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(xPos, yPos, game) {
-        _super.call(this, game, xPos, yPos, 'pSprite');
-        this.pDirEnum = {
+        var _this = _super.call(this, game, xPos, yPos, 'pSprite') || this;
+        _this.pDirEnum = {
             RIGHT: 0,
             LEFT: 1,
             UPRIGHT: 2,
@@ -262,7 +267,7 @@ var Player = (function (_super) {
             DOWNRIGHT: 6,
             DOWNLEFT: 7
         };
-        this.rAttack = this.animations.add('rAttack', [6, 7, 8, 9], 10);
+        _this.rAttack = _this.animations.add('rAttack', [6, 7, 8, 9], 10);
         //this.lAttack = this.animations.add('lAttack', [12, 13, 14, 15], 10);
         //this.uAttack = this.animations.add('uAttack', [18, 19, 20, 21], 10);
         //this.dAttack = this.animations.add('dAttack', [24, 25, 26, 27], 10);
@@ -270,28 +275,29 @@ var Player = (function (_super) {
         //this.ulAttack = this.animations.add('ulAttack', [36, 37, 38, 39], 10);
         //this.drAttack = this.animations.add('drAttack', [42, 43, 44, 45], 10);
         //this.dlAttack = this.animations.add('dlAttack', [48, 49, 50, 51], 10);
-        this.attacked = false;
-        this.frame = this.pDirEnum.RIGHT;
-        this.newPFrame = this.frame;
-        this.smoothed = false;
-        this.exists = true;
-        this.anchor.setTo(0.5, 0.5);
-        this.game.physics.enable(this, Phaser.Physics.ARCADE);
-        this.body.setSize(24, 42, 34, 10);
-        this.body.collideWorldBounds = true;
-        this.maxHealth = 5;
-        this.health = this.maxHealth;
-        this.canDamage = true;
-        this.aim = false;
-        this.pVelocityX = 0;
-        this.pVelocityY = 0;
-        this.pSpeed = 150;
-        this.weapon = game.add.weapon(100, 'testBullet');
-        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        this.weapon.bulletSpeed = 200;
-        this.weapon.autofire = false;
-        this.lives = 1;
-        this.createSaberHitBoxes();
+        _this.attacked = false;
+        _this.frame = _this.pDirEnum.RIGHT;
+        _this.newPFrame = _this.frame;
+        _this.smoothed = false;
+        _this.exists = true;
+        _this.anchor.setTo(0.5, 0.5);
+        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+        _this.body.setSize(24, 42, 34, 10);
+        _this.body.collideWorldBounds = true;
+        _this.maxHealth = 5;
+        _this.health = _this.maxHealth;
+        _this.canDamage = true;
+        _this.aim = false;
+        _this.pVelocityX = 0;
+        _this.pVelocityY = 0;
+        _this.pSpeed = 150;
+        _this.weapon = game.add.weapon(100, 'testBullet');
+        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.weapon.bulletSpeed = 200;
+        _this.weapon.autofire = false;
+        _this.lives = 1;
+        _this.createSaberHitBoxes();
+        return _this;
     }
     Player.prototype.createSaberHitBoxes = function () {
         this.saberHitBoxes = this.game.add.physicsGroup();
@@ -446,15 +452,12 @@ var Player = (function (_super) {
             if (this.aim) {
                 if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
                     if (keyState.isDown(Phaser.KeyCode.W)) {
-                        //this.weapon.trackOffset.y = -this.height / 2;
                         this.weapon.fireAngle = 270;
                     }
                     else {
-                        //this.weapon.trackOffset.y = this.height / 2;
                         this.weapon.fireAngle = 90;
                     }
                     if (keyState.isDown(Phaser.KeyCode.A)) {
-                        //this.weapon.trackOffset.x = -this.width / 2;
                         if (this.weapon.fireAngle > 180) {
                             this.weapon.fireAngle -= 45;
                         }
@@ -463,7 +466,6 @@ var Player = (function (_super) {
                         }
                     }
                     else {
-                        //this.weapon.trackOffset.x = this.width / 2;
                         if (this.weapon.fireAngle > 180) {
                             this.weapon.fireAngle += 45;
                         }
@@ -474,11 +476,9 @@ var Player = (function (_super) {
                 }
                 else {
                     if (keyState.isDown(Phaser.KeyCode.W)) {
-                        //this.weapon.trackOffset.y -= this.height / 2;
                         this.weapon.fireAngle = 270;
                     }
                     if (keyState.isDown(Phaser.KeyCode.S)) {
-                        //this.weapon.trackOffset.y += this.height / 2;
                         if (this.weapon.fireAngle == 270) {
                             this.weapon.fireAngle = 0;
                         }
@@ -487,11 +487,9 @@ var Player = (function (_super) {
                         }
                     }
                     if (keyState.isDown(Phaser.KeyCode.A)) {
-                        //this.weapon.trackOffset.x -= this.width / 2;
                         this.weapon.fireAngle = 180;
                     }
                     if (keyState.isDown(Phaser.KeyCode.D)) {
-                        //this.weapon.trackOffset.x += this.width / 2;
                         this.weapon.fireAngle = 0;
                     }
                 }
@@ -624,29 +622,64 @@ var Player = (function (_super) {
     return Player;
 }(Phaser.Sprite));
 var Enemy = (function (_super) {
-    __extends(Enemy, _super);
-    function Enemy(xPos, yPos, game, player) {
-        _super.call(this, game, xPos, yPos, 'life');
-        this.smoothed = false;
-        this.exists = true;
-        this.anchor.setTo(0.5, 0.5);
-        this.game.physics.enable(this, Phaser.Physics.ARCADE);
-        this.body.collideWorldBounds = true;
-        this.maxHealth = 1;
-        this.aim = false;
-        this.eVelocityX = 0;
-        this.eVelocityY = 0;
-        this.eSpeed = 50;
-        this.fireTimer = this.game.time.now + 3000;
-        this.weapon = game.add.weapon(100, 'testBullet');
-        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        this.weapon.bulletSpeed = 200;
-        this.weapon.fireRate = 500;
-        this.player = player;
-        game.add.existing(this);
+    __extends(Enemy, _super); // -----------------------------------------------------Enemy code
+    function Enemy(xPos, yPos, game, enemyType, player) {
+        var _this = _super.call(this, game, xPos, yPos, 'eSprite') || this;
+        _this.enemyTypeEnum = {
+            BASE: 0,
+            RAPID: 1,
+            SHOTGUN: 2,
+            LASER: 3
+        };
+        _this.eType = enemyType;
+        if (_this.eType == _this.enemyTypeEnum.RAPID) {
+            _this.frame = 1;
+        }
+        else if (_this.eType == _this.enemyTypeEnum.LASER) {
+            _this.frame = 3;
+        }
+        else if (_this.eType == _this.enemyTypeEnum.SHOTGUN) {
+            _this.frame = 2;
+        }
+        _this.smoothed = false;
+        _this.exists = true;
+        _this.anchor.setTo(0.5, 0.5);
+        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
+        _this.body.collideWorldBounds = true;
+        _this.body.setSize(28, 49, 2, 2);
+        _this.maxHealth = 1;
+        _this.aim = false;
+        _this.eVelocityX = 0;
+        _this.eVelocityY = 0;
+        _this.fireTimer = _this.game.time.now + 3000;
+        _this.weapon = game.add.weapon(100, 'testBullet');
+        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.weapon.bulletSpeed = 200;
+        _this.weapon.fireRate = 500;
+        if (_this.eType == _this.enemyTypeEnum.BASE) {
+            _this.weapon.fireRate = 2000;
+            _this.eSpeed = 50;
+        }
+        else if (_this.eType == _this.enemyTypeEnum.RAPID) {
+            _this.weapon.fireRate = 700;
+            _this.eSpeed = 60;
+        }
+        else if (_this.eType == _this.enemyTypeEnum.LASER) {
+            _this.weapon.fireRate = 100;
+            _this.eSpeed = 35;
+        }
+        else {
+            _this.weapon.fireRate = 0;
+            _this.eSpeed = 35;
+        }
+        _this.player = player;
+        game.add.existing(_this);
+        return _this;
     }
     Enemy.prototype.ePathfinding = function () {
         if (this.alive) {
+            //if (this.eType = this.enemyTypeEnum.BASE)
+            //{
             if (this.position.x < this.player.position.x - 10) {
                 this.eMoveLeft = false;
                 this.eMoveRight = true;
@@ -671,6 +704,16 @@ var Enemy = (function (_super) {
                 this.eMoveUp = false;
                 this.eMoveDown = false;
             }
+            //else if (this.eType == this.enemyTypeEnum.RAPID)
+            //{
+            //}
+            //else if (this.eType == this.enemyTypeEnum.LASER)
+            //{
+            //}
+            //else
+            //{
+            //}
+            //}
         }
     };
     Enemy.prototype.eUpdate = function (time) {
@@ -678,8 +721,19 @@ var Enemy = (function (_super) {
             this.eVelocityX = 0;
             this.eVelocityY = 0;
             if (this.game.time.now > this.fireTimer) {
+                if (this.eType == this.enemyTypeEnum.BASE) {
+                    this.fireTimer = this.game.time.now + 2000;
+                }
+                else if (this.eType == this.enemyTypeEnum.RAPID) {
+                    this.fireTimer = this.game.time.now + 700;
+                }
+                else if (this.eType == this.enemyTypeEnum.LASER) {
+                    this.fireTimer = this.game.time.now + 100;
+                }
+                else {
+                    this.fireTimer = this.game.time.now + 4000;
+                }
                 this.eAim = true;
-                this.fireTimer = this.game.time.now + 2000;
             }
             if (this.eAim) {
                 this.aim = true;
@@ -687,40 +741,35 @@ var Enemy = (function (_super) {
             this.weapon.trackSprite(this, 0, 0);
             this.weapon.fireAngle = 0;
             this.ePathfinding();
-            if (!this.aim) {
-                if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight))) {
-                    if (this.eMoveUp) {
-                        this.eVelocityY -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
-                    }
-                    else {
-                        this.eVelocityY += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
-                    }
-                    if (this.eMoveLeft) {
-                        this.eVelocityX -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
-                    }
-                    else {
-                        this.eVelocityX += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
-                    }
+            if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight))) {
+                if (this.eMoveUp) {
+                    this.eVelocityY -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
                 }
                 else {
-                    if (this.eMoveUp) {
-                        this.eVelocityY -= this.eSpeed;
-                    }
-                    if (this.eMoveDown) {
-                        this.eVelocityY += this.eSpeed;
-                        this.weapon.fireAngle = 90;
-                    }
-                    if (this.eMoveLeft) {
-                        this.eVelocityX -= this.eSpeed;
-                        this.weapon.fireAngle = 180;
-                    }
-                    if (this.eMoveRight) {
-                        this.eVelocityX += this.eSpeed;
-                        this.weapon.fireAngle = 0;
-                    }
+                    this.eVelocityY += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
+                }
+                if (this.eMoveLeft) {
+                    this.eVelocityX -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
+                }
+                else {
+                    this.eVelocityX += Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
                 }
             }
             else {
+                if (this.eMoveUp) {
+                    this.eVelocityY -= this.eSpeed;
+                }
+                if (this.eMoveDown) {
+                    this.eVelocityY += this.eSpeed;
+                }
+                if (this.eMoveLeft) {
+                    this.eVelocityX -= this.eSpeed;
+                }
+                if (this.eMoveRight) {
+                    this.eVelocityX += this.eSpeed;
+                }
+            }
+            if (this.aim) {
                 if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight))) {
                     if (this.eMoveUp) {
                         this.weapon.trackOffset.y = -this.height / 2;
@@ -773,7 +822,20 @@ var Enemy = (function (_super) {
                     }
                 }
                 this.weapon.bulletAngleOffset = 90;
-                this.weapon.fire();
+                if (this.eType = this.enemyTypeEnum.SHOTGUN) {
+                    this.weapon.fire();
+                    this.weapon.fireAngle -= 30;
+                    this.weapon.fire();
+                    this.weapon.fireAngle += 15;
+                    this.weapon.fire();
+                    this.weapon.fireAngle += 30;
+                    this.weapon.fire();
+                    this.weapon.fireAngle += 15;
+                    this.weapon.fire();
+                }
+                else {
+                    this.weapon.fire();
+                }
                 this.eAim = false;
             }
             this.body.velocity.y = this.eVelocityY * time;
@@ -782,5 +844,6 @@ var Enemy = (function (_super) {
         }
     };
     return Enemy;
-}(Phaser.Sprite));
+}(Phaser.Sprite // -----------------------------------------------------Enemy code
+));
 //# sourceMappingURL=app.js.map
