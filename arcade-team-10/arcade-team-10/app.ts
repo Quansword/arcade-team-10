@@ -27,7 +27,7 @@
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
-		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 52, 52, 0, 2);
+		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 128, 128, 53, 0, 2);
 		game.load.image('testBullet', 'assets/temp.png');
 
 		game.load.image('background', 'assets/Maze1.png');
