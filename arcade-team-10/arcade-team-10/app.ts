@@ -106,6 +106,11 @@
 		for (var i = 0; i < enemies.children.length; i++)
 		{
 			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
+
+            for (var j = 0; j < player.saberHitBoxes.children.length; j++)
+            {
+                game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+            }
 		}
 
 		scoreText.text = score;
@@ -116,7 +121,7 @@
 	{
 
 		game.debug.bodyInfo(player, 32, 32);
-		game.debug.body(player);
+        game.debug.body(player);
 
 	}
 
@@ -126,6 +131,12 @@
 		game.scale.pageAlignVertically = true;
 		game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 		game.scale.setGameSize(1280, 720);
+	}
+
+	function bulletHitSaber(saber, bullet: Phaser.Bullet)
+	{
+        bullet.body.velocity.x = -bullet.body.velocity.x;
+        bullet.body.velocity.y = -bullet.body.velocity.y;
 	}
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
@@ -339,6 +350,9 @@ class Player extends Phaser.Sprite
 	//ulAttack: Phaser.Animation;
 	//drAttack: Phaser.Animation;
 	//dlAttack: Phaser.Animation;
+    saberHitBoxes: Phaser.Group;
+
+    
 
 	pDirEnum =
 	{
@@ -391,7 +405,22 @@ class Player extends Phaser.Sprite
 		this.weapon.autofire = false;
 
 		this.lives = 1;
+
+        this.createSaberHitBoxes();
 	}
+
+    createSaberHitBoxes()
+    {
+        this.saberHitBoxes = this.game.add.physicsGroup();
+        this.addChild(this.saberHitBoxes);
+
+        var rightSaber = this.game.add.sprite(-5, -20, 'bleh');
+        rightSaber.scale.setTo(0.8, 1.25);
+        this.game.physics.enable(rightSaber, Phaser.Physics.ARCADE);
+        this.saberHitBoxes.addChild(rightSaber);
+
+        this.saberHitBoxes.enableBody = true;
+    }
 
 	pUpdate(time: number, keyState: Phaser.Keyboard)
 	{
