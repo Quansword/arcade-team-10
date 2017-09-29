@@ -27,9 +27,6 @@ window.onload = function ()
 	let gate4: Barrier;
 	let background: Phaser.Sprite;
 
-	let scoreText: Phaser.Text;
-	var score;
-
 	let lives: Phaser.Group;
 	var hud;
 
@@ -58,7 +55,7 @@ window.onload = function ()
         background.scale.setTo(0.7, 0.7);
 
 		//createWalls();
-		player = new Player(300, 350, game);
+		player = new Player(2000, 2000, game);
 		game.add.existing(player);
 
         game.world.setBounds(0, 0, 9600, 6656);
@@ -82,12 +79,6 @@ window.onload = function ()
 			hud.add(new Phaser.Sprite(game, 0, 0, 'heart'));
 			hud.children[i].position.set((hud.children[i].width * i) + (hud.children[i].width / 2), hud.children[i].height / 2);
 		}
-
-        var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
-        scoreText = game.add.text(game.camera.width - 150, 5, '0', style);
-        scoreText.setTextBounds(0, 0, 100, 100);
-        scoreText.fixedToCamera = true;
-		score = 0;
 	}
 
 	function update()
@@ -127,7 +118,6 @@ window.onload = function ()
             game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies, saberHitEnemy, null, this);
         }
 
-		scoreText.text = score;
 		render();
 	}
 
@@ -164,7 +154,6 @@ window.onload = function ()
 	function saberHitEnemy(saber, enemy: Enemy) // -----------------------------------------------------Enemy code
 	{
 		enemy.kill();
-		score += 50;
 	}
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
@@ -221,7 +210,6 @@ window.onload = function ()
 	{
 		bullet.kill();
 		enemy.kill();
-		score += 50;
 	}
 
 	function createEnemies()
@@ -324,7 +312,6 @@ window.onload = function ()
 
 		if (player.lives < 1)
 		{
-			score = "Game Over";
 			player.kill();
 		}
 	}

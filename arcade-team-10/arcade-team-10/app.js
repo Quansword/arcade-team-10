@@ -27,8 +27,6 @@ window.onload = function () {
     var gate3;
     var gate4;
     var background;
-    var scoreText;
-    var score;
     var lives;
     var hud;
     function preload() {
@@ -48,7 +46,7 @@ window.onload = function () {
         background = game.add.sprite(0, 0, 'background');
         background.scale.setTo(0.7, 0.7);
         //createWalls();
-        player = new Player(300, 350, game);
+        player = new Player(2000, 2000, game);
         game.add.existing(player);
         game.world.setBounds(0, 0, 9600, 6656);
         game.camera.follow(player);
@@ -66,11 +64,6 @@ window.onload = function () {
             hud.add(new Phaser.Sprite(game, 0, 0, 'heart'));
             hud.children[i].position.set((hud.children[i].width * i) + (hud.children[i].width / 2), hud.children[i].height / 2);
         }
-        var style = { font: "bold 64px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
-        scoreText = game.add.text(game.camera.width - 150, 5, '0', style);
-        scoreText.setTextBounds(0, 0, 100, 100);
-        scoreText.fixedToCamera = true;
-        score = 0;
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -95,7 +88,6 @@ window.onload = function () {
         for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
             game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies, saberHitEnemy, null, this);
         }
-        scoreText.text = score;
         render();
     }
     function render() {
@@ -120,7 +112,6 @@ window.onload = function () {
     }
     function saberHitEnemy(saber, enemy) {
         enemy.kill();
-        score += 50;
     }
     function bulletHitPlayer(player, bullet) {
         bullet.kill();
@@ -159,7 +150,6 @@ window.onload = function () {
     function bulletHitEnemy(enemy, bullet) {
         bullet.kill();
         enemy.kill();
-        score += 50;
     }
     function createEnemies() {
         var enemy1 = new Enemy(300, 550, game, 2, player);
@@ -235,7 +225,6 @@ window.onload = function () {
             player.reset(300, 300, 1);
         }
         if (player.lives < 1) {
-            score = "Game Over";
             player.kill();
         }
     }
