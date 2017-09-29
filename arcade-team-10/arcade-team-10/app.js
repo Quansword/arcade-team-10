@@ -46,13 +46,12 @@ window.onload = function () {
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
         background = game.add.sprite(0, 0, 'background');
-        background.scale.setTo(0.5, 0.5);
-        createWalls();
+        background.scale.setTo(0.7, 0.7);
+        //createWalls();
         player = new Player(300, 350, game);
         game.add.existing(player);
         game.world.setBounds(0, 0, 9600, 6656);
         game.camera.follow(player);
-        game.camera.scale.setTo(1.15, 1.15);
         enemies = game.add.group();
         enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
@@ -794,15 +793,12 @@ var Enemy = (function (_super) {
             if (this.aim) {
                 if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight))) {
                     if (this.eMoveUp) {
-                        this.weapon.trackOffset.y = -this.height / 2;
                         this.weapon.fireAngle = 270;
                     }
                     else {
-                        this.weapon.trackOffset.y = this.height / 2;
                         this.weapon.fireAngle = 90;
                     }
                     if (this.eMoveLeft) {
-                        this.weapon.trackOffset.x = -this.width / 2;
                         if (this.weapon.fireAngle > 180) {
                             this.weapon.fireAngle -= 45;
                         }
@@ -811,7 +807,6 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        this.weapon.trackOffset.x = this.width / 2;
                         if (this.weapon.fireAngle > 180) {
                             this.weapon.fireAngle += 45;
                         }
@@ -822,11 +817,9 @@ var Enemy = (function (_super) {
                 }
                 else {
                     if (this.eMoveUp) {
-                        this.weapon.trackOffset.y -= this.height / 2;
                         this.weapon.fireAngle = 270;
                     }
                     if (this.eMoveDown) {
-                        this.weapon.trackOffset.y += this.height / 2;
                         if (this.weapon.fireAngle == 270) {
                             this.weapon.fireAngle = 0;
                         }
@@ -835,11 +828,9 @@ var Enemy = (function (_super) {
                         }
                     }
                     if (this.eMoveLeft) {
-                        this.weapon.trackOffset.x -= this.width / 2;
                         this.weapon.fireAngle = 180;
                     }
                     if (this.eMoveRight) {
-                        this.weapon.trackOffset.x += this.width / 2;
                         this.weapon.fireAngle = 0;
                     }
                 }
