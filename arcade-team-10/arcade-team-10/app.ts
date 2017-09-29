@@ -461,25 +461,25 @@ class Player extends Phaser.Sprite
         this.saberHitBoxes = this.game.add.physicsGroup();
         this.addChild(this.saberHitBoxes);
 
-        this.rightSaber = this.game.add.sprite(5, 0, 'bleh');
+        this.rightSaber = this.game.add.sprite(10, 0, 'bleh');
         this.rightSaber.anchor.setTo(0.5, 0.5);
-        this.rightSaber.scale.setTo(0.8, 1.25);
+        this.rightSaber.scale.setTo(1, 1.4);
         this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.rightSaber);
         this.rightSaber.name = "rightSaber";
         this.disableHitbox("rightSaber");
 
-        this.leftSaber = this.game.add.sprite(-35, 0, 'bleh');
+        this.leftSaber = this.game.add.sprite(-45, 0, 'bleh');
         this.leftSaber.anchor.setTo(0.5, 0.5);
-        this.leftSaber.scale.setTo(0.8, 1.25);
+        this.leftSaber.scale.setTo(1, 1.4);
         this.game.physics.enable(this.leftSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.leftSaber);
         this.leftSaber.name = "leftSaber";
         this.disableHitbox("leftSaber");
 
-        this.topSaber = this.game.add.sprite(-20, -30, 'bleh');
+        this.topSaber = this.game.add.sprite(-18, -13, 'bleh');
         this.topSaber.anchor.setTo(0.5, 0.5);
-        this.topSaber.scale.setTo(1.25, 0.8);
+        this.topSaber.scale.setTo(1.75, 0.8);
         this.game.physics.enable(this.topSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.topSaber);
         this.topSaber.name = "topSaber";
@@ -487,7 +487,7 @@ class Player extends Phaser.Sprite
 
         this.topRightSaber = this.game.add.sprite(5, -30, 'bleh');
         this.topRightSaber.anchor.setTo(0.5, 0.5);
-        this.topRightSaber.scale.setTo(1.25, 0.8);
+        this.topRightSaber.scale.setTo(1.2, 0.8);
         this.game.physics.enable(this.topRightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.topRightSaber);
         this.topRightSaber.name = "topRightSaber";
@@ -501,9 +501,9 @@ class Player extends Phaser.Sprite
         this.topLeftSaber.name = "topLeftSaber";
         this.disableHitbox("topLeftSaber");
 
-        this.bottomSaber = this.game.add.sprite(-20, 30, 'bleh');
+        this.bottomSaber = this.game.add.sprite(-18, 33, 'bleh');
         this.bottomSaber.anchor.setTo(0.5, 0.5);
-        this.bottomSaber.scale.setTo(1.25, 0.8);
+        this.bottomSaber.scale.setTo(1.75, 0.8);
         this.game.physics.enable(this.bottomSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.bottomSaber);
         this.bottomSaber.name = "bottomSaber";
@@ -568,27 +568,27 @@ class Player extends Phaser.Sprite
     {
         if (name == "rightSaber")
         {
-            this.rightSaber.reset(5, 0);
+            this.rightSaber.reset(10, 0);
         }
         else if (name == "leftSaber")
         {
-            this.leftSaber.reset(-35, 0);
+            this.leftSaber.reset(-45, 0);
         }
         else if (name == "topSaber")
         {
-            this.topSaber.reset(-20, -30);
+            this.topSaber.reset(-18, -13);
         }
         else if (name == "topRightSaber")
         {
-            this.topSaber.reset(5, -30);
+            this.topRightSaber.reset(5, -30);
         }
         else if (name == "topLeftSaber")
         {
-            this.topSaber.reset(-35, -30);
+            this.topLeftSaber.reset(-35, -30);
         }
         else if (name == "bottomSaber")
         {
-            this.bottomSaber.reset(-20, 30);
+            this.bottomSaber.reset(-18, 33);
         }
         else if (name == "bottomRightSaber")
         {
