@@ -223,6 +223,7 @@ window.onload = function ()
 		enemyBullets.add(enemy2.weapon.bullets);
 
 		var enemy3 = new Enemy(1000, 200, game, 2, player);
+			score = "Game Over";
 		enemies.add(enemy3);
 		enemyBullets.add(enemy3.weapon.bullets);
 	}
