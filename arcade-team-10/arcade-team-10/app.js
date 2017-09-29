@@ -45,10 +45,10 @@ window.onload = function () {
         game.physics.startSystem(Phaser.Physics.ARCADE);
         background = game.add.sprite(0, 0, 'background');
         background.scale.setTo(0.7, 0.7);
-        //createWalls();
-        player = new Player(2000, 2000, game);
+        createWalls();
+        player = new Player(2050, 1200, game);
         game.add.existing(player);
-        game.world.setBounds(0, 0, 9600, 6656);
+        game.world.setBounds(0, 0, 9600 * 0.7, 4864 * 0.7);
         game.camera.follow(player);
         enemies = game.add.group();
         enemies.enableBody = true;
@@ -152,32 +152,26 @@ window.onload = function () {
         enemy.kill();
     }
     function createEnemies() {
-        var enemy1 = new Enemy(300, 550, game, 2, player);
+        var enemy1 = new Enemy(2000, 900, game, 2, player);
         enemies.add(enemy1);
         enemyBullets.add(enemy1.weapon.bullets);
-        var enemy2 = new Enemy(1000, 500, game, 2, player);
+        var enemy2 = new Enemy(2000, 800, game, 2, player);
         enemies.add(enemy2);
         enemyBullets.add(enemy2.weapon.bullets);
-        var enemy3 = new Enemy(1000, 200, game, 2, player);
+        var enemy3 = new Enemy(2000, 700, game, 2, player);
         enemies.add(enemy3);
         enemyBullets.add(enemy3.weapon.bullets);
     }
     function createWalls() {
         walls = game.add.physicsGroup();
-        var wall1 = new Barrier(145, 35, 400, 10, game, walls, 'wall');
-        var wall2 = new Barrier(735, 35, 400, 10, game, walls, 'wall');
-        var wall3 = new Barrier(735, 650, 400, 10, game, walls, 'wall');
-        var wall4 = new Barrier(145, 650, 400, 10, game, walls, 'wall');
-        var wall5 = new Barrier(145, 240, 220, 10, game, walls, 'wall');
-        var wall6 = new Barrier(735, 240, 400, 10, game, walls, 'wall');
-        var wall7 = new Barrier(145, 450, 220, 10, game, walls, 'wall');
-        var wall8 = new Barrier(145, 35, 10, 200, game, walls, 'wall');
-        var wall9 = new Barrier(145, 450, 10, 200, game, walls, 'wall');
-        var wall10 = new Barrier(735, 450, 10, 200, game, walls, 'wall');
-        var wall11 = new Barrier(1120, 450, 10, 200, game, walls, 'wall');
-        var wall12 = new Barrier(1120, 35, 10, 200, game, walls, 'wall');
-        var wall13 = new Barrier(530, 250, 10, 200, game, walls, 'wall');
-        var wall14 = new Barrier(530, 440, 220, 10, game, walls, 'wall');
+        //Spawn Room walls
+        var wall1 = new Barrier(760, 930, 1170, 10, game, walls, 'wall');
+        var wall2 = new Barrier(2100, 930, 1170, 10, game, walls, 'wall');
+        var wall3 = new Barrier(2377, 1200, 896, 10, game, walls, 'wall');
+        var wall4 = new Barrier(1660, 1570, 710, 10, game, walls, 'wall');
+        var wall5 = new Barrier(1650, 930, 10, 670, game, walls, 'wall');
+        var wall6 = new Barrier(2375, 930, 10, 280, game, walls, 'wall');
+        var wall7 = new Barrier(2380, 1380, 10, 250, game, walls, 'wall');
         walls.enableBody = true;
     }
     function createGates() {
