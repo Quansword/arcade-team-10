@@ -35,7 +35,7 @@ window.onload = function () {
         game.stage.backgroundColor = '#eee';
         game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
         game.load.image('testBullet', 'assets/temp.png');
-        game.load.image('background', 'assets/Maze1.png');
+        game.load.image('background', 'assets/Level1.png');
         game.load.image('wall', 'assets/wall.png');
         game.load.image('life', 'assets/life.png');
         game.load.image('gate', 'assets/gate.png');
@@ -46,12 +46,13 @@ window.onload = function () {
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
         background = game.add.sprite(0, 0, 'background');
-        background.scale.setTo(4, 3);
+        background.scale.setTo(0.5, 0.5);
         createWalls();
         player = new Player(300, 350, game);
         game.add.existing(player);
-        game.world.setBounds(0, 0, 1920, 1920);
+        game.world.setBounds(0, 0, 9600, 6656);
         game.camera.follow(player);
+        game.camera.scale.setTo(1.15, 1.15);
         enemies = game.add.group();
         enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
@@ -301,6 +302,7 @@ var Player = (function (_super) {
         this.smoothed = false;
         this.exists = true;
         this.anchor.setTo(0.5, 0.5);
+        this.scale.setTo(1.5, 1.5);
         this.game.physics.enable(this, Phaser.Physics.ARCADE);
         this.body.setSize(24, 42, 48, 48);
         this.body.collideWorldBounds = true;
