@@ -165,13 +165,19 @@ window.onload = function () {
     function createWalls() {
         walls = game.add.physicsGroup();
         //Spawn Room walls
-        var wall1 = new Barrier(760, 930, 1170, 10, game, walls, 'wall');
-        var wall2 = new Barrier(2100, 930, 1170, 10, game, walls, 'wall');
-        var wall3 = new Barrier(2377, 1200, 896, 10, game, walls, 'wall');
-        var wall4 = new Barrier(1660, 1570, 710, 10, game, walls, 'wall');
-        var wall5 = new Barrier(1650, 930, 10, 670, game, walls, 'wall');
-        var wall6 = new Barrier(2375, 930, 10, 280, game, walls, 'wall');
-        var wall7 = new Barrier(2380, 1380, 10, 250, game, walls, 'wall');
+        var wall1 = new Barrier(760, 810, 1170, 120, game, walls, 'wall');
+        var wall2 = new Barrier(2100, 810, 1170, 120, game, walls, 'wall');
+        var wall3 = new Barrier(2377, 1120, 896, 90, game, walls, 'wall');
+        var wall4 = new Barrier(1300, 1570, 1430, 120, game, walls, 'wall');
+        var wall5 = new Barrier(1300, 930, 350, 670, game, walls, 'wall');
+        var wall6 = new Barrier(2377, 930, 350, 280, game, walls, 'wall');
+        var wall7 = new Barrier(2380, 1380, 350, 250, game, walls, 'wall');
+        // Room abve spawn room
+        var wall8 = new Barrier(2100, 620, 47, 300, game, walls, 'wall');
+        var wall9 = new Barrier(1882, 540, 265, 80, game, walls, 'wall');
+        var wall10 = new Barrier(1300, 540, 360, 80, game, walls, 'wall');
+        var wall12 = new Barrier(1300, 540, 90, 300, game, walls, 'wall');
+        var wall15 = new Barrier(1882, 272, 45, 340, game, walls, 'wall');
         walls.enableBody = true;
     }
     function createGates() {
@@ -179,7 +185,7 @@ window.onload = function () {
         gate1 = new Barrier(540, 35, 200, 10, game, gates, 'gate');
         gate2 = new Barrier(540, 650, 200, 10, game, gates, 'gate');
         gate3 = new Barrier(145, 250, 10, 190, game, gates, 'gate');
-        gate4 = new Barrier(1120, 250, 10, 190, game, gates, 'gate');
+        gate4 = new Barrier(1120, 300, 10, 190, game, gates, 'gate');
         gates.enableBody = true;
     }
     function screenTransition(player, gate) {
@@ -242,7 +248,7 @@ var Barrier = (function (_super) {
         this.scale.setTo(width, height);
         game.physics.arcade.enable(this);
         this.body.immovable = true;
-        this.renderable = false;
+        this.renderable = true;
         group.add(this);
     }
     return Barrier;
@@ -319,7 +325,7 @@ var Player = (function (_super) {
         this.saberHitBoxes.addChild(this.leftSaber);
         this.leftSaber.name = "leftSaber";
         this.disableHitbox("leftSaber");
-        this.topSaber = this.game.add.sprite(-18, -13);
+        this.topSaber = this.game.add.sprite(-18, -23);
         this.topSaber.anchor.setTo(0.5, 0.5);
         this.topSaber.scale.setTo(1.75, 0.8);
         this.game.physics.enable(this.topSaber, Phaser.Physics.ARCADE);
@@ -401,7 +407,7 @@ var Player = (function (_super) {
             this.leftSaber.reset(-45, 0);
         }
         else if (name == "topSaber") {
-            this.topSaber.reset(-18, -13);
+            this.topSaber.reset(-18, -23);
         }
         else if (name == "topRightSaber") {
             this.topRightSaber.reset(0, -10);
