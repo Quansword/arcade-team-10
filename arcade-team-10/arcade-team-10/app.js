@@ -127,7 +127,7 @@ window.onload = function () {
     }
     function saberHitEnemy(saber, enemy) {
         enemy.kill();
-        dropHealth(enemy.x, enemy.y);
+        dropHealth(enemy.position.x, enemy.position.y);
     }
     function bulletHitPlayer(player, bullet) {
         bullet.kill();
@@ -172,7 +172,7 @@ window.onload = function () {
     function bulletHitEnemy(enemy, bullet) {
         bullet.kill();
         enemy.kill();
-        dropHealth(enemy.x, enemy.y);
+        dropHealth(enemy.position.x, enemy.position.y);
     }
     function createEnemies() {
         var enemy1 = new Enemy(2000, 900, game, 2, player);
@@ -260,8 +260,8 @@ window.onload = function () {
             for (var i = 0; i < 3; i++) {
                 if (healthDrops.children[i].alive == false) {
                     healthDrops.children[i].revive();
-                    healthDrops.children[i].x = x;
-                    healthDrops.children[i].y = y;
+                    healthDrops.children[i].position.x = x;
+                    healthDrops.children[i].position.y = y;
                     break;
                 }
             }
@@ -685,7 +685,9 @@ var Enemy = (function (_super) {
         _this.body.collideWorldBounds = true;
         _this.body.setSize(28, 49, 2, 2);
         _this.maxHealth = 1;
+        _this.eAim = false;
         _this.aim = false;
+        _this.linedUp = false;
         _this.eVelocityX = 0;
         _this.eVelocityY = 0;
         _this.fireTimer = _this.game.time.now + 3000;
@@ -693,6 +695,7 @@ var Enemy = (function (_super) {
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         _this.weapon.bulletSpeed = 200;
         _this.weapon.fireRate = 500;
+        _this.weapon.bulletAngleOffset = 90;
         if (_this.eType == _this.enemyTypeEnum.BASE) {
             _this.weapon.fireRate = 2000;
             _this.eSpeed = 50;
@@ -713,33 +716,129 @@ var Enemy = (function (_super) {
         game.add.existing(_this);
         return _this;
     }
-    Enemy.prototype.ePathfinding = function () {
+    Enemy.prototype.ePathfinding = function (time) {
+        this.eMoveUp = false;
+        this.eMoveRight = false;
+        this.eMoveLeft = false;
+        this.eMoveDown = false;
         if (this.alive) {
             //if (this.eType = this.enemyTypeEnum.BASE)
             //{
-            if (this.position.x < this.player.position.x - 10) {
-                this.eMoveLeft = false;
-                this.eMoveRight = true;
-            }
-            else if (this.position.x > this.player.position.x + 10) {
-                this.eMoveLeft = true;
-                this.eMoveRight = false;
+            if (time < 1000) {
+                if (this.position.x <= this.player.position.x) {
+                    if (this.position.x < this.player.position.x - 150) {
+                        this.eMoveLeft = false;
+                        this.eMoveRight = true;
+                    }
+                    else if (this.position.x > this.player.position.x - 100) {
+                        this.eMoveLeft = true;
+                        this.eMoveRight = false;
+                    }
+                    else {
+                        this.eMoveLeft = false;
+                        this.eMoveRight = true;
+                    }
+                }
+                else {
+                    if (this.position.x > this.player.position.x + 150) {
+                        this.eMoveLeft = true;
+                        this.eMoveRight = false;
+                    }
+                    else if (this.position.x < this.player.position.x + 100) {
+                        this.eMoveLeft = false;
+                        this.eMoveRight = true;
+                    }
+                    else {
+                        this.eMoveLeft = true;
+                        this.eMoveRight = false;
+                    }
+                }
+                if (this.position.y <= this.player.position.y) {
+                    if (this.position.y < this.player.position.y - 150) {
+                        this.eMoveUp = false;
+                        this.eMoveDown = true;
+                    }
+                    else if (this.position.y > this.player.position.y - 100) {
+                        this.eMoveUp = true;
+                        this.eMoveDown = false;
+                    }
+                    else {
+                        this.eMoveUp = false;
+                        this.eMoveDown = true;
+                    }
+                }
+                else {
+                    if (this.position.y > this.player.position.y + 150) {
+                        this.eMoveUp = true;
+                        this.eMoveDown = false;
+                    }
+                    else if (this.position.y < this.player.position.y + 100) {
+                        this.eMoveUp = false;
+                        this.eMoveDown = true;
+                    }
+                    else {
+                        this.eMoveUp = true;
+                        this.eMoveDown = false;
+                    }
+                }
             }
             else {
-                this.eMoveLeft = false;
-                this.eMoveRight = false;
-            }
-            if (this.position.y < this.player.position.y - 10) {
-                this.eMoveUp = false;
-                this.eMoveDown = true;
-            }
-            else if (this.position.y > this.player.position.y + 10) {
-                this.eMoveUp = true;
-                this.eMoveDown = false;
-            }
-            else {
-                this.eMoveUp = false;
-                this.eMoveDown = false;
+                if (this.position.x <= this.player.position.x) {
+                    if (this.position.x < this.player.position.x - 300) {
+                        this.eMoveLeft = false;
+                        this.eMoveRight = true;
+                    }
+                    else if (this.position.x > this.player.position.x - 200) {
+                        this.eMoveLeft = true;
+                        this.eMoveRight = false;
+                    }
+                    else {
+                        this.eMoveLeft = false;
+                        this.eMoveRight = true;
+                    }
+                }
+                else {
+                    if (this.position.x > this.player.position.x + 300) {
+                        this.eMoveLeft = true;
+                        this.eMoveRight = false;
+                    }
+                    else if (this.position.x < this.player.position.x + 200) {
+                        this.eMoveLeft = false;
+                        this.eMoveRight = true;
+                    }
+                    else {
+                        this.eMoveLeft = true;
+                        this.eMoveRight = false;
+                    }
+                }
+                if (this.position.y <= this.player.position.y) {
+                    if (this.position.y < this.player.position.y - 300) {
+                        this.eMoveUp = false;
+                        this.eMoveDown = true;
+                    }
+                    else if (this.position.y > this.player.position.y - 200) {
+                        this.eMoveUp = true;
+                        this.eMoveDown = false;
+                    }
+                    else {
+                        this.eMoveUp = false;
+                        this.eMoveDown = true;
+                    }
+                }
+                else {
+                    if (this.position.y > this.player.position.y + 300) {
+                        this.eMoveUp = true;
+                        this.eMoveDown = false;
+                    }
+                    else if (this.position.y < this.player.position.y + 200) {
+                        this.eMoveUp = false;
+                        this.eMoveDown = true;
+                    }
+                    else {
+                        this.eMoveUp = true;
+                        this.eMoveDown = false;
+                    }
+                }
             }
             //else if (this.eType == this.enemyTypeEnum.RAPID)
             //{
@@ -777,7 +876,7 @@ var Enemy = (function (_super) {
             }
             this.weapon.trackSprite(this, 0, 0);
             this.weapon.fireAngle = 0;
-            this.ePathfinding();
+            this.ePathfinding(this.fireTimer - this.game.time.now);
             if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight))) {
                 if (this.eMoveUp) {
                     this.eVelocityY -= Math.sqrt(Math.pow(this.eSpeed, 2) / 2);
@@ -807,50 +906,9 @@ var Enemy = (function (_super) {
                 }
             }
             if (this.aim) {
-                if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight))) {
-                    if (this.eMoveUp) {
-                        this.weapon.fireAngle = 270;
-                    }
-                    else {
-                        this.weapon.fireAngle = 90;
-                    }
-                    if (this.eMoveLeft) {
-                        if (this.weapon.fireAngle > 180) {
-                            this.weapon.fireAngle -= 45;
-                        }
-                        else {
-                            this.weapon.fireAngle += 45;
-                        }
-                    }
-                    else {
-                        if (this.weapon.fireAngle > 180) {
-                            this.weapon.fireAngle += 45;
-                        }
-                        else {
-                            this.weapon.fireAngle -= 45;
-                        }
-                    }
-                }
-                else {
-                    if (this.eMoveUp) {
-                        this.weapon.fireAngle = 270;
-                    }
-                    if (this.eMoveDown) {
-                        if (this.weapon.fireAngle == 270) {
-                            this.weapon.fireAngle = 0;
-                        }
-                        else {
-                            this.weapon.fireAngle = 90;
-                        }
-                    }
-                    if (this.eMoveLeft) {
-                        this.weapon.fireAngle = 180;
-                    }
-                    if (this.eMoveRight) {
-                        this.weapon.fireAngle = 0;
-                    }
-                }
-                this.weapon.bulletAngleOffset = 90;
+                var fireDegree = this.game.physics.arcade.angleBetween(this, this.player);
+                fireDegree = fireDegree * 57.2958;
+                this.weapon.fireAngle = fireDegree;
                 if (this.eType = this.enemyTypeEnum.SHOTGUN) {
                     this.weapon.fire();
                     this.weapon.fireAngle -= 30;

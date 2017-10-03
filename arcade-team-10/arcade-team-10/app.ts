@@ -166,7 +166,7 @@ window.onload = function ()
 	function saberHitEnemy(saber, enemy: Enemy) // -----------------------------------------------------Enemy code
 	{
 		enemy.kill();
-		dropHealth(enemy.x, enemy.y);
+		dropHealth(enemy.position.x, enemy.position.y);
 	}
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
@@ -232,7 +232,7 @@ window.onload = function ()
 	{
 		bullet.kill();
 		enemy.kill();
-		dropHealth(enemy.x, enemy.y);
+		dropHealth(enemy.position.x, enemy.position.y);
 	}
 
 	function createEnemies()
@@ -355,8 +355,8 @@ window.onload = function ()
 				if (healthDrops.children[i].alive == false)
 				{
 					healthDrops.children[i].revive();
-					healthDrops.children[i].x = x;
-					healthDrops.children[i].y = y;
+					healthDrops.children[i].position.x = x;
+					healthDrops.children[i].position.y = y;
 					break;
 				}
 			}
@@ -896,7 +896,6 @@ class Player extends Phaser.Sprite
 class Enemy extends Phaser.Sprite // -----------------------------------------------------Enemy code
 {
 	eType: number;
-	aim: boolean;
 	eVelocityX: number;
 	eVelocityY: number;
 	eSpeed: number;
@@ -908,6 +907,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	eMoveLeft: boolean;
 	eMoveRight: boolean;
 	eAim: boolean;
+	aim: boolean;
+	linedUp: boolean;
 
 	fireTimer: number;
 	dead: boolean;
@@ -948,7 +949,10 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.body.setSize(28, 49, 2, 2);
 		this.maxHealth = 1;
 
+		this.eAim = false;
 		this.aim = false;
+		this.linedUp = false;
+
 		this.eVelocityX = 0;
 		this.eVelocityY = 0;
 
@@ -958,6 +962,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 200;
 		this.weapon.fireRate = 500;
+		this.weapon.bulletAngleOffset = 90;
 
 		if (this.eType == this.enemyTypeEnum.BASE)
 		{
@@ -984,43 +989,169 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		game.add.existing(this);
 	}
 
-	ePathfinding()
+	ePathfinding(time: number)
 	{
+		this.eMoveUp = false;
+		this.eMoveRight = false;
+		this.eMoveLeft = false;
+		this.eMoveDown = false;
+
 		if (this.alive)
 		{
 			//if (this.eType = this.enemyTypeEnum.BASE)
 			//{
-				if (this.position.x < this.player.position.x - 10)
+			if (time < 1000)
+			{
+				if (this.position.x <= this.player.position.x)
 				{
-					this.eMoveLeft = false;
-					this.eMoveRight = true;
-				}
-				else if (this.position.x > this.player.position.x + 10)
-				{
-					this.eMoveLeft = true;
-					this.eMoveRight = false;
+					if (this.position.x < this.player.position.x - 150)
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
+					else if (this.position.x > this.player.position.x - 100)
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
+					else
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
 				}
 				else
 				{
-					this.eMoveLeft = false;
-					this.eMoveRight = false;
+					if (this.position.x > this.player.position.x + 150)
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
+					else if (this.position.x < this.player.position.x + 100)
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
+					else
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
 				}
 
-				if (this.position.y < this.player.position.y - 10)
+				if (this.position.y <= this.player.position.y)
 				{
-					this.eMoveUp = false;
-					this.eMoveDown = true;
-				}
-				else if (this.position.y > this.player.position.y + 10)
-				{
-					this.eMoveUp = true;
-					this.eMoveDown = false;
+					if (this.position.y < this.player.position.y - 150)
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
+					else if (this.position.y > this.player.position.y - 100)
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
+					else
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
 				}
 				else
 				{
-					this.eMoveUp = false;
-					this.eMoveDown = false;
+					if (this.position.y > this.player.position.y + 150)
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
+					else if (this.position.y < this.player.position.y + 100)
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
+					else
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
 				}
+			}
+			else
+			{
+				if (this.position.x <= this.player.position.x)
+				{
+					if (this.position.x < this.player.position.x - 300)
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
+					else if (this.position.x > this.player.position.x - 200)
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
+					else
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
+				}
+				else
+				{
+					if (this.position.x > this.player.position.x + 300)
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
+					else if (this.position.x < this.player.position.x + 200)
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
+					else
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
+				}
+
+				if (this.position.y <= this.player.position.y)
+				{
+					if (this.position.y < this.player.position.y - 300)
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
+					else if (this.position.y > this.player.position.y - 200)
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
+					else
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
+				}
+				else
+				{
+					if (this.position.y > this.player.position.y + 300)
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
+					else if (this.position.y < this.player.position.y + 200)
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
+					else
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
+				}
+			}
 				//else if (this.eType == this.enemyTypeEnum.RAPID)
 				//{
 
@@ -1073,7 +1204,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 			this.weapon.trackSprite(this, 0, 0);
 			this.weapon.fireAngle = 0;
 
-			this.ePathfinding();
+			this.ePathfinding(this.fireTimer - this.game.time.now);
 
 			if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight)))
 			{
@@ -1118,68 +1249,9 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 			if (this.aim)
 			{
-				if ((this.eMoveUp || this.eMoveDown) && (this.eMoveLeft || this.eMoveRight) && !((this.eMoveUp && this.eMoveDown) || (this.eMoveLeft && this.eMoveRight)))
-				{
-					if (this.eMoveUp)
-					{
-						this.weapon.fireAngle = 270;
-					}
-					else
-					{
-						this.weapon.fireAngle = 90;
-					}
-
-					if (this.eMoveLeft)
-					{
-						if (this.weapon.fireAngle > 180)
-						{
-							this.weapon.fireAngle -= 45;
-						}
-						else
-						{
-							this.weapon.fireAngle += 45;
-						}
-					}
-					else
-					{
-						if (this.weapon.fireAngle > 180)
-						{
-							this.weapon.fireAngle += 45;
-						}
-						else
-						{
-							this.weapon.fireAngle -= 45;
-						}
-					}
-				}
-				else
-				{
-					if (this.eMoveUp)
-					{
-						this.weapon.fireAngle = 270;
-					}
-					if (this.eMoveDown)
-					{
-						if (this.weapon.fireAngle == 270)
-						{
-							this.weapon.fireAngle = 0;
-						}
-						else
-						{
-							this.weapon.fireAngle = 90;
-						}
-					}
-
-					if (this.eMoveLeft)
-					{
-						this.weapon.fireAngle = 180;
-					}
-					if (this.eMoveRight)
-					{
-						this.weapon.fireAngle = 0;
-					}
-				}
-				this.weapon.bulletAngleOffset = 90;
+				var fireDegree = this.game.physics.arcade.angleBetween(this, this.player);
+				fireDegree = fireDegree * 57.2958;
+				this.weapon.fireAngle = fireDegree;
 
 				if (this.eType = this.enemyTypeEnum.SHOTGUN)
 				{
