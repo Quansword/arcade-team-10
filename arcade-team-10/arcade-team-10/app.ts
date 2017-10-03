@@ -428,7 +428,7 @@ class Player extends Phaser.Sprite
     topLeftSaber: Phaser.Sprite;
     bottomSaber: Phaser.Sprite;
     bottomRightSaber: Phaser.Sprite;
-    bottomLeftSaber: Phaser.Sprite;
+	bottomLeftSaber: Phaser.Sprite;
 
 	pDirEnum =
 	{
@@ -480,6 +480,7 @@ class Player extends Phaser.Sprite
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 200;
 		this.weapon.autofire = false;
+		this.weapon.bulletAngleOffset = 90;
 
 		this.lives = 1;
 
@@ -647,26 +648,43 @@ class Player extends Phaser.Sprite
 			}
 
 			this.weapon.trackSprite(this, 0, 0);
-			this.weapon.fireAngle = 0;
 
 			if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
 			{
 				if (keyState.isDown(Phaser.KeyCode.W))
 				{
 					this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+					this.weapon.fireAngle = 270;
 				}
 				else
 				{
 					this.pVelocityY += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+					this.weapon.fireAngle = 90;
 				}
 
 				if (keyState.isDown(Phaser.KeyCode.A))
 				{
 					this.pVelocityX -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+					if (this.weapon.fireAngle > 180)
+					{
+						this.weapon.fireAngle -= 45;
+					}
+					else
+					{
+						this.weapon.fireAngle += 45;
+					}
 				}
 				else
 				{
 					this.pVelocityX += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+					if (this.weapon.fireAngle > 180)
+					{
+						this.weapon.fireAngle += 45;
+					}
+					else
+					{
+						this.weapon.fireAngle -= 45;
+					}
 				}
 			}
 			else
@@ -674,85 +692,31 @@ class Player extends Phaser.Sprite
 				if (keyState.isDown(Phaser.KeyCode.W))
 				{
 					this.pVelocityY -= this.pSpeed;
+					this.weapon.fireAngle = 270;
 				}
 				if (keyState.isDown(Phaser.KeyCode.S))
 				{
 					this.pVelocityY += this.pSpeed;
-				}
-
-				if (keyState.isDown(Phaser.KeyCode.A))
-				{
-					this.pVelocityX -= this.pSpeed;
-				}
-				if (keyState.isDown(Phaser.KeyCode.D))
-				{
-					this.pVelocityX += this.pSpeed;
-				}
-			}
-			if (this.aim)
-			{
-				if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
-				{
-					if (keyState.isDown(Phaser.KeyCode.W))
+					if (this.weapon.fireAngle == 270)
 					{
-						this.weapon.fireAngle = 270;
+						this.weapon.fireAngle = 0;
 					}
 					else
 					{
 						this.weapon.fireAngle = 90;
 					}
-
-					if (keyState.isDown(Phaser.KeyCode.A))
-					{
-						if (this.weapon.fireAngle > 180)
-						{
-							this.weapon.fireAngle -= 45;
-						}
-						else
-						{
-							this.weapon.fireAngle += 45;
-						}
-					}
-					else
-					{
-						if (this.weapon.fireAngle > 180)
-						{
-							this.weapon.fireAngle += 45;
-						}
-						else
-						{
-							this.weapon.fireAngle -= 45;
-						}
-					}
 				}
-				else
+
+				if (keyState.isDown(Phaser.KeyCode.A))
 				{
-					if (keyState.isDown(Phaser.KeyCode.W))
-					{
-						this.weapon.fireAngle = 270;
-					}
-					if (keyState.isDown(Phaser.KeyCode.S))
-					{
-						if (this.weapon.fireAngle == 270)
-						{
-							this.weapon.fireAngle = 0;
-						}
-						else
-						{
-							this.weapon.fireAngle = 90;
-						}
-					}
-
-					if (keyState.isDown(Phaser.KeyCode.A))
-					{
-						this.weapon.fireAngle = 180;
-					}
-					if (keyState.isDown(Phaser.KeyCode.D))
-					{
-						this.weapon.fireAngle = 0;
-					}
+					this.pVelocityX -= this.pSpeed;
+					this.weapon.fireAngle = 180;
 				}
-				this.weapon.bulletAngleOffset = 90;
+				if (keyState.isDown(Phaser.KeyCode.D))
+				{
+					this.pVelocityX += this.pSpeed;
+					this.weapon.fireAngle = 0;
+				}
 			}
 
 			// ----------------------------------------------------- Determining new direction
@@ -808,7 +772,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('dAttack');
 						this.attacked = true;
-                        this.enableHitbox("bottomSaber");
+						this.enableHitbox("bottomSaber");
 					}
 				}
 				else if (this.weapon.fireAngle == 45)
@@ -818,7 +782,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('drAttack');
 						this.attacked = true;
-                        this.enableHitbox("bottomRightSaber");
+						this.enableHitbox("bottomRightSaber");
 					}
 				}
 				else if (this.weapon.fireAngle == 135)
@@ -828,7 +792,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('dlAttack');
 						this.attacked = true;
-                        this.enableHitbox("bottomLeftSaber");
+						this.enableHitbox("bottomLeftSaber");
 					}
 				}
 				else if (this.weapon.fireAngle == 0)
@@ -848,7 +812,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('lAttack');
 						this.attacked = true;
-                        this.enableHitbox("leftSaber");
+						this.enableHitbox("leftSaber");
 					}
 				}
 				else if (this.weapon.fireAngle == 270)
@@ -858,7 +822,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('uAttack');
 						this.attacked = true;
-                        this.enableHitbox("topSaber");
+						this.enableHitbox("topSaber");
 					}
 				}
 				else if (this.weapon.fireAngle == 225)
@@ -868,7 +832,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('ulAttack');
 						this.attacked = true;
-                        this.enableHitbox("topLeftSaber");
+						this.enableHitbox("topLeftSaber");
 					}
 				}
 				else if (this.weapon.fireAngle == 315)
@@ -878,7 +842,7 @@ class Player extends Phaser.Sprite
 					{
 						this.animations.play('urAttack');
 						this.attacked = true;
-                        this.enableHitbox("topRightSaber");
+						this.enableHitbox("topRightSaber");
 					}
 				}
 			}
@@ -977,6 +941,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.smoothed = false;
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
+		this.scale.setTo(1.5, 1.5);
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
 		this.body.collideWorldBounds = true;

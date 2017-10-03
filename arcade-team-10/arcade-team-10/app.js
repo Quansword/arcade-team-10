@@ -342,6 +342,7 @@ var Player = (function (_super) {
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
         _this.weapon.bulletSpeed = 200;
         _this.weapon.autofire = false;
+        _this.weapon.bulletAngleOffset = 90;
         _this.lives = 1;
         _this.createSaberHitBoxes();
         return _this;
@@ -471,80 +472,56 @@ var Player = (function (_super) {
                 this.aim = true;
             }
             this.weapon.trackSprite(this, 0, 0);
-            this.weapon.fireAngle = 0;
             if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
                 if (keyState.isDown(Phaser.KeyCode.W)) {
                     this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+                    this.weapon.fireAngle = 270;
                 }
                 else {
                     this.pVelocityY += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+                    this.weapon.fireAngle = 90;
                 }
                 if (keyState.isDown(Phaser.KeyCode.A)) {
                     this.pVelocityX -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+                    if (this.weapon.fireAngle > 180) {
+                        this.weapon.fireAngle -= 45;
+                    }
+                    else {
+                        this.weapon.fireAngle += 45;
+                    }
                 }
                 else {
                     this.pVelocityX += Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
+                    if (this.weapon.fireAngle > 180) {
+                        this.weapon.fireAngle += 45;
+                    }
+                    else {
+                        this.weapon.fireAngle -= 45;
+                    }
                 }
             }
             else {
                 if (keyState.isDown(Phaser.KeyCode.W)) {
                     this.pVelocityY -= this.pSpeed;
+                    this.weapon.fireAngle = 270;
                 }
                 if (keyState.isDown(Phaser.KeyCode.S)) {
                     this.pVelocityY += this.pSpeed;
-                }
-                if (keyState.isDown(Phaser.KeyCode.A)) {
-                    this.pVelocityX -= this.pSpeed;
-                }
-                if (keyState.isDown(Phaser.KeyCode.D)) {
-                    this.pVelocityX += this.pSpeed;
-                }
-            }
-            if (this.aim) {
-                if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D)))) {
-                    if (keyState.isDown(Phaser.KeyCode.W)) {
-                        this.weapon.fireAngle = 270;
+                    if (this.weapon.fireAngle == 270) {
+                        this.weapon.fireAngle = 0;
                     }
                     else {
                         this.weapon.fireAngle = 90;
                     }
-                    if (keyState.isDown(Phaser.KeyCode.A)) {
-                        if (this.weapon.fireAngle > 180) {
-                            this.weapon.fireAngle -= 45;
-                        }
-                        else {
-                            this.weapon.fireAngle += 45;
-                        }
-                    }
-                    else {
-                        if (this.weapon.fireAngle > 180) {
-                            this.weapon.fireAngle += 45;
-                        }
-                        else {
-                            this.weapon.fireAngle -= 45;
-                        }
-                    }
                 }
-                else {
-                    if (keyState.isDown(Phaser.KeyCode.W)) {
-                        this.weapon.fireAngle = 270;
-                    }
-                    if (keyState.isDown(Phaser.KeyCode.S)) {
-                        if (this.weapon.fireAngle == 270) {
-                            this.weapon.fireAngle = 0;
-                        }
-                        else {
-                            this.weapon.fireAngle = 90;
-                        }
-                    }
-                    if (keyState.isDown(Phaser.KeyCode.A)) {
-                        this.weapon.fireAngle = 180;
-                    }
-                    if (keyState.isDown(Phaser.KeyCode.D)) {
-                        this.weapon.fireAngle = 0;
-                    }
+                if (keyState.isDown(Phaser.KeyCode.A)) {
+                    this.pVelocityX -= this.pSpeed;
+                    this.weapon.fireAngle = 180;
                 }
-                this.weapon.bulletAngleOffset = 90;
+                if (keyState.isDown(Phaser.KeyCode.D)) {
+                    this.pVelocityX += this.pSpeed;
+                    this.weapon.fireAngle = 0;
+                }
             }
             // ----------------------------------------------------- Determining new direction
             if (this.pVelocityX > 0) {
@@ -703,6 +680,7 @@ var Enemy = (function (_super) {
         _this.smoothed = false;
         _this.exists = true;
         _this.anchor.setTo(0.5, 0.5);
+        _this.scale.setTo(1.5, 1.5);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
         _this.body.collideWorldBounds = true;
         _this.body.setSize(28, 49, 2, 2);
