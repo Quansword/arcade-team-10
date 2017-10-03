@@ -19,17 +19,15 @@ window.onload = function ()
 	var enemies;
 	let enemyBullets: Phaser.Group;
 
-	let walls: Phaser.Group;
-	var gates: Phaser.Group;
-	let gate1: Barrier;
-	let gate2: Barrier;
-	let gate3: Barrier;
-	let gate4: Barrier;
+	//let walls: Phaser.Group;
 	let background: Phaser.Sprite;
 
 	let lives: Phaser.Group;
 	var healthDrops;
 	var hud;
+
+	var map;
+	var layer;
 
 	function preload()
 	{
@@ -39,6 +37,7 @@ window.onload = function ()
 		game.load.image('bullet', 'assets/Bullet.png');
 		game.load.image('laser', 'assets/Laser.png');
 
+		game.load.tilemap('map', 'assets/Map.csv', null, Phaser.Tilemap.CSV);
 		game.load.image('background', 'assets/Level1.png');
 		game.load.image('wall', 'assets/wall.png');
 		game.load.image('life', 'assets/life.png');
@@ -54,13 +53,16 @@ window.onload = function ()
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 		background = game.add.sprite(0, 0, 'background');
-		background.scale.setTo(0.7, 0.7);
+		map = game.add.tilemap('map', 64, 64);
+		layer = map.createLayer(0);
+		layer.resizeWorld();
+		map.setCollision(0, true, layer);
+		layer.debug = true;
 
-		createWalls();
 		player = new Player(2050, 1200, game);
 		game.add.existing(player);
 
-		game.world.setBounds(0, 0, 9600 * 0.7, 4864 * 0.7);
+		game.world.setBounds(0, 0, 9600, 4864);
 		game.camera.follow(player);
 		game.renderer.renderSession.roundPixels = true;
 
@@ -70,6 +72,7 @@ window.onload = function ()
 		for (var i = 0; i < 3; i++)
 		{
 			healthDrops.add(new Phaser.Sprite(game, -1, -1, 'heart'));
+			healthDrops.children[i].scale.setTo(1.5, 1.5);
 			healthDrops.children[i].kill();
 		}
 
@@ -89,7 +92,8 @@ window.onload = function ()
 		for (var i = 0; i < player.maxHealth; i++)
 		{
 			hud.add(new Phaser.Sprite(game, 0, 0, 'heart'));
-			hud.children[i].position.set((hud.children[i].width * i) + (hud.children[i].width / 2), hud.children[i].height / 2);
+			hud.children[i].scale.setTo(1.5, 1.5);
+			hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
 		}
 	}
 
@@ -105,14 +109,16 @@ window.onload = function ()
 			enemy.eUpdate(deltaTime);
 		}, this);
 
-		game.physics.arcade.collide(player, walls);
-		game.physics.arcade.collide(enemies, walls);
-		game.physics.arcade.collide(player, gates, screenTransition);
+		game.physics.arcade.collide(player, layer);
+		game.physics.arcade.collide(enemies, layer);
+		//game.physics.arcade.collide(player, walls);
+		//game.physics.arcade.collide(enemies, walls);
 
 		game.physics.arcade.overlap(player, healthDrops, pickupHealth);
 
-		game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
-		game.physics.arcade.collide(enemyBullets, walls, killBullet);
+		game.physics.arcade.collide(player.weapon.bullets, layer, killBullet);
+		//game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
+		//game.physics.arcade.collide(enemyBullets, walls, killBullet);
 
 		game.physics.arcade.overlap(player, enemies, enemyHitPlayer);
 		game.physics.arcade.collide(enemies, enemies);
@@ -121,6 +127,7 @@ window.onload = function ()
 		for (var i = 0; i < enemies.children.length; i++)
 		{
 			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
+			game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
 
 			for (var j = 0; j < player.saberHitBoxes.children.length; j++)
 			{
@@ -153,7 +160,7 @@ window.onload = function ()
 		game.scale.pageAlignHorizontally = true;
 		game.scale.pageAlignVertically = true;
 		game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-		game.scale.setGameSize(1280, 720);
+		game.scale.setGameSize(1920, 1080);
 	}
 
 	function bulletHitSaber(saber, bullet: Phaser.Bullet)
@@ -261,77 +268,28 @@ window.onload = function ()
 		enemyBullets.add(enemy3.weapon.bullets);
 	}
 
-	function createWalls()
-	{
-		walls = game.add.physicsGroup();
+	//function createWalls()
+	//{
+	//	walls = game.add.physicsGroup();
 
-		//Spawn Room walls
-		var wall1 = new Barrier(760, 810, 1170, 120, game, walls, 'wall');
-		var wall2 = new Barrier(2100, 810, 1170, 120, game, walls, 'wall');
-		var wall3 = new Barrier(2377, 1120, 896, 90, game, walls, 'wall');
-		var wall4 = new Barrier(1300, 1570, 1430, 120, game, walls, 'wall');
-		var wall5 = new Barrier(1300, 930, 350, 670, game, walls, 'wall');
-		var wall6 = new Barrier(2377, 930, 350, 280, game, walls, 'wall');
-		var wall7 = new Barrier(2380, 1380, 350, 250, game, walls, 'wall');
+	//	//Spawn Room walls
+	//	var wall1 = new Barrier(760, 810, 1170, 120, game, walls, 'wall');
+	//	var wall2 = new Barrier(2100, 810, 1170, 120, game, walls, 'wall');
+	//	var wall3 = new Barrier(2377, 1120, 896, 90, game, walls, 'wall');
+	//	var wall4 = new Barrier(1300, 1570, 1430, 120, game, walls, 'wall');
+	//	var wall5 = new Barrier(1300, 930, 350, 670, game, walls, 'wall');
+	//	var wall6 = new Barrier(2377, 930, 350, 280, game, walls, 'wall');
+	//	var wall7 = new Barrier(2380, 1380, 350, 250, game, walls, 'wall');
 
-		// Room abve spawn room
-		var wall8 = new Barrier(2100, 620, 47, 300, game, walls, 'wall');
-		var wall9 = new Barrier(1882, 540, 265, 80, game, walls, 'wall');
-		var wall10 = new Barrier(1300, 540, 360, 80, game, walls, 'wall');
-		var wall12 = new Barrier(1300, 540, 90, 300, game, walls, 'wall');
-		var wall15 = new Barrier(1882, 272, 45, 340, game, walls, 'wall');
+	//	// Room abve spawn room
+	//	var wall8 = new Barrier(2100, 620, 47, 300, game, walls, 'wall');
+	//	var wall9 = new Barrier(1882, 540, 265, 80, game, walls, 'wall');
+	//	var wall10 = new Barrier(1300, 540, 360, 80, game, walls, 'wall');
+	//	var wall12 = new Barrier(1300, 540, 90, 300, game, walls, 'wall');
+	//	var wall15 = new Barrier(1882, 272, 45, 340, game, walls, 'wall');
 
-		walls.enableBody = true;
-	}
-
-	function createGates()
-	{
-		gates = game.add.physicsGroup();
-
-		gate1 = new Barrier(540, 35, 200, 10, game, gates, 'gate');
-		gate2 = new Barrier(540, 650, 200, 10, game, gates, 'gate');
-		gate3 = new Barrier(145, 250, 10, 190, game, gates, 'gate');
-		gate4 = new Barrier(1120, 300, 10, 190, game, gates, 'gate');
-
-		gates.enableBody = true;
-	}
-
-	function screenTransition(player: Player, gate: Barrier)
-	{
-		gates.forEach(function (item)
-		{
-			item.renderable = false;
-		}, this);
-
-		if (player.body.touching.left && gate4.renderable != true)
-		{
-			player.body.position.x = 1000;
-			player.body.position.y = 300;
-			gate4.renderable = true;
-		}
-		else if (player.body.touching.right && gate3.renderable != true)
-		{
-			player.body.position.x = 300;
-			player.body.position.y = 300;
-			gate3.renderable = true;
-		}
-		else if (player.body.touching.down && gate1.renderable != true)
-		{
-			player.body.position.x = 600;
-			player.body.position.y = 100;
-			gate1.renderable = true;
-		}
-		else if (player.body.touching.up && gate2.renderable != true)
-		{
-			player.body.position.x = 600;
-			player.body.position.y = 500;
-			gate2.renderable = true;
-		}
-
-		enemies.removeAll();
-		enemyBullets.removeAll();
-		createEnemies();
-	}
+	//	walls.enableBody = true;
+	//}
 
 	function killPlayer(player: Player)
 	{
@@ -351,7 +309,7 @@ window.onload = function ()
 		}
 	}
 
-	function killBullet(bullet: Phaser.Bullet, wall: Barrier)
+	function killBullet(bullet: Phaser.Bullet, layer)
 	{
 		bullet.kill();
 	}
@@ -385,18 +343,18 @@ window.onload = function ()
 //▄█████████▀    ███    █▀    ███    ███   ███    ███ █▀     ██████████   ███    ███ 
 //                            ███    ███   ███    ███                     ███    ███ 
 
-class Barrier extends Phaser.Sprite 
-{
-	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game, group: Phaser.Group, type: string)
-	{
-		super(game, xPos, yPos, type);
-		this.scale.setTo(width, height);
-		game.physics.arcade.enable(this);
-		this.body.immovable = true;
-		this.renderable = true;
-		group.add(this);
-	}
-}
+//class Barrier extends Phaser.Sprite 
+//{
+//	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game, group: Phaser.Group, type: string)
+//	{
+//		super(game, xPos, yPos, type);
+//		this.scale.setTo(width, height);
+//		game.physics.arcade.enable(this);
+//		this.body.immovable = true;
+//		this.renderable = true;
+//		group.add(this);
+//	}
+//}
 
 //   ▄███████▄  ▄█          ▄████████ ▄██   ▄      ▄████████    ▄████████ 
 //  ███    ███ ███         ███    ███ ███   ██▄   ███    ███   ███    ███ 
@@ -472,7 +430,7 @@ class Player extends Phaser.Sprite
 		this.smoothed = false;
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
-		this.scale.setTo(1.5, 1.5);
+		this.scale.setTo(2.25, 2.25);
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
 		this.body.setSize(24, 42, 48, 48);
@@ -505,7 +463,7 @@ class Player extends Phaser.Sprite
 
 		this.rightSaber = this.game.add.sprite(10, 0);
 		this.rightSaber.anchor.setTo(0.5, 0.5);
-		this.rightSaber.scale.setTo(1, 1.4);
+		this.rightSaber.scale.setTo(1.1, 1.5);
 		this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
 		this.saberHitBoxes.addChild(this.rightSaber);
 		this.rightSaber.name = "rightSaber";
@@ -513,7 +471,7 @@ class Player extends Phaser.Sprite
 
 		this.leftSaber = this.game.add.sprite(-45, 0);
 		this.leftSaber.anchor.setTo(0.5, 0.5);
-		this.leftSaber.scale.setTo(1, 1.4);
+		this.leftSaber.scale.setTo(1.1, 1.5);
 		this.game.physics.enable(this.leftSaber, Phaser.Physics.ARCADE);
 		this.saberHitBoxes.addChild(this.leftSaber);
 		this.leftSaber.name = "leftSaber";
@@ -521,7 +479,7 @@ class Player extends Phaser.Sprite
 
 		this.topSaber = this.game.add.sprite(-18, -23);
 		this.topSaber.anchor.setTo(0.5, 0.5);
-		this.topSaber.scale.setTo(1.75, 0.8);
+		this.topSaber.scale.setTo(1.85, 0.9);
 		this.game.physics.enable(this.topSaber, Phaser.Physics.ARCADE);
 		this.saberHitBoxes.addChild(this.topSaber);
 		this.topSaber.name = "topSaber";
@@ -529,7 +487,7 @@ class Player extends Phaser.Sprite
 
 		this.topRightSaber = this.game.add.sprite(0, -10);
 		this.topRightSaber.anchor.setTo(0.5, 0.5);
-		this.topRightSaber.scale.setTo(1.75, 0.8);
+		this.topRightSaber.scale.setTo(1.85, 0.9);
 		this.topRightSaber.rotation += 0.4;
 		this.game.physics.enable(this.topRightSaber, Phaser.Physics.ARCADE);
 		this.saberHitBoxes.addChild(this.topRightSaber);
@@ -538,7 +496,7 @@ class Player extends Phaser.Sprite
 
 		this.topLeftSaber = this.game.add.sprite(-35, -10);
 		this.topLeftSaber.anchor.setTo(0.5, 0.5);
-		this.topLeftSaber.scale.setTo(1.75, 0.8);
+		this.topLeftSaber.scale.setTo(1.85, 0.9);
 		this.topLeftSaber.rotation -= 0.4;
 		this.game.physics.enable(this.topLeftSaber, Phaser.Physics.ARCADE);
 		this.saberHitBoxes.addChild(this.topLeftSaber);
@@ -547,7 +505,7 @@ class Player extends Phaser.Sprite
 
 		this.bottomSaber = this.game.add.sprite(-18, 33);
 		this.bottomSaber.anchor.setTo(0.5, 0.5);
-		this.bottomSaber.scale.setTo(1.75, 0.8);
+		this.bottomSaber.scale.setTo(1.85, 0.9);
 		this.game.physics.enable(this.bottomSaber, Phaser.Physics.ARCADE);
 		this.saberHitBoxes.addChild(this.bottomSaber);
 		this.bottomSaber.name = "bottomSaber";
@@ -555,7 +513,7 @@ class Player extends Phaser.Sprite
 
 		this.bottomRightSaber = this.game.add.sprite(5, 20);
 		this.bottomRightSaber.anchor.setTo(0.5, 0.5);
-		this.bottomRightSaber.scale.setTo(1.75, 0.8);
+		this.bottomRightSaber.scale.setTo(1.85, 0.9);
 		this.bottomRightSaber.rotation -= 0.4;
 		this.game.physics.enable(this.bottomRightSaber, Phaser.Physics.ARCADE);
 		this.saberHitBoxes.addChild(this.bottomRightSaber);
@@ -564,7 +522,7 @@ class Player extends Phaser.Sprite
 
 		this.bottomLeftSaber = this.game.add.sprite(-35, 20);
 		this.bottomLeftSaber.anchor.setTo(0.5, 0.5);
-		this.bottomLeftSaber.scale.setTo(1.75, 0.8);
+		this.bottomLeftSaber.scale.setTo(1.85, 0.9);
 		this.bottomLeftSaber.rotation += 0.4;
 		this.game.physics.enable(this.bottomLeftSaber, Phaser.Physics.ARCADE);
 		this.saberHitBoxes.addChild(this.bottomLeftSaber);
@@ -953,7 +911,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.smoothed = false;
 		this.exists = true;
 		this.anchor.setTo(0.5, 0.5);
-		this.scale.setTo(1.5, 1.5);
+		this.scale.setTo(2.2, 2.2);
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
 		this.body.collideWorldBounds = true;
@@ -979,7 +937,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 		this.weapon.bullets.forEach((b: Phaser.Bullet) =>
 		{
-			b.scale.setTo(1.25, 1.25);
+			b.scale.setTo(1.5, 1.5);
 		}, this);
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 300;
