@@ -115,6 +115,7 @@ window.onload = function ()
 		game.physics.arcade.collide(enemyBullets, walls, killBullet);
 
 		game.physics.arcade.overlap(player, enemies, enemyHitPlayer);
+		game.physics.arcade.collide(enemies, enemies);
 
 		game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
 		for (var i = 0; i < enemies.children.length; i++)
@@ -236,9 +237,18 @@ window.onload = function ()
 		dropHealth(enemy.position.x, enemy.position.y);
 	}
 
+//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄
+//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄ 
+//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███ 
+// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███ 
+//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███ 
+//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███ 
+//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███ 
+//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀ 
+
 	function createEnemies()
 	{
-		var enemy1 = new Enemy(2000, 900, game, 1, player);
+		var enemy1 = new Enemy(2000, 900, game, 0, player);
 		enemies.add(enemy1);
 		enemyBullets.add(enemy1.weapon.bullets);
 
@@ -246,7 +256,7 @@ window.onload = function ()
 		enemies.add(enemy2);
 		enemyBullets.add(enemy2.weapon.bullets);
 
-		var enemy3 = new Enemy(2000, 700, game, 1, player);
+		var enemy3 = new Enemy(2000, 700, game, 2, player);
 		enemies.add(enemy3);
 		enemyBullets.add(enemy3.weapon.bullets);
 	}
@@ -1010,547 +1020,547 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 		if (this.alive)
 		{
-			//if (this.eType == this.enemyTypeEnum.BASE)
-			//{
-			//	if (time < 1000)
-			//	{
-			//		if (this.body.position.x <= this.player.position.x)
-			//		{
-			//			if (this.body.position.x < this.player.body.position.x - 200)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else if (this.body.position.x > this.player.body.position.x - 150)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.x > this.player.body.position.x + 200)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else if (this.body.position.x < this.player.body.position.x + 150)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//		}
+			if (this.eType == this.enemyTypeEnum.BASE)
+			{
+				if (time < 1000)
+				{
+					if (this.body.position.x <= this.player.position.x)
+					{
+						if (this.body.position.x < this.player.body.position.x - 200)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.body.position.x - 150)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.x > this.player.body.position.x + 200)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.body.position.x + 150)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+					}
 
-			//		if (this.body.position.y <= this.player.body.position.y)
-			//		{
-			//			if (this.body.position.y < this.player.body.position.y - 200)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else if (this.body.position.y > this.player.body.position.y - 150)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.y > this.player.body.position.y + 200)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else if (this.body.position.y < this.player.body.position.y + 150)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//		}
-			//	}
-			//	else
-			//	{
-			//		if (this.body.position.x <= this.player.body.position.x)
-			//		{
-			//			if (this.body.position.x < this.player.body.position.x - 350)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else if (this.body.position.x > this.player.position.x - 250)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.x > this.player.position.x + 350)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else if (this.body.position.x < this.player.position.x + 250)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//		}
+					if (this.body.position.y <= this.player.body.position.y)
+					{
+						if (this.body.position.y < this.player.body.position.y - 200)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.body.position.y - 150)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.y > this.player.body.position.y + 200)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.body.position.y + 150)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+					}
+				}
+				else
+				{
+					if (this.body.position.x <= this.player.body.position.x)
+					{
+						if (this.body.position.x < this.player.body.position.x - 350)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 250)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.x > this.player.position.x + 350)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 250)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+					}
 
-			//		if (this.body.position.y <= this.player.position.y)
-			//		{
-			//			if (this.body.position.y < this.player.position.y - 350)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else if (this.body.position.y > this.player.position.y - 250)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.y > this.player.position.y + 350)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else if (this.body.position.y < this.player.position.y + 250)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//		}
-			//	}
-			//}
-			//else if (this.eType == this.enemyTypeEnum.RAPID)
-			//{
-			//	if (time < 500)
-			//	{
-			//		if (this.body.position.x <= this.player.position.x)
-			//		{
-			//			if (this.body.position.x < this.player.position.x - 150)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else if (this.body.position.x > this.player.position.x - 100)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.x > this.player.position.x + 150)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else if (this.body.position.x < this.player.position.x + 100)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//		}
+					if (this.body.position.y <= this.player.position.y)
+					{
+						if (this.body.position.y < this.player.position.y - 350)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 250)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.y > this.player.position.y + 350)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 250)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+					}
+				}
+			}
+			else if (this.eType == this.enemyTypeEnum.RAPID)
+			{
+				if (time < 500)
+				{
+					if (this.body.position.x <= this.player.position.x)
+					{
+						if (this.body.position.x < this.player.position.x - 150)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 100)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.x > this.player.position.x + 150)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 100)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+					}
 
-			//		if (this.body.position.y <= this.player.position.y)
-			//		{
-			//			if (this.body.position.y < this.player.position.y - 150)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else if (this.body.position.y > this.player.position.y - 100)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.y > this.player.position.y + 150)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else if (this.body.position.y < this.player.position.y + 100)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//		}
-			//	}
-			//	else
-			//	{
-			//		if (this.body.position.x <= this.player.position.x)
-			//		{
-			//			if (this.body.position.x < this.player.position.x - 200)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else if (this.body.position.x > this.player.position.x - 150)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.x > this.player.position.x + 200)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else if (this.body.position.x < this.player.position.x + 150)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//		}
+					if (this.body.position.y <= this.player.position.y)
+					{
+						if (this.body.position.y < this.player.position.y - 150)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 100)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.y > this.player.position.y + 150)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 100)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+					}
+				}
+				else
+				{
+					if (this.body.position.x <= this.player.position.x)
+					{
+						if (this.body.position.x < this.player.position.x - 200)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 150)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.x > this.player.position.x + 200)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 150)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+					}
 
-			//		if (this.body.position.y <= this.player.position.y)
-			//		{
-			//			if (this.body.position.y < this.player.position.y - 200)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else if (this.body.position.y > this.player.position.y - 150)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.y > this.player.position.y + 200)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else if (this.body.position.y < this.player.position.y + 150)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//		}
-			//	}
-			//}
-			//else if (this.eType == this.enemyTypeEnum.LASER)
-			//{
-			//	if (this.body.position.x <= this.player.position.x)
-			//	{
-			//		if (this.body.position.x < this.player.position.x - 350)
-			//		{
-			//			this.eMoveLeft = false;
-			//			this.eMoveRight = true;
-			//		}
-			//		else if (this.body.position.x > this.player.position.x - 250)
-			//		{
-			//			this.eMoveLeft = true;
-			//			this.eMoveRight = false;
-			//		}
-			//		else
-			//		{
-			//			this.eMoveLeft = true;
-			//			this.eMoveRight = false;
-			//		}
-			//	}
-			//	else
-			//	{
-			//		if (this.body.position.x > this.player.position.x + 350)
-			//		{
-			//			this.eMoveLeft = true;
-			//			this.eMoveRight = false;
-			//		}
-			//		else if (this.body.position.x < this.player.position.x + 250)
-			//		{
-			//			this.eMoveLeft = false;
-			//			this.eMoveRight = true;
-			//		}
-			//		else
-			//		{
-			//			this.eMoveLeft = false;
-			//			this.eMoveRight = true;
-			//		}
-			//	}
+					if (this.body.position.y <= this.player.position.y)
+					{
+						if (this.body.position.y < this.player.position.y - 200)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 150)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.y > this.player.position.y + 200)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 150)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+					}
+				}
+			}
+			else if (this.eType == this.enemyTypeEnum.LASER)
+			{
+				if (this.body.position.x <= this.player.position.x)
+				{
+					if (this.body.position.x < this.player.position.x - 350)
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
+					else if (this.body.position.x > this.player.position.x - 250)
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
+					else
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
+				}
+				else
+				{
+					if (this.body.position.x > this.player.position.x + 350)
+					{
+						this.eMoveLeft = true;
+						this.eMoveRight = false;
+					}
+					else if (this.body.position.x < this.player.position.x + 250)
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
+					else
+					{
+						this.eMoveLeft = false;
+						this.eMoveRight = true;
+					}
+				}
 
-			//	if (this.body.position.y <= this.player.position.y)
-			//	{
-			//		if (this.body.position.y < this.player.position.y - 350)
-			//		{
-			//			this.eMoveUp = false;
-			//			this.eMoveDown = true;
-			//		}
-			//		else if (this.body.position.y > this.player.position.y - 250)
-			//		{
-			//			this.eMoveUp = true;
-			//			this.eMoveDown = false;
-			//		}
-			//		else
-			//		{
-			//			this.eMoveUp = true;
-			//			this.eMoveDown = false;
-			//		}
-			//	}
-			//	else
-			//	{
-			//		if (this.body.position.y > this.player.position.y + 350)
-			//		{
-			//			this.eMoveUp = true;
-			//			this.eMoveDown = false;
-			//		}
-			//		else if (this.body.position.y < this.player.position.y + 250)
-			//		{
-			//			this.eMoveUp = false;
-			//			this.eMoveDown = true;
-			//		}
-			//		else
-			//		{
-			//			this.eMoveUp = false;
-			//			this.eMoveDown = true;
-			//		}
-			//	}
-			//}
-			//else
-			//{
-			//	if (time < 1500)
-			//	{
-			//		if (this.body.position.x <= this.player.position.x)
-			//		{
-			//			if (this.body.position.x < this.player.position.x - 150)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else if (this.body.position.x > this.player.position.x - 100)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.x > this.player.position.x + 150)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else if (this.body.position.x < this.player.position.x + 100)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//		}
+				if (this.body.position.y <= this.player.position.y)
+				{
+					if (this.body.position.y < this.player.position.y - 350)
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
+					else if (this.body.position.y > this.player.position.y - 250)
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
+					else
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
+				}
+				else
+				{
+					if (this.body.position.y > this.player.position.y + 350)
+					{
+						this.eMoveUp = true;
+						this.eMoveDown = false;
+					}
+					else if (this.body.position.y < this.player.position.y + 250)
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
+					else
+					{
+						this.eMoveUp = false;
+						this.eMoveDown = true;
+					}
+				}
+			}
+			else
+			{
+				if (time < 1500)
+				{
+					if (this.body.position.x <= this.player.position.x)
+					{
+						if (this.body.position.x < this.player.position.x - 150)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 100)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.x > this.player.position.x + 150)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 100)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+					}
 
-			//		if (this.body.position.y <= this.player.position.y)
-			//		{
-			//			if (this.body.position.y < this.player.position.y - 150)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else if (this.body.position.y > this.player.position.y - 100)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.y > this.player.position.y + 150)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else if (this.body.position.y < this.player.position.y + 100)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//		}
-			//	}
-			//	else
-			//	{
-			//		if (this.body.position.x <= this.player.position.x)
-			//		{
-			//			if (this.body.position.x < this.player.position.x - 200)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else if (this.body.position.x > this.player.position.x - 150)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.x > this.player.position.x + 200)
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//			else if (this.body.position.x < this.player.position.x + 150)
-			//			{
-			//				this.eMoveLeft = false;
-			//				this.eMoveRight = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveLeft = true;
-			//				this.eMoveRight = false;
-			//			}
-			//		}
+					if (this.body.position.y <= this.player.position.y)
+					{
+						if (this.body.position.y < this.player.position.y - 150)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 100)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.y > this.player.position.y + 150)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 100)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+					}
+				}
+				else
+				{
+					if (this.body.position.x <= this.player.position.x)
+					{
+						if (this.body.position.x < this.player.position.x - 200)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 150)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.x > this.player.position.x + 200)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 150)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+					}
 
-			//		if (this.body.position.y <= this.player.position.y)
-			//		{
-			//			if (this.body.position.y < this.player.position.y - 200)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else if (this.body.position.y > this.player.position.y - 150)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//		}
-			//		else
-			//		{
-			//			if (this.body.position.y > this.player.position.y + 200)
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//			else if (this.body.position.y < this.player.position.y + 150)
-			//			{
-			//				this.eMoveUp = false;
-			//				this.eMoveDown = true;
-			//			}
-			//			else
-			//			{
-			//				this.eMoveUp = true;
-			//				this.eMoveDown = false;
-			//			}
-			//		}
-			//	}
-			//}
+					if (this.body.position.y <= this.player.position.y)
+					{
+						if (this.body.position.y < this.player.position.y - 200)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 150)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.y > this.player.position.y + 200)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 150)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+					}
+				}
+			}
 		}
 	}
 
