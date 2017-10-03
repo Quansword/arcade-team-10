@@ -28,6 +28,7 @@ window.onload = function ()
 	let background: Phaser.Sprite;
 
 	let lives: Phaser.Group;
+	var healthDrops;
 	var hud;
 
 	function preload()
@@ -59,7 +60,17 @@ window.onload = function ()
 		game.add.existing(player);
 
         game.world.setBounds(0, 0, 9600*0.7, 4864*0.7);
-        game.camera.follow(player);
+		game.camera.follow(player);
+		game.renderer.renderSession.roundPixels = true;
+
+		healthDrops = game.add.group();
+		healthDrops.enableBody = true;
+		healthDrops.physicsBodyType = Phaser.Physics.ARCADE;
+		for (var i = 0; i < 3; i++)
+		{
+			healthDrops.add(new Phaser.Sprite(game, -1, -1, 'heart'));
+			healthDrops.children[i].kill();
+		}
 
 		enemies = game.add.group();
 		enemies.enableBody = true;
@@ -97,6 +108,8 @@ window.onload = function ()
 		game.physics.arcade.collide(enemies, walls);
 		game.physics.arcade.collide(player, gates, screenTransition);
 
+		game.physics.arcade.overlap(player, healthDrops, pickupHealth);
+
 		game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
 		game.physics.arcade.collide(enemyBullets, walls, killBullet);
 
@@ -123,7 +136,6 @@ window.onload = function ()
 
 	function render()
 	{
-
 		game.debug.bodyInfo(player, 32, 32);
 		game.debug.body(player);
 
@@ -154,6 +166,7 @@ window.onload = function ()
 	function saberHitEnemy(saber, enemy: Enemy) // -----------------------------------------------------Enemy code
 	{
 		enemy.kill();
+		dropHealth(enemy.x, enemy.y);
 	}
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
@@ -185,7 +198,7 @@ window.onload = function ()
 
 	function playerVisible()
 	{
-		player.visible = !player.visible;
+		player.alpha = (player.alpha + 1) % 2;
 	}
 
 	function playerInvuln()
@@ -199,6 +212,15 @@ window.onload = function ()
 		player.heal(hNum);
 	}
 
+	function pickupHealth(player: Player, healthDrop: Phaser.Sprite)
+	{
+		if (player.health != player.maxHealth)
+		{
+			healPlayer(player, 1);
+			healthDrop.kill();
+		}
+	}
+
 	function increaseHealth(player: Player)
 	{
 		player.maxHealth += 1;
@@ -210,6 +232,7 @@ window.onload = function ()
 	{
 		bullet.kill();
 		enemy.kill();
+		dropHealth(enemy.x, enemy.y);
 	}
 
 	function createEnemies()
@@ -320,6 +343,24 @@ window.onload = function ()
 	function killBullet(bullet: Phaser.Bullet, wall: Barrier)
 	{
 		bullet.kill();
+	}
+
+	function dropHealth(x: number, y: number)
+	{
+		let rand = game.rnd.integerInRange(1, 100);
+		if (rand > 97)
+		{
+			for (var i = 0; i < 3; i++)
+			{
+				if (healthDrops.children[i].alive == false)
+				{
+					healthDrops.children[i].revive();
+					healthDrops.children[i].x = x;
+					healthDrops.children[i].y = y;
+					break;
+				}
+			}
+		}
 	}
 };
 
