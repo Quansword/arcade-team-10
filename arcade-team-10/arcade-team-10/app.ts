@@ -17,7 +17,6 @@ window.onload = function ()
 	let keyState: Phaser.Keyboard;
 	let player: Player;
 	var enemies;
-	var enemyBullets;
 
 	//let walls: Phaser.Group;
 	let bossRoom: Room;
@@ -91,9 +90,6 @@ window.onload = function ()
 		enemies = game.add.group();
 		enemies.enableBody = true;
 		enemies.physicsBodyType = Phaser.Physics.ARCADE;
-		enemyBullets = game.add.physicsGroup();
-		enemyBullets.enableBody = true;
-		enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
 
 		createEnemies();
 
@@ -110,7 +106,7 @@ window.onload = function ()
 		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
 		pClearCircle.anchor.setTo(0.5, 0.5);
 		game.physics.arcade.enable(pClearCircle);
-		pClearCircle.body.setCircle(player.body.width * 4);
+		pClearCircle.body.setCircle(player.body.width * 2.5);
 		pClearCircle.body.immovable = true;
 		pClearCircle.kill();
 
@@ -318,8 +314,8 @@ window.onload = function ()
 	function playerClear()
 	{
 		pClearCircle.revive();
-		pClearCircle.position.x = player.body.position.x - (player.body.width * 3);
-		pClearCircle.position.y = player.body.position.y - (player.body.width * 3);
+		pClearCircle.position.x = player.body.position.x - (player.body.width * 2);
+		pClearCircle.position.y = player.body.position.y - (player.body.width * 2);
 		game.time.events.add(2000, endClear, this);
 	}
 
@@ -368,21 +364,26 @@ window.onload = function ()
 
 	function createEnemies()
 	{
-		var enemy1 = new Enemy(8500, 900, 0, player, bossRoom, game);
+		var enemy1 = new Enemy(8200, 800, 0, player, bossRoom, game);
 		enemies.add(enemy1);
-		enemyBullets.add(enemy1.weapon.bullets);
 
-		var enemy2 = new Enemy(8500, 800, 1, player, bossRoom, game);
+		var enemy2 = new Enemy(8500, 800, 0, player, bossRoom, game);
 		enemies.add(enemy2);
-		enemyBullets.add(enemy2.weapon.bullets);
 
-		var enemy3 = new Enemy(8500, 700, 2, player, bossRoom, game);
+		var enemy3 = new Enemy(8800, 800, 0, player, bossRoom, game);
 		enemies.add(enemy3);
-		enemyBullets.add(enemy3.weapon.bullets);
 
-		var enemy4 = new Enemy(8500, 600, 3, player, bossRoom, game);
+		var enemy4 = new Enemy(8500, 700, 1, player, bossRoom, game);
 		enemies.add(enemy4);
-		enemyBullets.add(enemy4.weapon.bullets);
+
+		var enemy5 = new Enemy(8300, 700, 2, player, bossRoom, game);
+		enemies.add(enemy5);
+
+		var enemy6 = new Enemy(8700, 700, 2, player, bossRoom, game);
+		enemies.add(enemy6);
+
+		var enemy7 = new Enemy(8500, 600, 3, player, bossRoom, game);
+		enemies.add(enemy7);
 	}
 
 	function killPlayer(player: Player)
