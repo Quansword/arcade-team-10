@@ -104,6 +104,7 @@ window.onload = function () {
             enemy.eUpdate(deltaTime);
         }, this);
         game.physics.arcade.collide(player, layer);
+        game.physics.arcade.collide(player, boss, bossHitPlayer, null, this);
         game.physics.arcade.collide(enemies, layer);
         game.physics.arcade.collide(enemies, laserGate1);
         game.physics.arcade.collide(enemies, laserGate4);
@@ -204,6 +205,9 @@ window.onload = function () {
     }
     function bulletHitPlayer(player, bullet) {
         bullet.kill();
+        damagePlayer(player, 1);
+    }
+    function bossHitPlayer(player, boss) {
         damagePlayer(player, 1);
     }
     function enemyHitPlayer(player, enemy) {

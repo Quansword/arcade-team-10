@@ -136,6 +136,7 @@ window.onload = function ()
 		}, this);
 
 		game.physics.arcade.collide(player, layer);
+		game.physics.arcade.collide(player, boss, bossHitPlayer, null, this);
 		game.physics.arcade.collide(enemies, layer);
 		game.physics.arcade.collide(enemies, laserGate1);
 		game.physics.arcade.collide(enemies, laserGate4);
@@ -283,6 +284,11 @@ window.onload = function ()
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
 	{
 		bullet.kill();
+		damagePlayer(player, 1);
+	}
+
+	function bossHitPlayer(player: Player, boss: Boss)
+	{
 		damagePlayer(player, 1);
 	}
 
