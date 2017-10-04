@@ -1250,7 +1250,23 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 		this.weapon.bullets.forEach((b: Phaser.Bullet) =>
 		{
-			b.scale.setTo(1.5, 1.5);
+
+            if (this.eType == this.enemyTypeEnum.LASER)
+            {
+			    b.scale.setTo(3, 3);
+            }
+            else if (this.eType == this.enemyTypeEnum.BASE)
+            {
+			    b.scale.setTo(1.5, 1.5);
+            }
+            else if (this.eType == this.enemyTypeEnum.SHOTGUN)
+            {
+			    b.scale.setTo(2, 2);
+            }
+            else 
+            {
+			    b.scale.setTo(1.5, 1.5);
+            }
 		}, this);
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 300
