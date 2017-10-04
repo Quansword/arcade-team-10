@@ -126,10 +126,13 @@ window.onload = function ()
 			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
 			game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
 
-			for (var j = 0; j < player.saberHitBoxes.children.length; j++)
-			{
-				game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
-			}
+            if (player.alive)
+            {
+                for (var j = 0; j < player.saberHitBoxes.children.length; j++)
+                {
+                    game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+                }
+            }
 		}
 
 		for (var j = 0; j < player.saberHitBoxes.children.length; j++)
@@ -274,29 +277,6 @@ window.onload = function ()
 		enemies.add(enemy4);
 	}
 
-	//function createWalls()
-	//{
-	//	walls = game.add.physicsGroup();
-
-	//	//Spawn Room walls
-	//	var wall1 = new Barrier(760, 810, 1170, 120, game, walls, 'wall');
-	//	var wall2 = new Barrier(2100, 810, 1170, 120, game, walls, 'wall');
-	//	var wall3 = new Barrier(2377, 1120, 896, 90, game, walls, 'wall');
-	//	var wall4 = new Barrier(1300, 1570, 1430, 120, game, walls, 'wall');
-	//	var wall5 = new Barrier(1300, 930, 350, 670, game, walls, 'wall');
-	//	var wall6 = new Barrier(2377, 930, 350, 280, game, walls, 'wall');
-	//	var wall7 = new Barrier(2380, 1380, 350, 250, game, walls, 'wall');
-
-	//	// Room abve spawn room
-	//	var wall8 = new Barrier(2100, 620, 47, 300, game, walls, 'wall');
-	//	var wall9 = new Barrier(1882, 540, 265, 80, game, walls, 'wall');
-	//	var wall10 = new Barrier(1300, 540, 360, 80, game, walls, 'wall');
-	//	var wall12 = new Barrier(1300, 540, 90, 300, game, walls, 'wall');
-	//	var wall15 = new Barrier(1882, 272, 45, 340, game, walls, 'wall');
-
-	//	walls.enableBody = true;
-	//}
-
 	function killPlayer(player: Player)
 	{
 		var life = lives.getFirstAlive();
@@ -349,18 +329,18 @@ window.onload = function ()
 //▄█████████▀    ███    █▀    ███    ███   ███    ███ █▀     ██████████   ███    ███ 
 //                            ███    ███   ███    ███                     ███    ███ 
 
-//class Barrier extends Phaser.Sprite 
-//{
-//	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game, group: Phaser.Group, type: string)
-//	{
-//		super(game, xPos, yPos, type);
-//		this.scale.setTo(width, height);
-//		game.physics.arcade.enable(this);
-//		this.body.immovable = true;
-//		this.renderable = true;
-//		group.add(this);
-//	}
-//}
+class Barrier extends Phaser.Sprite 
+{
+	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game, group: Phaser.Group, type: string)
+	{
+		super(game, xPos, yPos, type);
+		this.scale.setTo(width, height);
+		game.physics.arcade.enable(this);
+		this.body.immovable = true;
+		this.renderable = true;
+		group.add(this);
+	}
+}
 
 //   ▄████████  ▄██████▄   ▄██████▄    ▄▄▄▄███▄▄▄▄   
 //  ███    ███ ███    ███ ███    ███ ▄██▀▀▀███▀▀▀██▄ 
