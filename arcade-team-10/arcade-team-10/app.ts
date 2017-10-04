@@ -36,6 +36,8 @@ window.onload = function ()
 
     var boss: Boss;
 
+    let enemyKillCount: number;
+
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -56,7 +58,7 @@ window.onload = function ()
 	}
 
 	function create()
-	{
+    {
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 		background = game.add.sprite(0, 0, 'background');
@@ -109,6 +111,8 @@ window.onload = function ()
         laserGate4.activate();
 
         boss = new Boss (8400, 100, game);
+
+        enemyKillCount = 0;
 	}
 
 	function update()
@@ -125,6 +129,8 @@ window.onload = function ()
 
 		game.physics.arcade.collide(player, layer);
 		game.physics.arcade.collide(enemies, layer);
+		game.physics.arcade.collide(enemies, laserGate1);
+		game.physics.arcade.collide(enemies, laserGate4);
 		game.physics.arcade.overlap(player, bossRoom, activateBossRoom);
 		//game.physics.arcade.collide(player, walls);
 		//game.physics.arcade.collide(enemies, walls);
@@ -198,6 +204,16 @@ window.onload = function ()
 
         laserGate4.update();
 
+        console.log(enemyKillCount);
+        if (boss.bossStage == boss.bossStageEnum.STEP_0)
+        {
+            if (enemyKillCount == 4)
+            {
+                boss.bossStage = boss.bossStageEnum.STEP_1;
+                laserGate4.deactivate();
+            }
+        }
+
 		//render();
 	}
 
@@ -241,7 +257,8 @@ window.onload = function ()
 
 	function saberHitEnemy(saber, enemy: Enemy) // -----------------------------------------------------Enemy code
 	{
-		enemy.kill();
+        enemy.kill();
+        enemyKillCount++;
 		dropHealth(enemy.position.x, enemy.position.y);
 	}
 
@@ -316,6 +333,7 @@ window.onload = function ()
 	{
 		bullet.kill();
 		enemy.kill();
+        enemyKillCount++;
 		dropHealth(enemy.position.x, enemy.position.y);
 	}
 
@@ -490,6 +508,16 @@ class Room extends Phaser.Sprite
                                                   
 class Boss extends Phaser.Sprite 
 {
+	bossStageEnum =
+	{
+		STEP_0: 0,
+		STEP_1: 1,
+		STEP_2: 2,
+		STEP_3: 3
+	};
+
+	bossStage: number | string;
+
     constructor(xPos: number, yPos: number, game: Phaser.Game)
     {
         super(game, xPos, yPos, "boss");
@@ -497,6 +525,7 @@ class Boss extends Phaser.Sprite
         this.body.immovable = true;
         this.scale.setTo(2, 2);
         game.add.existing(this);
+        this.bossStage = this.bossStageEnum.STEP_0;
     }
 }
 
