@@ -908,6 +908,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	eAim: boolean;
 	aim: boolean;
 	fireBreak: boolean;
+	secondShot: number;
 
 	fireTimer: number;
 	dead: boolean;
@@ -973,6 +974,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.weapon.bulletSpeed = 350;
 		this.weapon.fireRate = 500;
 		this.weapon.bulletAngleOffset = 90;
+		this.secondShot = 0;
 
 		if (this.eType == this.enemyTypeEnum.BASE)
 		{
@@ -982,12 +984,13 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 		else if (this.eType == this.enemyTypeEnum.RAPID)
 		{
-			this.weapon.fireRate = 500;
-			this.weapon.bulletAngleVariance = 5;
+			this.weapon.fireRate = 400;
+			this.weapon.bulletAngleVariance = 10;
 			this.eSpeed = 200;
 		}
 		else if (this.eType == this.enemyTypeEnum.LASER)
 		{
+			this.weapon.bulletSpeed = 500;
 			this.weapon.fireRate = 10;
 			this.eSpeed = 75;
 		}
@@ -1332,77 +1335,80 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 			}
 			else if (this.eType == this.enemyTypeEnum.LASER)
 			{
-				if (this.body.position.x <= this.player.position.x)
+				if (!this.fireBreak)
 				{
-					if (this.body.position.x < this.player.position.x - 350)
+					if (this.body.position.x <= this.player.position.x)
 					{
-						this.eMoveLeft = false;
-						this.eMoveRight = true;
-					}
-					else if (this.body.position.x > this.player.position.x - 250)
-					{
-						this.eMoveLeft = true;
-						this.eMoveRight = false;
+						if (this.body.position.x < this.player.position.x - 350)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 250)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
 					}
 					else
 					{
-						this.eMoveLeft = true;
-						this.eMoveRight = false;
+						if (this.body.position.x > this.player.position.x + 350)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 250)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
 					}
-				}
-				else
-				{
-					if (this.body.position.x > this.player.position.x + 350)
-					{
-						this.eMoveLeft = true;
-						this.eMoveRight = false;
-					}
-					else if (this.body.position.x < this.player.position.x + 250)
-					{
-						this.eMoveLeft = false;
-						this.eMoveRight = true;
-					}
-					else
-					{
-						this.eMoveLeft = false;
-						this.eMoveRight = true;
-					}
-				}
 
-				if (this.body.position.y <= this.player.position.y)
-				{
-					if (this.body.position.y < this.player.position.y - 350)
+					if (this.body.position.y <= this.player.position.y)
 					{
-						this.eMoveUp = false;
-						this.eMoveDown = true;
-					}
-					else if (this.body.position.y > this.player.position.y - 250)
-					{
-						this.eMoveUp = true;
-						this.eMoveDown = false;
-					}
-					else
-					{
-						this.eMoveUp = true;
-						this.eMoveDown = false;
-					}
-				}
-				else
-				{
-					if (this.body.position.y > this.player.position.y + 350)
-					{
-						this.eMoveUp = true;
-						this.eMoveDown = false;
-					}
-					else if (this.body.position.y < this.player.position.y + 250)
-					{
-						this.eMoveUp = false;
-						this.eMoveDown = true;
+						if (this.body.position.y < this.player.position.y - 350)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 250)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
 					}
 					else
 					{
-						this.eMoveUp = false;
-						this.eMoveDown = true;
+						if (this.body.position.y > this.player.position.y + 350)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 250)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
 					}
 				}
 			}
@@ -1586,11 +1592,11 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				{
 					if (this.eType == this.enemyTypeEnum.BASE)
 					{
-						this.fireTimer = this.game.time.now + 3000;
+						this.fireTimer = this.game.time.now + 2000;
 					}
 					else if (this.eType == this.enemyTypeEnum.RAPID)
 					{
-						this.fireTimer = this.game.time.now + 500;
+						this.fireTimer = this.game.time.now + 400;
 					}
 					else if (this.eType == this.enemyTypeEnum.LASER)
 					{
@@ -1598,7 +1604,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						this.fireTimer = this.game.time.now + 5000;
+						this.fireTimer = this.game.time.now + 4000;
 					}
 					this.eAim = true;
 				}
@@ -1609,7 +1615,6 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				}
 
 				this.weapon.trackSprite(this, 0, 0);
-				this.weapon.fireAngle = 0;
 
 				this.ePathfinding(this.fireTimer - this.game.time.now);
 
@@ -1656,9 +1661,21 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 				if (this.aim)
 				{
-					var fireDegree = this.game.physics.arcade.angleBetween(this.body, this.player.body);
-					fireDegree = fireDegree * 57.2958;
-					this.weapon.fireAngle = fireDegree;
+					if (this.eType == this.enemyTypeEnum.LASER && !this.fireBreak)
+					{
+						var prediction = new Phaser.Rectangle(this.player.body.position.x, this.player.body.position.y, this.player.body.width, this.player.body.height);
+						prediction.x = prediction.x + (this.player.body.velocity.x * 3);
+						prediction.y = prediction.y + (this.player.body.velocity.y * 3);
+						var fireDegree = this.game.physics.arcade.angleBetween(this.body, prediction);
+						fireDegree = fireDegree * 57.2958;
+						this.weapon.fireAngle = fireDegree;
+					}
+					else if (this.eType != this.enemyTypeEnum.LASER)
+					{
+						var fireDegree = this.game.physics.arcade.angleBetween(this.body, this.player.body);
+						fireDegree = fireDegree * 57.2958;
+						this.weapon.fireAngle = fireDegree;
+					}
 
 					if (this.eType == this.enemyTypeEnum.SHOTGUN)
 					{
@@ -1671,6 +1688,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						this.weapon.fire();
 						this.weapon.fireAngle += 15;
 						this.weapon.fire();
+						this.secondShot = this.weapon.fireAngle;
+						this.game.time.events.add(500, this.eSecondShot, this);
 					}
 					else if (this.eType == this.enemyTypeEnum.LASER)
 					{
@@ -1678,7 +1697,16 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						if (!this.fireBreak)
 						{
 							this.fireBreak = true;
-							this.game.time.events.add(4000, this.eLaserDelay, this);
+							this.game.time.events.add(4000, this.eFireDelay, this);
+						}
+					}
+					else if (this.eType == this.enemyTypeEnum.RAPID)
+					{
+						this.weapon.fire();
+						if (!this.fireBreak)
+						{
+							this.fireBreak = true;
+							this.game.time.events.add(6000, this.eFireDelay, this);
 						}
 					}
 					else
@@ -1697,9 +1725,30 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 	}
 
-	eLaserDelay()
+	eSecondShot()
 	{
-		this.fireTimer = this.game.time.now + 3500;
+		this.weapon.fireAngle = this.secondShot;
+		this.weapon.fire();
+		this.weapon.fireAngle -= 15;
+		this.weapon.fire();
+		this.weapon.fireAngle -= 15;
+		this.weapon.fire();
+		this.weapon.fireAngle -= 30;
+		this.weapon.fire();
+		this.weapon.fireAngle -= 15;
+		this.weapon.fire();
+	}
+
+	eFireDelay()
+	{
+		if (this.eType == this.enemyTypeEnum.LASER)
+		{
+			this.fireTimer = this.game.time.now + 3500;
+		}
+		else
+		{
+			this.fireTimer = this.game.time.now + 2000;
+		}
 		this.fireBreak = false;
 	}
 }
