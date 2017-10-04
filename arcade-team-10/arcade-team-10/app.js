@@ -24,12 +24,14 @@ window.onload = function () {
     var keyState;
     var player;
     var enemies;
+    var enemyBullets;
     //let walls: Phaser.Group;
     var bossRoom;
     var background;
     var lives;
     var healthDrops;
     var hud;
+    var pClearCircle;
     var map;
     var layer;
     function preload() {
@@ -70,6 +72,9 @@ window.onload = function () {
         enemies = game.add.group();
         enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
+        enemyBullets = game.add.physicsGroup();
+        enemyBullets.enableBody = true;
+        enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
         createEnemies();
         hud = game.add.group();
         hud.fixedToCamera = true;
@@ -79,6 +84,12 @@ window.onload = function () {
             hud.children[i].scale.setTo(1.5, 1.5);
             hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
         }
+        pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
+        pClearCircle.anchor.setTo(0.5, 0.5);
+        game.physics.arcade.enable(pClearCircle);
+        pClearCircle.body.setCircle(player.body.width * 4);
+        pClearCircle.body.immovable = true;
+        pClearCircle.kill();
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -103,6 +114,7 @@ window.onload = function () {
                 game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
             }
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
+            game.physics.arcade.collide(enemies.children[i].weapon.bullets, pClearCircle, clearBullet);
             for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
                 if (enemies.children[i].eType != 3) {
                     game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
@@ -116,6 +128,11 @@ window.onload = function () {
     }
     //function render()
     //{
+    //	if (pClearCircle.alive)
+    //	{
+    //		game.debug.bodyInfo(pClearCircle, 32, 32);
+    //		game.debug.body(pClearCircle);
+    //	}
     //	game.debug.bodyInfo(player, 32, 32);
     //	game.debug.body(player);
     //	game.debug.rectangle(bossRoom);
@@ -161,8 +178,9 @@ window.onload = function () {
                 playerInvuln();
                 playerVisible();
                 game.time.events.repeat(200, 3, playerVisible, this);
-                game.time.events.add(800, playerInvuln, this);
+                game.time.events.add(1000, playerInvuln, this);
             }
+            playerClear();
         }
     }
     function playerVisible() {
@@ -170,6 +188,15 @@ window.onload = function () {
     }
     function playerInvuln() {
         player.canDamage = !player.canDamage;
+    }
+    function playerClear() {
+        pClearCircle.revive();
+        pClearCircle.position.x = player.body.position.x - (player.body.width * 3);
+        pClearCircle.position.y = player.body.position.y - (player.body.width * 3);
+        game.time.events.add(2000, endClear, this);
+    }
+    function endClear() {
+        pClearCircle.kill();
     }
     function healPlayer(player, hNum) {
         hud.children[player.health].visible = true;
@@ -202,12 +229,16 @@ window.onload = function () {
     function createEnemies() {
         var enemy1 = new Enemy(8500, 900, 0, player, bossRoom, game);
         enemies.add(enemy1);
+        enemyBullets.add(enemy1.weapon.bullets);
         var enemy2 = new Enemy(8500, 800, 1, player, bossRoom, game);
         enemies.add(enemy2);
+        enemyBullets.add(enemy2.weapon.bullets);
         var enemy3 = new Enemy(8500, 700, 2, player, bossRoom, game);
         enemies.add(enemy3);
+        enemyBullets.add(enemy3.weapon.bullets);
         var enemy4 = new Enemy(8500, 600, 3, player, bossRoom, game);
         enemies.add(enemy4);
+        enemyBullets.add(enemy4.weapon.bullets);
     }
     //function createWalls()
     //{
@@ -240,8 +271,11 @@ window.onload = function () {
             player.kill();
         }
     }
-    function killBullet(bullet, layer) {
+    function killBullet(bullet, other) {
         bullet.kill();
+    }
+    function clearBullet(bullet, clear) {
+        clear.kill();
     }
     function dropHealth(x, y) {
         var rand = game.rnd.integerInRange(1, 100);
@@ -709,7 +743,7 @@ var Enemy = (function (_super) {
             b.scale.setTo(1.5, 1.5);
         }, _this);
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 350;
+        _this.weapon.bulletSpeed = 300;
         _this.weapon.fireRate = 500;
         _this.weapon.bulletAngleOffset = 90;
         _this.secondShot = 0;
@@ -754,11 +788,11 @@ var Enemy = (function (_super) {
             if (this.eType == this.enemyTypeEnum.BASE) {
                 if (time < 1000) {
                     if (this.body.position.x <= this.player.position.x) {
-                        if (this.body.position.x < this.player.body.position.x - 200) {
+                        if (this.body.position.x < this.player.body.position.x - 300) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
-                        else if (this.body.position.x > this.player.body.position.x - 150) {
+                        else if (this.body.position.x > this.player.body.position.x - 250) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
@@ -768,11 +802,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.x > this.player.body.position.x + 200) {
+                        if (this.body.position.x > this.player.body.position.x + 300) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
-                        else if (this.body.position.x < this.player.body.position.x + 150) {
+                        else if (this.body.position.x < this.player.body.position.x + 250) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
@@ -782,11 +816,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     if (this.body.position.y <= this.player.body.position.y) {
-                        if (this.body.position.y < this.player.body.position.y - 200) {
+                        if (this.body.position.y < this.player.body.position.y - 300) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
-                        else if (this.body.position.y > this.player.body.position.y - 150) {
+                        else if (this.body.position.y > this.player.body.position.y - 250) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
@@ -796,11 +830,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.y > this.player.body.position.y + 200) {
+                        if (this.body.position.y > this.player.body.position.y + 300) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
-                        else if (this.body.position.y < this.player.body.position.y + 150) {
+                        else if (this.body.position.y < this.player.body.position.y + 250) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
@@ -812,7 +846,125 @@ var Enemy = (function (_super) {
                 }
                 else {
                     if (this.body.position.x <= this.player.body.position.x) {
-                        if (this.body.position.x < this.player.body.position.x - 350) {
+                        if (this.body.position.x < this.player.body.position.x - 450) {
+                            this.eMoveLeft = false;
+                            this.eMoveRight = true;
+                        }
+                        else if (this.body.position.x > this.player.position.x - 350) {
+                            this.eMoveLeft = true;
+                            this.eMoveRight = false;
+                        }
+                        else {
+                            this.eMoveLeft = false;
+                            this.eMoveRight = true;
+                        }
+                    }
+                    else {
+                        if (this.body.position.x > this.player.position.x + 400) {
+                            this.eMoveLeft = true;
+                            this.eMoveRight = false;
+                        }
+                        else if (this.body.position.x < this.player.position.x + 350) {
+                            this.eMoveLeft = false;
+                            this.eMoveRight = true;
+                        }
+                        else {
+                            this.eMoveLeft = true;
+                            this.eMoveRight = false;
+                        }
+                    }
+                    if (this.body.position.y <= this.player.position.y) {
+                        if (this.body.position.y < this.player.position.y - 400) {
+                            this.eMoveUp = false;
+                            this.eMoveDown = true;
+                        }
+                        else if (this.body.position.y > this.player.position.y - 350) {
+                            this.eMoveUp = true;
+                            this.eMoveDown = false;
+                        }
+                        else {
+                            this.eMoveUp = false;
+                            this.eMoveDown = true;
+                        }
+                    }
+                    else {
+                        if (this.body.position.y > this.player.position.y + 400) {
+                            this.eMoveUp = true;
+                            this.eMoveDown = false;
+                        }
+                        else if (this.body.position.y < this.player.position.y + 350) {
+                            this.eMoveUp = false;
+                            this.eMoveDown = true;
+                        }
+                        else {
+                            this.eMoveUp = true;
+                            this.eMoveDown = false;
+                        }
+                    }
+                }
+            }
+            else if (this.eType == this.enemyTypeEnum.RAPID) {
+                if (time < 250) {
+                    if (this.body.position.x <= this.player.position.x) {
+                        if (this.body.position.x < this.player.position.x - 250) {
+                            this.eMoveLeft = false;
+                            this.eMoveRight = true;
+                        }
+                        else if (this.body.position.x > this.player.position.x - 200) {
+                            this.eMoveLeft = true;
+                            this.eMoveRight = false;
+                        }
+                        else {
+                            this.eMoveLeft = false;
+                            this.eMoveRight = true;
+                        }
+                    }
+                    else {
+                        if (this.body.position.x > this.player.position.x + 250) {
+                            this.eMoveLeft = true;
+                            this.eMoveRight = false;
+                        }
+                        else if (this.body.position.x < this.player.position.x + 200) {
+                            this.eMoveLeft = false;
+                            this.eMoveRight = true;
+                        }
+                        else {
+                            this.eMoveLeft = true;
+                            this.eMoveRight = false;
+                        }
+                    }
+                    if (this.body.position.y <= this.player.position.y) {
+                        if (this.body.position.y < this.player.position.y - 250) {
+                            this.eMoveUp = false;
+                            this.eMoveDown = true;
+                        }
+                        else if (this.body.position.y > this.player.position.y - 200) {
+                            this.eMoveUp = true;
+                            this.eMoveDown = false;
+                        }
+                        else {
+                            this.eMoveUp = false;
+                            this.eMoveDown = true;
+                        }
+                    }
+                    else {
+                        if (this.body.position.y > this.player.position.y + 250) {
+                            this.eMoveUp = true;
+                            this.eMoveDown = false;
+                        }
+                        else if (this.body.position.y < this.player.position.y + 200) {
+                            this.eMoveUp = false;
+                            this.eMoveDown = true;
+                        }
+                        else {
+                            this.eMoveUp = true;
+                            this.eMoveDown = false;
+                        }
+                    }
+                }
+                else {
+                    if (this.body.position.x <= this.player.position.x) {
+                        if (this.body.position.x < this.player.position.x - 300) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
@@ -826,7 +978,7 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.x > this.player.position.x + 350) {
+                        if (this.body.position.x > this.player.position.x + 300) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
@@ -840,7 +992,7 @@ var Enemy = (function (_super) {
                         }
                     }
                     if (this.body.position.y <= this.player.position.y) {
-                        if (this.body.position.y < this.player.position.y - 350) {
+                        if (this.body.position.y < this.player.position.y - 300) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
@@ -854,129 +1006,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.y > this.player.position.y + 350) {
+                        if (this.body.position.y > this.player.position.y + 300) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
                         else if (this.body.position.y < this.player.position.y + 250) {
-                            this.eMoveUp = false;
-                            this.eMoveDown = true;
-                        }
-                        else {
-                            this.eMoveUp = true;
-                            this.eMoveDown = false;
-                        }
-                    }
-                }
-            }
-            else if (this.eType == this.enemyTypeEnum.RAPID) {
-                if (time < 500) {
-                    if (this.body.position.x <= this.player.position.x) {
-                        if (this.body.position.x < this.player.position.x - 150) {
-                            this.eMoveLeft = false;
-                            this.eMoveRight = true;
-                        }
-                        else if (this.body.position.x > this.player.position.x - 100) {
-                            this.eMoveLeft = true;
-                            this.eMoveRight = false;
-                        }
-                        else {
-                            this.eMoveLeft = false;
-                            this.eMoveRight = true;
-                        }
-                    }
-                    else {
-                        if (this.body.position.x > this.player.position.x + 150) {
-                            this.eMoveLeft = true;
-                            this.eMoveRight = false;
-                        }
-                        else if (this.body.position.x < this.player.position.x + 100) {
-                            this.eMoveLeft = false;
-                            this.eMoveRight = true;
-                        }
-                        else {
-                            this.eMoveLeft = true;
-                            this.eMoveRight = false;
-                        }
-                    }
-                    if (this.body.position.y <= this.player.position.y) {
-                        if (this.body.position.y < this.player.position.y - 150) {
-                            this.eMoveUp = false;
-                            this.eMoveDown = true;
-                        }
-                        else if (this.body.position.y > this.player.position.y - 100) {
-                            this.eMoveUp = true;
-                            this.eMoveDown = false;
-                        }
-                        else {
-                            this.eMoveUp = false;
-                            this.eMoveDown = true;
-                        }
-                    }
-                    else {
-                        if (this.body.position.y > this.player.position.y + 150) {
-                            this.eMoveUp = true;
-                            this.eMoveDown = false;
-                        }
-                        else if (this.body.position.y < this.player.position.y + 100) {
-                            this.eMoveUp = false;
-                            this.eMoveDown = true;
-                        }
-                        else {
-                            this.eMoveUp = true;
-                            this.eMoveDown = false;
-                        }
-                    }
-                }
-                else {
-                    if (this.body.position.x <= this.player.position.x) {
-                        if (this.body.position.x < this.player.position.x - 200) {
-                            this.eMoveLeft = false;
-                            this.eMoveRight = true;
-                        }
-                        else if (this.body.position.x > this.player.position.x - 150) {
-                            this.eMoveLeft = true;
-                            this.eMoveRight = false;
-                        }
-                        else {
-                            this.eMoveLeft = false;
-                            this.eMoveRight = true;
-                        }
-                    }
-                    else {
-                        if (this.body.position.x > this.player.position.x + 200) {
-                            this.eMoveLeft = true;
-                            this.eMoveRight = false;
-                        }
-                        else if (this.body.position.x < this.player.position.x + 150) {
-                            this.eMoveLeft = false;
-                            this.eMoveRight = true;
-                        }
-                        else {
-                            this.eMoveLeft = true;
-                            this.eMoveRight = false;
-                        }
-                    }
-                    if (this.body.position.y <= this.player.position.y) {
-                        if (this.body.position.y < this.player.position.y - 200) {
-                            this.eMoveUp = false;
-                            this.eMoveDown = true;
-                        }
-                        else if (this.body.position.y > this.player.position.y - 150) {
-                            this.eMoveUp = true;
-                            this.eMoveDown = false;
-                        }
-                        else {
-                            this.eMoveUp = false;
-                            this.eMoveDown = true;
-                        }
-                    }
-                    else {
-                        if (this.body.position.y > this.player.position.y + 200) {
-                            this.eMoveUp = true;
-                            this.eMoveDown = false;
-                        }
-                        else if (this.body.position.y < this.player.position.y + 150) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
@@ -990,11 +1024,11 @@ var Enemy = (function (_super) {
             else if (this.eType == this.enemyTypeEnum.LASER) {
                 if (!this.fireBreak) {
                     if (this.body.position.x <= this.player.position.x) {
-                        if (this.body.position.x < this.player.position.x - 350) {
+                        if (this.body.position.x < this.player.position.x - 450) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
-                        else if (this.body.position.x > this.player.position.x - 250) {
+                        else if (this.body.position.x > this.player.position.x - 350) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
@@ -1004,11 +1038,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.x > this.player.position.x + 350) {
+                        if (this.body.position.x > this.player.position.x + 450) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
-                        else if (this.body.position.x < this.player.position.x + 250) {
+                        else if (this.body.position.x < this.player.position.x + 350) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
@@ -1018,11 +1052,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     if (this.body.position.y <= this.player.position.y) {
-                        if (this.body.position.y < this.player.position.y - 350) {
+                        if (this.body.position.y < this.player.position.y - 450) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
-                        else if (this.body.position.y > this.player.position.y - 250) {
+                        else if (this.body.position.y > this.player.position.y - 350) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
@@ -1032,11 +1066,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.y > this.player.position.y + 350) {
+                        if (this.body.position.y > this.player.position.y + 450) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
-                        else if (this.body.position.y < this.player.position.y + 250) {
+                        else if (this.body.position.y < this.player.position.y + 350) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
@@ -1050,11 +1084,11 @@ var Enemy = (function (_super) {
             else {
                 if (time < 1500) {
                     if (this.body.position.x <= this.player.position.x) {
-                        if (this.body.position.x < this.player.position.x - 150) {
+                        if (this.body.position.x < this.player.position.x - 250) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
-                        else if (this.body.position.x > this.player.position.x - 100) {
+                        else if (this.body.position.x > this.player.position.x - 200) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
@@ -1064,11 +1098,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.x > this.player.position.x + 150) {
+                        if (this.body.position.x > this.player.position.x + 250) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
-                        else if (this.body.position.x < this.player.position.x + 100) {
+                        else if (this.body.position.x < this.player.position.x + 200) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
@@ -1078,11 +1112,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     if (this.body.position.y <= this.player.position.y) {
-                        if (this.body.position.y < this.player.position.y - 150) {
+                        if (this.body.position.y < this.player.position.y - 250) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
-                        else if (this.body.position.y > this.player.position.y - 100) {
+                        else if (this.body.position.y > this.player.position.y - 200) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
@@ -1092,11 +1126,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.y > this.player.position.y + 150) {
+                        if (this.body.position.y > this.player.position.y + 250) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
-                        else if (this.body.position.y < this.player.position.y + 100) {
+                        else if (this.body.position.y < this.player.position.y + 200) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
@@ -1108,11 +1142,11 @@ var Enemy = (function (_super) {
                 }
                 else {
                     if (this.body.position.x <= this.player.position.x) {
-                        if (this.body.position.x < this.player.position.x - 200) {
+                        if (this.body.position.x < this.player.position.x - 300) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
-                        else if (this.body.position.x > this.player.position.x - 150) {
+                        else if (this.body.position.x > this.player.position.x - 250) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
@@ -1122,11 +1156,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.x > this.player.position.x + 200) {
+                        if (this.body.position.x > this.player.position.x + 300) {
                             this.eMoveLeft = true;
                             this.eMoveRight = false;
                         }
-                        else if (this.body.position.x < this.player.position.x + 150) {
+                        else if (this.body.position.x < this.player.position.x + 250) {
                             this.eMoveLeft = false;
                             this.eMoveRight = true;
                         }
@@ -1136,11 +1170,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     if (this.body.position.y <= this.player.position.y) {
-                        if (this.body.position.y < this.player.position.y - 200) {
+                        if (this.body.position.y < this.player.position.y - 300) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
-                        else if (this.body.position.y > this.player.position.y - 150) {
+                        else if (this.body.position.y > this.player.position.y - 250) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
@@ -1150,11 +1184,11 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
-                        if (this.body.position.y > this.player.position.y + 200) {
+                        if (this.body.position.y > this.player.position.y + 300) {
                             this.eMoveUp = true;
                             this.eMoveDown = false;
                         }
-                        else if (this.body.position.y < this.player.position.y + 150) {
+                        else if (this.body.position.y < this.player.position.y + 250) {
                             this.eMoveUp = false;
                             this.eMoveDown = true;
                         }
