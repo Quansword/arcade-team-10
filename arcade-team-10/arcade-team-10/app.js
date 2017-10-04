@@ -99,10 +99,14 @@ window.onload = function () {
         game.physics.arcade.collide(enemies, enemies);
         game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
         for (var i = 0; i < enemies.children.length; i++) {
-            game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
+            if (player.canDamage) {
+                game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
+            }
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
             for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
-                game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+                if (enemies.children[i].eType != 3) {
+                    game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+                }
             }
         }
         for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
