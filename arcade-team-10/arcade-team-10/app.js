@@ -6,16 +6,11 @@
 //  ███    ███   ███    ███ ███   ███   ███   ███    █▄  
 //  ███    ███   ███    ███ ███   ███   ███   ███    ███ 
 //  ████████▀    ███    █▀   ▀█   ███   █▀    ██████████ 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 window.onload = function () {
     //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
     //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
@@ -286,11 +281,10 @@ window.onload = function () {
 var Room = (function (_super) {
     __extends(Room, _super);
     function Room(x, y, width, height, game) {
-        var _this = _super.call(this, game, x, y) || this;
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(width, height);
-        _this.active = false;
-        return _this;
+        _super.call(this, game, x, y);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.setSize(width, height);
+        this.active = false;
     }
     return Room;
 }(Phaser.Sprite));
@@ -306,8 +300,8 @@ var Room = (function (_super) {
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(xPos, yPos, game) {
-        var _this = _super.call(this, game, xPos, yPos, 'pSprite') || this;
-        _this.pDirEnum = {
+        _super.call(this, game, xPos, yPos, 'pSprite');
+        this.pDirEnum = {
             RIGHT: 0,
             LEFT: 1,
             UPRIGHT: 2,
@@ -317,99 +311,98 @@ var Player = (function (_super) {
             DOWNRIGHT: 6,
             DOWNLEFT: 7
         };
-        _this.rAttack = _this.animations.add('rAttack', [6, 7, 8, 9, 10, 11], 15);
-        _this.lAttack = _this.animations.add('lAttack', [12, 13, 14, 15, 16, 17], 15);
-        _this.uAttack = _this.animations.add('uAttack', [18, 19, 20, 21, 22, 23], 15);
-        _this.dAttack = _this.animations.add('dAttack', [24, 25, 26, 27, 28, 29], 15);
-        _this.urAttack = _this.animations.add('urAttack', [30, 31, 32, 33, 34, 35], 15);
-        _this.ulAttack = _this.animations.add('ulAttack', [36, 37, 38, 39, 40, 41], 15);
-        _this.drAttack = _this.animations.add('drAttack', [42, 43, 44, 45, 46, 47], 15);
-        _this.dlAttack = _this.animations.add('dlAttack', [48, 49, 50, 51, 52, 53], 15);
-        _this.attacked = false;
-        _this.frame = _this.pDirEnum.RIGHT;
-        _this.newPFrame = _this.frame;
-        _this.smoothed = false;
-        _this.exists = true;
-        _this.anchor.setTo(0.5, 0.5);
-        _this.scale.setTo(2.25, 2.25);
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(24, 42, 48, 48);
-        _this.body.collideWorldBounds = true;
-        _this.maxHealth = 5;
-        _this.health = _this.maxHealth;
-        _this.canDamage = true;
-        _this.aim = false;
-        _this.pVelocityX = 0;
-        _this.pVelocityY = 0;
-        _this.pSpeed = 250;
-        _this.weapon = game.add.weapon(100, 'bullet');
-        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 350;
-        _this.weapon.autofire = false;
-        _this.weapon.bulletAngleOffset = 90;
-        _this.lives = 1;
-        _this.createSaberHitBoxes();
-        return _this;
+        this.rAttack = this.animations.add('rAttack', [6, 7, 8, 9, 10, 11], 15);
+        this.lAttack = this.animations.add('lAttack', [12, 13, 14, 15, 16, 17], 15);
+        this.uAttack = this.animations.add('uAttack', [18, 19, 20, 21, 22, 23], 15);
+        this.dAttack = this.animations.add('dAttack', [24, 25, 26, 27, 28, 29], 15);
+        this.urAttack = this.animations.add('urAttack', [30, 31, 32, 33, 34, 35], 15);
+        this.ulAttack = this.animations.add('ulAttack', [36, 37, 38, 39, 40, 41], 15);
+        this.drAttack = this.animations.add('drAttack', [42, 43, 44, 45, 46, 47], 15);
+        this.dlAttack = this.animations.add('dlAttack', [48, 49, 50, 51, 52, 53], 15);
+        this.attacked = false;
+        this.frame = this.pDirEnum.RIGHT;
+        this.newPFrame = this.frame;
+        this.smoothed = false;
+        this.exists = true;
+        this.anchor.setTo(0.5, 0.5);
+        this.scale.setTo(2.25, 2.25);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.setSize(24, 42, 48, 48);
+        this.body.collideWorldBounds = true;
+        this.maxHealth = 5;
+        this.health = this.maxHealth;
+        this.canDamage = true;
+        this.aim = false;
+        this.pVelocityX = 0;
+        this.pVelocityY = 0;
+        this.pSpeed = 250;
+        this.weapon = game.add.weapon(100, 'bullet');
+        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.weapon.bulletSpeed = 350;
+        this.weapon.autofire = false;
+        this.weapon.bulletAngleOffset = 90;
+        this.lives = 1;
+        this.createSaberHitBoxes();
     }
     Player.prototype.createSaberHitBoxes = function () {
         this.saberHitBoxes = this.game.add.physicsGroup();
         this.addChild(this.saberHitBoxes);
         this.rightSaber = this.game.add.sprite(10, 0);
         this.rightSaber.anchor.setTo(0.5, 0.5);
-        this.rightSaber.scale.setTo(1.1, 1.5);
+        this.rightSaber.scale.setTo(1.1, 1.8);
         this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.rightSaber);
         this.rightSaber.name = "rightSaber";
         this.disableHitbox("rightSaber");
         this.leftSaber = this.game.add.sprite(-45, 0);
         this.leftSaber.anchor.setTo(0.5, 0.5);
-        this.leftSaber.scale.setTo(1.1, 1.5);
+        this.leftSaber.scale.setTo(1.1, 1.8);
         this.game.physics.enable(this.leftSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.leftSaber);
         this.leftSaber.name = "leftSaber";
         this.disableHitbox("leftSaber");
         this.topSaber = this.game.add.sprite(-18, -23);
         this.topSaber.anchor.setTo(0.5, 0.5);
-        this.topSaber.scale.setTo(1.85, 0.9);
+        this.topSaber.scale.setTo(2, 0.9);
         this.game.physics.enable(this.topSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.topSaber);
         this.topSaber.name = "topSaber";
         this.disableHitbox("topSaber");
-        this.topRightSaber = this.game.add.sprite(0, -10);
+        this.topRightSaber = this.game.add.sprite(3, -12);
         this.topRightSaber.anchor.setTo(0.5, 0.5);
-        this.topRightSaber.scale.setTo(1.85, 0.9);
-        this.topRightSaber.rotation += 0.4;
+        this.topRightSaber.scale.setTo(2.2, 0.9);
+        this.topRightSaber.rotation += 0.6;
         this.game.physics.enable(this.topRightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.topRightSaber);
         this.topRightSaber.name = "topRightSaber";
         this.disableHitbox("topRightSaber");
-        this.topLeftSaber = this.game.add.sprite(-35, -10);
+        this.topLeftSaber = this.game.add.sprite(-38, -12);
         this.topLeftSaber.anchor.setTo(0.5, 0.5);
-        this.topLeftSaber.scale.setTo(1.85, 0.9);
-        this.topLeftSaber.rotation -= 0.4;
+        this.topLeftSaber.scale.setTo(2.2, 0.9);
+        this.topLeftSaber.rotation -= 0.6;
         this.game.physics.enable(this.topLeftSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.topLeftSaber);
         this.topLeftSaber.name = "topLeftSaber";
         this.disableHitbox("topLeftSaber");
-        this.bottomSaber = this.game.add.sprite(-18, 33);
+        this.bottomSaber = this.game.add.sprite(-18, 40);
         this.bottomSaber.anchor.setTo(0.5, 0.5);
-        this.bottomSaber.scale.setTo(1.85, 0.9);
+        this.bottomSaber.scale.setTo(2, 0.9);
         this.game.physics.enable(this.bottomSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.bottomSaber);
         this.bottomSaber.name = "bottomSaber";
         this.disableHitbox("bottomSaber");
-        this.bottomRightSaber = this.game.add.sprite(5, 20);
+        this.bottomRightSaber = this.game.add.sprite(3, 23);
         this.bottomRightSaber.anchor.setTo(0.5, 0.5);
-        this.bottomRightSaber.scale.setTo(1.85, 0.9);
-        this.bottomRightSaber.rotation -= 0.4;
+        this.bottomRightSaber.scale.setTo(2.2, 0.9);
+        this.bottomRightSaber.rotation -= 0.6;
         this.game.physics.enable(this.bottomRightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.bottomRightSaber);
         this.bottomRightSaber.name = "bottomRightSaber";
         this.disableHitbox("bottomRightSaber");
-        this.bottomLeftSaber = this.game.add.sprite(-35, 20);
+        this.bottomLeftSaber = this.game.add.sprite(-38, 23);
         this.bottomLeftSaber.anchor.setTo(0.5, 0.5);
-        this.bottomLeftSaber.scale.setTo(1.85, 0.9);
-        this.bottomLeftSaber.rotation += 0.4;
+        this.bottomLeftSaber.scale.setTo(2.2, 0.9);
+        this.bottomLeftSaber.rotation += 0.6;
         this.game.physics.enable(this.bottomLeftSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.bottomLeftSaber);
         this.bottomLeftSaber.name = "bottomLeftSaber";
@@ -453,19 +446,19 @@ var Player = (function (_super) {
             this.topSaber.reset(-18, -23);
         }
         else if (name == "topRightSaber") {
-            this.topRightSaber.reset(0, -10);
+            this.topRightSaber.reset(3, -12);
         }
         else if (name == "topLeftSaber") {
-            this.topLeftSaber.reset(-35, -10);
+            this.topLeftSaber.reset(-38, -12);
         }
         else if (name == "bottomSaber") {
-            this.bottomSaber.reset(-18, 33);
+            this.bottomSaber.reset(-18, 40);
         }
         else if (name == "bottomRightSaber") {
-            this.bottomRightSaber.reset(5, 20);
+            this.bottomRightSaber.reset(3, 23);
         }
         else if (name == "bottomLeftSaber") {
-            this.bottomLeftSaber.reset(-35, 20);
+            this.bottomLeftSaber.reset(-38, 23);
         }
     };
     Player.prototype.pUpdate = function (time, keyState) {
@@ -662,74 +655,73 @@ var Player = (function (_super) {
 //  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███ 
 //  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀ 
 var Enemy = (function (_super) {
-    __extends(Enemy, _super); // -----------------------------------------------------Enemy code
+    __extends(Enemy, _super);
     function Enemy(xPos, yPos, enemyType, player, room, game) {
-        var _this = _super.call(this, game, xPos, yPos, 'eSprite') || this;
-        _this.enemyTypeEnum = {
+        _super.call(this, game, xPos, yPos, 'eSprite');
+        this.enemyTypeEnum = {
             BASE: 0,
             RAPID: 1,
             SHOTGUN: 2,
             LASER: 3
         };
-        _this.eType = enemyType;
-        if (_this.eType == _this.enemyTypeEnum.RAPID) {
-            _this.frame = 1;
+        this.eType = enemyType;
+        if (this.eType == this.enemyTypeEnum.RAPID) {
+            this.frame = 1;
         }
-        else if (_this.eType == _this.enemyTypeEnum.LASER) {
-            _this.frame = 3;
+        else if (this.eType == this.enemyTypeEnum.LASER) {
+            this.frame = 3;
         }
-        else if (_this.eType == _this.enemyTypeEnum.SHOTGUN) {
-            _this.frame = 2;
+        else if (this.eType == this.enemyTypeEnum.SHOTGUN) {
+            this.frame = 2;
         }
-        _this.smoothed = false;
-        _this.exists = true;
-        _this.anchor.setTo(0.5, 0.5);
-        _this.scale.setTo(2.2, 2.2);
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.collideWorldBounds = true;
-        _this.body.setSize(28, 49, 2, 2);
-        _this.maxHealth = 1;
-        _this.eAim = false;
-        _this.aim = false;
-        _this.fireBreak = false;
-        _this.eVelocityX = 0;
-        _this.eVelocityY = 0;
-        _this.fireTimer = _this.game.time.now + 3000;
-        if (_this.eType == _this.enemyTypeEnum.LASER) {
-            _this.weapon = game.add.weapon(200, 'laser');
+        this.smoothed = false;
+        this.exists = true;
+        this.anchor.setTo(0.5, 0.5);
+        this.scale.setTo(2.2, 2.2);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.collideWorldBounds = true;
+        this.body.setSize(28, 49, 2, 2);
+        this.maxHealth = 1;
+        this.eAim = false;
+        this.aim = false;
+        this.fireBreak = false;
+        this.eVelocityX = 0;
+        this.eVelocityY = 0;
+        this.fireTimer = this.game.time.now + 3000;
+        if (this.eType == this.enemyTypeEnum.LASER) {
+            this.weapon = game.add.weapon(200, 'laser');
         }
         else {
-            _this.weapon = game.add.weapon(100, 'bullet');
+            this.weapon = game.add.weapon(100, 'bullet');
         }
-        _this.weapon.bullets.forEach(function (b) {
+        this.weapon.bullets.forEach(function (b) {
             b.scale.setTo(1.5, 1.5);
-        }, _this);
-        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 350;
-        _this.weapon.fireRate = 500;
-        _this.weapon.bulletAngleOffset = 90;
-        if (_this.eType == _this.enemyTypeEnum.BASE) {
-            _this.weapon.fireRate = 2000;
-            _this.weapon.bulletAngleVariance = 10;
-            _this.eSpeed = 125;
+        }, this);
+        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.weapon.bulletSpeed = 350;
+        this.weapon.fireRate = 500;
+        this.weapon.bulletAngleOffset = 90;
+        if (this.eType == this.enemyTypeEnum.BASE) {
+            this.weapon.fireRate = 2000;
+            this.weapon.bulletAngleVariance = 10;
+            this.eSpeed = 125;
         }
-        else if (_this.eType == _this.enemyTypeEnum.RAPID) {
-            _this.weapon.fireRate = 500;
-            _this.weapon.bulletAngleVariance = 5;
-            _this.eSpeed = 200;
+        else if (this.eType == this.enemyTypeEnum.RAPID) {
+            this.weapon.fireRate = 500;
+            this.weapon.bulletAngleVariance = 5;
+            this.eSpeed = 200;
         }
-        else if (_this.eType == _this.enemyTypeEnum.LASER) {
-            _this.weapon.fireRate = 10;
-            _this.eSpeed = 75;
+        else if (this.eType == this.enemyTypeEnum.LASER) {
+            this.weapon.fireRate = 10;
+            this.eSpeed = 75;
         }
         else {
-            _this.weapon.fireRate = 0;
-            _this.eSpeed = 100;
+            this.weapon.fireRate = 0;
+            this.eSpeed = 100;
         }
-        _this.room = room;
-        _this.player = player;
-        game.add.existing(_this);
-        return _this;
+        this.room = room;
+        this.player = player;
+        game.add.existing(this);
     }
     //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
     //  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███ ███  
@@ -1259,6 +1251,5 @@ var Enemy = (function (_super) {
         this.fireBreak = false;
     };
     return Enemy;
-}(Phaser.Sprite // -----------------------------------------------------Enemy code
-));
+}(Phaser.Sprite));
 //# sourceMappingURL=app.js.map
