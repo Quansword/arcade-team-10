@@ -25,6 +25,7 @@ window.onload = function ()
 	let lives: Phaser.Group;
 	var healthDrops;
 	var hud;
+	let pClearCircle: Phaser.Sprite;
 
 	var map;
 	var layer;
@@ -104,6 +105,13 @@ window.onload = function ()
 			hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
 		}
 
+		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
+		pClearCircle.anchor.setTo(0.5, 0.5);
+		game.physics.arcade.enable(pClearCircle);
+		pClearCircle.body.setCircle(player.body.width * 2.5);
+		pClearCircle.body.immovable = true;
+		pClearCircle.kill();
+
         laserGate1 = new Barrier(8500, 1410, 1.25, 1, game);
         laserGate2 = new Barrier(8500, 1510, 1.25, 1, game);
         laserGate3 = new Barrier(8500, 1610, 1.25, 1, game);
@@ -146,18 +154,26 @@ window.onload = function ()
 		game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
 		for (var i = 0; i < enemies.children.length; i++)
 		{
-			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
-            game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
-            game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
-            game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
+			if (player.canDamage)
+			{
+				game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
+			}
+			game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
+			game.physics.arcade.collide(enemies.children[i].weapon.bullets, pClearCircle, clearBullet);
 
-            if (player.alive)
-            {
-                for (var j = 0; j < player.saberHitBoxes.children.length; j++)
-                {
-                    game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
-                }
-            }
+			game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
+			game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
+
+			if (player.alive)
+			{
+				for (var j = 0; j < player.saberHitBoxes.children.length; j++)
+				{
+					if (enemies.children[i].eType != 3)
+					{
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+					}
+				}
+			}
 		}
 
 		for (var j = 0; j < player.saberHitBoxes.children.length; j++)
@@ -219,6 +235,11 @@ window.onload = function ()
 
 	//function render()
 	//{
+	//	if (pClearCircle.alive)
+	//	{
+	//		game.debug.bodyInfo(pClearCircle, 32, 32);
+	//		game.debug.body(pClearCircle);
+	//	}
 	//	game.debug.bodyInfo(player, 32, 32);
 	//	game.debug.body(player);
 	//	game.debug.rectangle(bossRoom);
@@ -252,7 +273,6 @@ window.onload = function ()
 		bullet.body.velocity.y = -bullet.body.velocity.y;
 		player.weapon.bullets.add(bullet);
 		bullet.rotation += Math.PI;
-
 	}
 
 	function saberHitEnemy(saber, enemy: Enemy) // -----------------------------------------------------Enemy code
@@ -292,8 +312,9 @@ window.onload = function ()
 				playerInvuln();
 				playerVisible();
 				game.time.events.repeat(200, 3, playerVisible, this);
-				game.time.events.add(800, playerInvuln, this);
+				game.time.events.add(1000, playerInvuln, this);
 			}
+			playerClear();
 		}
 	}
 
@@ -305,6 +326,19 @@ window.onload = function ()
 	function playerInvuln()
 	{
 		player.canDamage = !player.canDamage;
+	}
+
+	function playerClear()
+	{
+		pClearCircle.revive();
+		pClearCircle.position.x = player.body.position.x - (player.body.width * 2);
+		pClearCircle.position.y = player.body.position.y - (player.body.width * 2);
+		game.time.events.add(2000, endClear, this);
+	}
+
+	function endClear()
+	{
+		pClearCircle.kill();
 	}
 
 	function healPlayer(player: Player, hNum: number)
@@ -348,17 +382,26 @@ window.onload = function ()
 
 	function createEnemies()
 	{
-		var enemy1 = new Enemy(8500, 900, 0, player, bossRoom, game);
+		var enemy1 = new Enemy(8200, 800, 0, player, bossRoom, game);
 		enemies.add(enemy1);
 
-		var enemy2 = new Enemy(8500, 800, 1, player, bossRoom, game);
+		var enemy2 = new Enemy(8500, 800, 0, player, bossRoom, game);
 		enemies.add(enemy2);
 
-		var enemy3 = new Enemy(8500, 700, 2, player, bossRoom, game);
+		var enemy3 = new Enemy(8800, 800, 0, player, bossRoom, game);
 		enemies.add(enemy3);
 
-		var enemy4 = new Enemy(8500, 600, 3, player, bossRoom, game);
+		var enemy4 = new Enemy(8500, 700, 1, player, bossRoom, game);
 		enemies.add(enemy4);
+
+		var enemy5 = new Enemy(8300, 700, 2, player, bossRoom, game);
+		enemies.add(enemy5);
+
+		var enemy6 = new Enemy(8700, 700, 2, player, bossRoom, game);
+		enemies.add(enemy6);
+
+		var enemy7 = new Enemy(8500, 600, 3, player, bossRoom, game);
+		enemies.add(enemy7);
 	}
 
 	function killPlayer(player: Player)
@@ -379,9 +422,14 @@ window.onload = function ()
 		}
 	}
 
-	function killBullet(bullet: Phaser.Bullet, layer)
+	function killBullet(bullet: Phaser.Bullet, other)
 	{
 		bullet.kill();
+	}
+
+	function clearBullet(bullet: Phaser.Bullet, clear: Phaser.Sprite)
+	{
+		clear.kill();
 	}
 
 	function killBulletGate(bullet: Phaser.Bullet, layer)
@@ -1052,6 +1100,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	eAim: boolean;
 	aim: boolean;
 	fireBreak: boolean;
+	secondShot: number;
 
 	fireTimer: number;
 	dead: boolean;
@@ -1114,9 +1163,10 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 			b.scale.setTo(1.5, 1.5);
 		}, this);
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.weapon.bulletSpeed = 350;
+		this.weapon.bulletSpeed = 300
 		this.weapon.fireRate = 500;
 		this.weapon.bulletAngleOffset = 90;
+		this.secondShot = 0;
 
 		if (this.eType == this.enemyTypeEnum.BASE)
 		{
@@ -1126,12 +1176,13 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 		else if (this.eType == this.enemyTypeEnum.RAPID)
 		{
-			this.weapon.fireRate = 500;
-			this.weapon.bulletAngleVariance = 5;
+			this.weapon.fireRate = 400;
+			this.weapon.bulletAngleVariance = 10;
 			this.eSpeed = 200;
 		}
 		else if (this.eType == this.enemyTypeEnum.LASER)
 		{
+			this.weapon.bulletSpeed = 500;
 			this.weapon.fireRate = 10;
 			this.eSpeed = 75;
 		}
@@ -1170,12 +1221,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				{
 					if (this.body.position.x <= this.player.position.x)
 					{
-						if (this.body.position.x < this.player.body.position.x - 200)
+						if (this.body.position.x < this.player.body.position.x - 300)
 						{
 							this.eMoveLeft = false;
 							this.eMoveRight = true;
 						}
-						else if (this.body.position.x > this.player.body.position.x - 150)
+						else if (this.body.position.x > this.player.body.position.x - 250)
 						{
 							this.eMoveLeft = true;
 							this.eMoveRight = false;
@@ -1188,12 +1239,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						if (this.body.position.x > this.player.body.position.x + 200)
+						if (this.body.position.x > this.player.body.position.x + 300)
 						{
 							this.eMoveLeft = true;
 							this.eMoveRight = false;
 						}
-						else if (this.body.position.x < this.player.body.position.x + 150)
+						else if (this.body.position.x < this.player.body.position.x + 250)
 						{
 							this.eMoveLeft = false;
 							this.eMoveRight = true;
@@ -1207,12 +1258,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 					if (this.body.position.y <= this.player.body.position.y)
 					{
-						if (this.body.position.y < this.player.body.position.y - 200)
+						if (this.body.position.y < this.player.body.position.y - 300)
 						{
 							this.eMoveUp = false;
 							this.eMoveDown = true;
 						}
-						else if (this.body.position.y > this.player.body.position.y - 150)
+						else if (this.body.position.y > this.player.body.position.y - 250)
 						{
 							this.eMoveUp = true;
 							this.eMoveDown = false;
@@ -1225,12 +1276,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						if (this.body.position.y > this.player.body.position.y + 200)
+						if (this.body.position.y > this.player.body.position.y + 300)
 						{
 							this.eMoveUp = true;
 							this.eMoveDown = false;
 						}
-						else if (this.body.position.y < this.player.body.position.y + 150)
+						else if (this.body.position.y < this.player.body.position.y + 250)
 						{
 							this.eMoveUp = false;
 							this.eMoveDown = true;
@@ -1246,7 +1297,162 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				{
 					if (this.body.position.x <= this.player.body.position.x)
 					{
-						if (this.body.position.x < this.player.body.position.x - 350)
+						if (this.body.position.x < this.player.body.position.x - 450)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 350)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.x > this.player.position.x + 400)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 350)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+					}
+
+					if (this.body.position.y <= this.player.position.y)
+					{
+						if (this.body.position.y < this.player.position.y - 400)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 350)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.y > this.player.position.y + 400)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 350)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+					}
+				}
+			}
+			else if (this.eType == this.enemyTypeEnum.RAPID)
+			{
+				if (time < 250)
+				{
+					if (this.body.position.x <= this.player.position.x)
+					{
+						if (this.body.position.x < this.player.position.x - 250)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 200)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.x > this.player.position.x + 250)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 200)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+					}
+
+					if (this.body.position.y <= this.player.position.y)
+					{
+						if (this.body.position.y < this.player.position.y - 250)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 200)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+					}
+					else
+					{
+						if (this.body.position.y > this.player.position.y + 250)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 200)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+					}
+				}
+				else
+				{
+					if (this.body.position.x <= this.player.position.x)
+					{
+						if (this.body.position.x < this.player.position.x - 300)
 						{
 							this.eMoveLeft = false;
 							this.eMoveRight = true;
@@ -1264,7 +1470,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						if (this.body.position.x > this.player.position.x + 350)
+						if (this.body.position.x > this.player.position.x + 300)
 						{
 							this.eMoveLeft = true;
 							this.eMoveRight = false;
@@ -1283,7 +1489,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 					if (this.body.position.y <= this.player.position.y)
 					{
-						if (this.body.position.y < this.player.position.y - 350)
+						if (this.body.position.y < this.player.position.y - 300)
 						{
 							this.eMoveUp = false;
 							this.eMoveDown = true;
@@ -1301,7 +1507,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						if (this.body.position.y > this.player.position.y + 350)
+						if (this.body.position.y > this.player.position.y + 300)
 						{
 							this.eMoveUp = true;
 							this.eMoveDown = false;
@@ -1319,234 +1525,82 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 				}
 			}
-			else if (this.eType == this.enemyTypeEnum.RAPID)
-			{
-				if (time < 500)
-				{
-					if (this.body.position.x <= this.player.position.x)
-					{
-						if (this.body.position.x < this.player.position.x - 150)
-						{
-							this.eMoveLeft = false;
-							this.eMoveRight = true;
-						}
-						else if (this.body.position.x > this.player.position.x - 100)
-						{
-							this.eMoveLeft = true;
-							this.eMoveRight = false;
-						}
-						else
-						{
-							this.eMoveLeft = false;
-							this.eMoveRight = true;
-						}
-					}
-					else
-					{
-						if (this.body.position.x > this.player.position.x + 150)
-						{
-							this.eMoveLeft = true;
-							this.eMoveRight = false;
-						}
-						else if (this.body.position.x < this.player.position.x + 100)
-						{
-							this.eMoveLeft = false;
-							this.eMoveRight = true;
-						}
-						else
-						{
-							this.eMoveLeft = true;
-							this.eMoveRight = false;
-						}
-					}
-
-					if (this.body.position.y <= this.player.position.y)
-					{
-						if (this.body.position.y < this.player.position.y - 150)
-						{
-							this.eMoveUp = false;
-							this.eMoveDown = true;
-						}
-						else if (this.body.position.y > this.player.position.y - 100)
-						{
-							this.eMoveUp = true;
-							this.eMoveDown = false;
-						}
-						else
-						{
-							this.eMoveUp = false;
-							this.eMoveDown = true;
-						}
-					}
-					else
-					{
-						if (this.body.position.y > this.player.position.y + 150)
-						{
-							this.eMoveUp = true;
-							this.eMoveDown = false;
-						}
-						else if (this.body.position.y < this.player.position.y + 100)
-						{
-							this.eMoveUp = false;
-							this.eMoveDown = true;
-						}
-						else
-						{
-							this.eMoveUp = true;
-							this.eMoveDown = false;
-						}
-					}
-				}
-				else
-				{
-					if (this.body.position.x <= this.player.position.x)
-					{
-						if (this.body.position.x < this.player.position.x - 200)
-						{
-							this.eMoveLeft = false;
-							this.eMoveRight = true;
-						}
-						else if (this.body.position.x > this.player.position.x - 150)
-						{
-							this.eMoveLeft = true;
-							this.eMoveRight = false;
-						}
-						else
-						{
-							this.eMoveLeft = false;
-							this.eMoveRight = true;
-						}
-					}
-					else
-					{
-						if (this.body.position.x > this.player.position.x + 200)
-						{
-							this.eMoveLeft = true;
-							this.eMoveRight = false;
-						}
-						else if (this.body.position.x < this.player.position.x + 150)
-						{
-							this.eMoveLeft = false;
-							this.eMoveRight = true;
-						}
-						else
-						{
-							this.eMoveLeft = true;
-							this.eMoveRight = false;
-						}
-					}
-
-					if (this.body.position.y <= this.player.position.y)
-					{
-						if (this.body.position.y < this.player.position.y - 200)
-						{
-							this.eMoveUp = false;
-							this.eMoveDown = true;
-						}
-						else if (this.body.position.y > this.player.position.y - 150)
-						{
-							this.eMoveUp = true;
-							this.eMoveDown = false;
-						}
-						else
-						{
-							this.eMoveUp = false;
-							this.eMoveDown = true;
-						}
-					}
-					else
-					{
-						if (this.body.position.y > this.player.position.y + 200)
-						{
-							this.eMoveUp = true;
-							this.eMoveDown = false;
-						}
-						else if (this.body.position.y < this.player.position.y + 150)
-						{
-							this.eMoveUp = false;
-							this.eMoveDown = true;
-						}
-						else
-						{
-							this.eMoveUp = true;
-							this.eMoveDown = false;
-						}
-					}
-				}
-			}
 			else if (this.eType == this.enemyTypeEnum.LASER)
 			{
-				if (this.body.position.x <= this.player.position.x)
+				if (!this.fireBreak)
 				{
-					if (this.body.position.x < this.player.position.x - 350)
+					if (this.body.position.x <= this.player.position.x)
 					{
-						this.eMoveLeft = false;
-						this.eMoveRight = true;
-					}
-					else if (this.body.position.x > this.player.position.x - 250)
-					{
-						this.eMoveLeft = true;
-						this.eMoveRight = false;
+						if (this.body.position.x < this.player.position.x - 450)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else if (this.body.position.x > this.player.position.x - 350)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
 					}
 					else
 					{
-						this.eMoveLeft = true;
-						this.eMoveRight = false;
+						if (this.body.position.x > this.player.position.x + 450)
+						{
+							this.eMoveLeft = true;
+							this.eMoveRight = false;
+						}
+						else if (this.body.position.x < this.player.position.x + 350)
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
+						else
+						{
+							this.eMoveLeft = false;
+							this.eMoveRight = true;
+						}
 					}
-				}
-				else
-				{
-					if (this.body.position.x > this.player.position.x + 350)
-					{
-						this.eMoveLeft = true;
-						this.eMoveRight = false;
-					}
-					else if (this.body.position.x < this.player.position.x + 250)
-					{
-						this.eMoveLeft = false;
-						this.eMoveRight = true;
-					}
-					else
-					{
-						this.eMoveLeft = false;
-						this.eMoveRight = true;
-					}
-				}
 
-				if (this.body.position.y <= this.player.position.y)
-				{
-					if (this.body.position.y < this.player.position.y - 350)
+					if (this.body.position.y <= this.player.position.y)
 					{
-						this.eMoveUp = false;
-						this.eMoveDown = true;
-					}
-					else if (this.body.position.y > this.player.position.y - 250)
-					{
-						this.eMoveUp = true;
-						this.eMoveDown = false;
-					}
-					else
-					{
-						this.eMoveUp = true;
-						this.eMoveDown = false;
-					}
-				}
-				else
-				{
-					if (this.body.position.y > this.player.position.y + 350)
-					{
-						this.eMoveUp = true;
-						this.eMoveDown = false;
-					}
-					else if (this.body.position.y < this.player.position.y + 250)
-					{
-						this.eMoveUp = false;
-						this.eMoveDown = true;
+						if (this.body.position.y < this.player.position.y - 450)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else if (this.body.position.y > this.player.position.y - 350)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
 					}
 					else
 					{
-						this.eMoveUp = false;
-						this.eMoveDown = true;
+						if (this.body.position.y > this.player.position.y + 450)
+						{
+							this.eMoveUp = true;
+							this.eMoveDown = false;
+						}
+						else if (this.body.position.y < this.player.position.y + 350)
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
+						else
+						{
+							this.eMoveUp = false;
+							this.eMoveDown = true;
+						}
 					}
 				}
 			}
@@ -1556,12 +1610,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				{
 					if (this.body.position.x <= this.player.position.x)
 					{
-						if (this.body.position.x < this.player.position.x - 150)
+						if (this.body.position.x < this.player.position.x - 250)
 						{
 							this.eMoveLeft = false;
 							this.eMoveRight = true;
 						}
-						else if (this.body.position.x > this.player.position.x - 100)
+						else if (this.body.position.x > this.player.position.x - 200)
 						{
 							this.eMoveLeft = true;
 							this.eMoveRight = false;
@@ -1574,12 +1628,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						if (this.body.position.x > this.player.position.x + 150)
+						if (this.body.position.x > this.player.position.x + 250)
 						{
 							this.eMoveLeft = true;
 							this.eMoveRight = false;
 						}
-						else if (this.body.position.x < this.player.position.x + 100)
+						else if (this.body.position.x < this.player.position.x + 200)
 						{
 							this.eMoveLeft = false;
 							this.eMoveRight = true;
@@ -1593,12 +1647,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 					if (this.body.position.y <= this.player.position.y)
 					{
-						if (this.body.position.y < this.player.position.y - 150)
+						if (this.body.position.y < this.player.position.y - 250)
 						{
 							this.eMoveUp = false;
 							this.eMoveDown = true;
 						}
-						else if (this.body.position.y > this.player.position.y - 100)
+						else if (this.body.position.y > this.player.position.y - 200)
 						{
 							this.eMoveUp = true;
 							this.eMoveDown = false;
@@ -1611,12 +1665,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						if (this.body.position.y > this.player.position.y + 150)
+						if (this.body.position.y > this.player.position.y + 250)
 						{
 							this.eMoveUp = true;
 							this.eMoveDown = false;
 						}
-						else if (this.body.position.y < this.player.position.y + 100)
+						else if (this.body.position.y < this.player.position.y + 200)
 						{
 							this.eMoveUp = false;
 							this.eMoveDown = true;
@@ -1632,12 +1686,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				{
 					if (this.body.position.x <= this.player.position.x)
 					{
-						if (this.body.position.x < this.player.position.x - 200)
+						if (this.body.position.x < this.player.position.x - 300)
 						{
 							this.eMoveLeft = false;
 							this.eMoveRight = true;
 						}
-						else if (this.body.position.x > this.player.position.x - 150)
+						else if (this.body.position.x > this.player.position.x - 250)
 						{
 							this.eMoveLeft = true;
 							this.eMoveRight = false;
@@ -1650,12 +1704,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						if (this.body.position.x > this.player.position.x + 200)
+						if (this.body.position.x > this.player.position.x + 300)
 						{
 							this.eMoveLeft = true;
 							this.eMoveRight = false;
 						}
-						else if (this.body.position.x < this.player.position.x + 150)
+						else if (this.body.position.x < this.player.position.x + 250)
 						{
 							this.eMoveLeft = false;
 							this.eMoveRight = true;
@@ -1669,12 +1723,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 					if (this.body.position.y <= this.player.position.y)
 					{
-						if (this.body.position.y < this.player.position.y - 200)
+						if (this.body.position.y < this.player.position.y - 300)
 						{
 							this.eMoveUp = false;
 							this.eMoveDown = true;
 						}
-						else if (this.body.position.y > this.player.position.y - 150)
+						else if (this.body.position.y > this.player.position.y - 250)
 						{
 							this.eMoveUp = true;
 							this.eMoveDown = false;
@@ -1687,12 +1741,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						if (this.body.position.y > this.player.position.y + 200)
+						if (this.body.position.y > this.player.position.y + 300)
 						{
 							this.eMoveUp = true;
 							this.eMoveDown = false;
 						}
-						else if (this.body.position.y < this.player.position.y + 150)
+						else if (this.body.position.y < this.player.position.y + 250)
 						{
 							this.eMoveUp = false;
 							this.eMoveDown = true;
@@ -1730,11 +1784,11 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				{
 					if (this.eType == this.enemyTypeEnum.BASE)
 					{
-						this.fireTimer = this.game.time.now + 3000;
+						this.fireTimer = this.game.time.now + 2000;
 					}
 					else if (this.eType == this.enemyTypeEnum.RAPID)
 					{
-						this.fireTimer = this.game.time.now + 500;
+						this.fireTimer = this.game.time.now + 400;
 					}
 					else if (this.eType == this.enemyTypeEnum.LASER)
 					{
@@ -1742,7 +1796,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					}
 					else
 					{
-						this.fireTimer = this.game.time.now + 5000;
+						this.fireTimer = this.game.time.now + 4000;
 					}
 					this.eAim = true;
 				}
@@ -1753,7 +1807,6 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				}
 
 				this.weapon.trackSprite(this, 0, 0);
-				this.weapon.fireAngle = 0;
 
 				this.ePathfinding(this.fireTimer - this.game.time.now);
 
@@ -1800,9 +1853,21 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 				if (this.aim)
 				{
-					var fireDegree = this.game.physics.arcade.angleBetween(this.body, this.player.body);
-					fireDegree = fireDegree * 57.2958;
-					this.weapon.fireAngle = fireDegree;
+					if (this.eType == this.enemyTypeEnum.LASER && !this.fireBreak)
+					{
+						var prediction = new Phaser.Rectangle(this.player.body.position.x, this.player.body.position.y, this.player.body.width, this.player.body.height);
+						prediction.x = prediction.x + (this.player.body.velocity.x * 3);
+						prediction.y = prediction.y + (this.player.body.velocity.y * 3);
+						var fireDegree = this.game.physics.arcade.angleBetween(this.body, prediction);
+						fireDegree = fireDegree * 57.2958;
+						this.weapon.fireAngle = fireDegree;
+					}
+					else if (this.eType != this.enemyTypeEnum.LASER)
+					{
+						var fireDegree = this.game.physics.arcade.angleBetween(this.body, this.player.body);
+						fireDegree = fireDegree * 57.2958;
+						this.weapon.fireAngle = fireDegree;
+					}
 
 					if (this.eType == this.enemyTypeEnum.SHOTGUN)
 					{
@@ -1815,6 +1880,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						this.weapon.fire();
 						this.weapon.fireAngle += 15;
 						this.weapon.fire();
+						this.secondShot = this.weapon.fireAngle;
+						this.game.time.events.add(500, this.eSecondShot, this);
 					}
 					else if (this.eType == this.enemyTypeEnum.LASER)
 					{
@@ -1822,7 +1889,16 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						if (!this.fireBreak)
 						{
 							this.fireBreak = true;
-							this.game.time.events.add(4000, this.eLaserDelay, this);
+							this.game.time.events.add(4000, this.eFireDelay, this);
+						}
+					}
+					else if (this.eType == this.enemyTypeEnum.RAPID)
+					{
+						this.weapon.fire();
+						if (!this.fireBreak)
+						{
+							this.fireBreak = true;
+							this.game.time.events.add(6000, this.eFireDelay, this);
 						}
 					}
 					else
@@ -1841,9 +1917,30 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 	}
 
-	eLaserDelay()
+	eSecondShot()
 	{
-		this.fireTimer = this.game.time.now + 3500;
+		this.weapon.fireAngle = this.secondShot;
+		this.weapon.fire();
+		this.weapon.fireAngle -= 15;
+		this.weapon.fire();
+		this.weapon.fireAngle -= 15;
+		this.weapon.fire();
+		this.weapon.fireAngle -= 30;
+		this.weapon.fire();
+		this.weapon.fireAngle -= 15;
+		this.weapon.fire();
+	}
+
+	eFireDelay()
+	{
+		if (this.eType == this.enemyTypeEnum.LASER)
+		{
+			this.fireTimer = this.game.time.now + 3500;
+		}
+		else
+		{
+			this.fireTimer = this.game.time.now + 2000;
+		}
 		this.fireBreak = false;
 	}
-};
+}
