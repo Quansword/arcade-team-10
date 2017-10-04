@@ -27,6 +27,9 @@ window.onload = function () {
     var hud;
     var map;
     var layer;
+    var laserGate1;
+    var laserGate2;
+    var laserGate3;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
@@ -34,8 +37,8 @@ window.onload = function () {
         game.load.image('laser', 'assets/Laser.png');
         game.load.tilemap('map', 'assets/Map.csv', null, Phaser.Tilemap.CSV);
         game.load.image('background', 'assets/Level1.png');
-        game.load.image('life', 'assets/life.png');
         game.load.image('heart', 'assets/Heart.png');
+        game.load.spritesheet('laserH', 'assets/LaserH.png', 224, 64, 6, 0, 0);
         game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
     }
     function create() {
@@ -74,6 +77,9 @@ window.onload = function () {
             hud.children[i].scale.setTo(1.5, 1.5);
             hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
         }
+        laserGate1 = new Barrier(8500, 1410, game);
+        laserGate2 = new Barrier(8500, 1510, game);
+        laserGate3 = new Barrier(8500, 1610, game);
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -96,13 +102,37 @@ window.onload = function () {
         for (var i = 0; i < enemies.children.length; i++) {
             game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
-            for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
-                game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+            game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
+            if (player.alive) {
+                for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
+                    game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
+                }
             }
         }
         for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
             game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies, saberHitEnemy, null, this);
         }
+        if (laserGate1.isActivated) {
+            game.physics.arcade.collide(player, laserGate1);
+        }
+        else {
+            game.physics.arcade.overlap(player, laserGate1, activateGate, null, this);
+        }
+        if (laserGate2.isActivated) {
+            game.physics.arcade.collide(player, laserGate2);
+        }
+        else {
+            game.physics.arcade.overlap(player, laserGate2, activateGate, null, this);
+        }
+        if (laserGate3.isActivated) {
+            game.physics.arcade.collide(player, laserGate3);
+        }
+        else {
+            game.physics.arcade.overlap(player, laserGate3, activateGate, null, this);
+        }
+        laserGate1.update();
+        laserGate2.update();
+        laserGate3.update();
         //render();
     }
     //function render()
@@ -143,6 +173,11 @@ window.onload = function () {
     }
     function enemyHitPlayer(player, enemy) {
         damagePlayer(player, 1);
+    }
+    function activateGate(player, laserGate) {
+        if (player.body.position.y < laserGate.position.y - 30) {
+            laserGate.activate();
+        }
     }
     function damagePlayer(player, dNum) {
         if (player.canDamage) {
@@ -200,25 +235,6 @@ window.onload = function () {
         var enemy4 = new Enemy(8500, 600, 3, player, bossRoom, game);
         enemies.add(enemy4);
     }
-    //function createWalls()
-    //{
-    //	walls = game.add.physicsGroup();
-    //	//Spawn Room walls
-    //	var wall1 = new Barrier(760, 810, 1170, 120, game, walls, 'wall');
-    //	var wall2 = new Barrier(2100, 810, 1170, 120, game, walls, 'wall');
-    //	var wall3 = new Barrier(2377, 1120, 896, 90, game, walls, 'wall');
-    //	var wall4 = new Barrier(1300, 1570, 1430, 120, game, walls, 'wall');
-    //	var wall5 = new Barrier(1300, 930, 350, 670, game, walls, 'wall');
-    //	var wall6 = new Barrier(2377, 930, 350, 280, game, walls, 'wall');
-    //	var wall7 = new Barrier(2380, 1380, 350, 250, game, walls, 'wall');
-    //	// Room abve spawn room
-    //	var wall8 = new Barrier(2100, 620, 47, 300, game, walls, 'wall');
-    //	var wall9 = new Barrier(1882, 540, 265, 80, game, walls, 'wall');
-    //	var wall10 = new Barrier(1300, 540, 360, 80, game, walls, 'wall');
-    //	var wall12 = new Barrier(1300, 540, 90, 300, game, walls, 'wall');
-    //	var wall15 = new Barrier(1882, 272, 45, 340, game, walls, 'wall');
-    //	walls.enableBody = true;
-    //}
     function killPlayer(player) {
         var life = lives.getFirstAlive();
         if (life) {
@@ -233,6 +249,9 @@ window.onload = function () {
     }
     function killBullet(bullet, layer) {
         bullet.kill();
+    }
+    function killBulletGate(bullet, layer) {
+        layer.kill();
     }
     function dropHealth(x, y) {
         var rand = game.rnd.integerInRange(1, 100);
@@ -257,18 +276,33 @@ window.onload = function () {
 //  ███    ███   ███    ███   ███    ███   ███    ███ ███    ███    ███   ███    ███ 
 //▄█████████▀    ███    █▀    ███    ███   ███    ███ █▀     ██████████   ███    ███ 
 //                            ███    ███   ███    ███                     ███    ███ 
-//class Barrier extends Phaser.Sprite 
-//{
-//	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game, group: Phaser.Group, type: string)
-//	{
-//		super(game, xPos, yPos, type);
-//		this.scale.setTo(width, height);
-//		game.physics.arcade.enable(this);
-//		this.body.immovable = true;
-//		this.renderable = true;
-//		group.add(this);
-//	}
-//}
+var Barrier = (function (_super) {
+    __extends(Barrier, _super);
+    function Barrier(xPos, yPos, game) {
+        _super.call(this, game, xPos, yPos, "laserH");
+        game.physics.arcade.enable(this);
+        this.body.immovable = true;
+        this.scale.setTo(1.25, 1);
+        game.add.existing(this);
+        this.frame = 1;
+        this.off = this.animations.add('off', [5], 15, true);
+        this.turnOn = this.animations.add('turnOn', [1, 2, 3, 4], 15, false);
+        this.on = this.animations.add('on', [1, 2], 15, true);
+        this.play("off");
+    }
+    Barrier.prototype.activate = function () {
+        this.isActivated = true;
+        this.play("turnOn");
+    };
+    Barrier.prototype.update = function () {
+        if (this.isActivated) {
+            if (this.animations.currentAnim.isFinished) {
+                this.play("on");
+            }
+        }
+    };
+    return Barrier;
+}(Phaser.Sprite));
 //   ▄████████  ▄██████▄   ▄██████▄    ▄▄▄▄███▄▄▄▄   
 //  ███    ███ ███    ███ ███    ███ ▄██▀▀▀███▀▀▀██▄ 
 //  ███    ███ ███    ███ ███    ███ ███   ███   ███ 
