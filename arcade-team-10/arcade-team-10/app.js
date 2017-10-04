@@ -33,6 +33,8 @@ window.onload = function () {
     var laserGate3;
     var laserGate4;
     var boss;
+    var healthBar;
+    var healthBarCrop;
     var enemyKillCount;
     function preload() {
         game.stage.backgroundColor = '#eee';
@@ -47,6 +49,8 @@ window.onload = function () {
         game.load.spritesheet('laserH', 'assets/LaserH.png', 224, 64, 6, 0, 0);
         game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
         game.load.image('boss', 'assets/Boss.png');
+        game.load.image('bossHealth', 'assets/BossHealth.png');
+        game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
     }
     function create() {
         fullScreen();
@@ -84,6 +88,12 @@ window.onload = function () {
             hud.children[i].scale.setTo(1.5, 1.5);
             hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
         }
+        hud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
+        hud.children[player.maxHealth].scale.setTo(6.5, 2);
+        hud.children[player.maxHealth].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+        hud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
+        hud.children[player.maxHealth + 1].scale.setTo(6.5, 2);
+        hud.children[player.maxHealth + 1].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
         pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
         pClearCircle.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(pClearCircle);
@@ -132,6 +142,7 @@ window.onload = function () {
                     if (enemies.children[i].eType != 3) {
                         game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
                     }
+                    game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss, saberHitBoss, null, this);
                 }
             }
         }
@@ -164,12 +175,18 @@ window.onload = function () {
         laserGate3.update();
         laserGate4.update();
         if (boss.bossStage == boss.bossStageEnum.STEP_0) {
-            if (enemyKillCount == 7) {
+            if (enemyKillCount >= 7) {
                 boss.bossStage = boss.bossStageEnum.STEP_1;
                 laserGate4.deactivate();
             }
         }
-        render();
+        else if (boss.bossStage == boss.bossStageEnum.STEP_1) {
+            if (boss.health <= 70) {
+                boss.bossStage = boss.bossStageEnum.STEP_2;
+                laserGate4.activate();
+            }
+        }
+        //render();
     }
     function render() {
         if (pClearCircle.alive) {
@@ -199,6 +216,19 @@ window.onload = function () {
         bullet.body.velocity.y = -bullet.body.velocity.y;
         player.weapon.bullets.add(bullet);
         bullet.rotation += Math.PI;
+    }
+    function saberHitBoss(saber, temp) {
+        if (boss.canDamage) {
+            boss.health--;
+            hud.children[player.maxHealth + 1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
+            console.log(boss.health);
+            if (boss.health != 0) {
+                bossInvuln();
+                bossVisible();
+                game.time.events.repeat(200, 3, bossVisible, this);
+                game.time.events.add(1000, bossInvuln, this);
+            }
+        }
     }
     function saberHitEnemy(saber, enemy) {
         enemy.kill();
@@ -238,6 +268,12 @@ window.onload = function () {
     }
     function playerInvuln() {
         player.canDamage = !player.canDamage;
+    }
+    function bossVisible() {
+        boss.alpha = (boss.alpha + 1) % 2;
+    }
+    function bossInvuln() {
+        boss.canDamage = !boss.canDamage;
     }
     function playerClear() {
         pClearCircle.revive();
@@ -416,6 +452,9 @@ var Boss = (function (_super) {
         this.scale.setTo(2, 2);
         game.add.existing(this);
         this.bossStage = this.bossStageEnum.STEP_0;
+        this.maxHealth = 100;
+        this.health = 100;
+        this.canDamage = true;
     }
     return Boss;
 }(Phaser.Sprite));
@@ -478,28 +517,28 @@ var Player = (function (_super) {
     Player.prototype.createSaberHitBoxes = function () {
         this.saberHitBoxes = this.game.add.physicsGroup();
         this.addChild(this.saberHitBoxes);
-        this.rightSaber = this.game.add.sprite(10, 0, 'bleh');
+        this.rightSaber = this.game.add.sprite(10, 0);
         this.rightSaber.anchor.setTo(0.5, 0.5);
         this.rightSaber.scale.setTo(1.1, 1.8);
         this.game.physics.enable(this.rightSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.rightSaber);
         this.rightSaber.name = "rightSaber";
         this.disableHitbox("rightSaber");
-        this.leftSaber = this.game.add.sprite(-45, 0, 'bleh');
+        this.leftSaber = this.game.add.sprite(-45, 0);
         this.leftSaber.anchor.setTo(0.5, 0.5);
         this.leftSaber.scale.setTo(1.1, 1.8);
         this.game.physics.enable(this.leftSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.leftSaber);
         this.leftSaber.name = "leftSaber";
         this.disableHitbox("leftSaber");
-        this.topSaber = this.game.add.sprite(-18, -23, 'bleh');
+        this.topSaber = this.game.add.sprite(-18, -23);
         this.topSaber.anchor.setTo(0.5, 0.5);
         this.topSaber.scale.setTo(2, 0.9);
         this.game.physics.enable(this.topSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.topSaber);
         this.topSaber.name = "topSaber";
         this.disableHitbox("topSaber");
-        this.topRightSaber = this.game.add.sprite(3, -12, 'bleh');
+        this.topRightSaber = this.game.add.sprite(3, -12);
         this.topRightSaber.anchor.setTo(0.5, 0.5);
         this.topRightSaber.scale.setTo(2.2, 0.9);
         this.topRightSaber.rotation += 0.6;
@@ -507,7 +546,7 @@ var Player = (function (_super) {
         this.saberHitBoxes.addChild(this.topRightSaber);
         this.topRightSaber.name = "topRightSaber";
         this.disableHitbox("topRightSaber");
-        this.topLeftSaber = this.game.add.sprite(-38, -12, 'bleh');
+        this.topLeftSaber = this.game.add.sprite(-38, -12);
         this.topLeftSaber.anchor.setTo(0.5, 0.5);
         this.topLeftSaber.scale.setTo(2.2, 0.9);
         this.topLeftSaber.rotation -= 0.6;
@@ -515,14 +554,14 @@ var Player = (function (_super) {
         this.saberHitBoxes.addChild(this.topLeftSaber);
         this.topLeftSaber.name = "topLeftSaber";
         this.disableHitbox("topLeftSaber");
-        this.bottomSaber = this.game.add.sprite(-18, 40, 'bleh');
+        this.bottomSaber = this.game.add.sprite(-18, 40);
         this.bottomSaber.anchor.setTo(0.5, 0.5);
         this.bottomSaber.scale.setTo(2, 0.9);
         this.game.physics.enable(this.bottomSaber, Phaser.Physics.ARCADE);
         this.saberHitBoxes.addChild(this.bottomSaber);
         this.bottomSaber.name = "bottomSaber";
         this.disableHitbox("bottomSaber");
-        this.bottomRightSaber = this.game.add.sprite(3, 23, 'bleh');
+        this.bottomRightSaber = this.game.add.sprite(3, 23);
         this.bottomRightSaber.anchor.setTo(0.5, 0.5);
         this.bottomRightSaber.scale.setTo(2.2, 0.9);
         this.bottomRightSaber.rotation -= 0.6;
@@ -530,7 +569,7 @@ var Player = (function (_super) {
         this.saberHitBoxes.addChild(this.bottomRightSaber);
         this.bottomRightSaber.name = "bottomRightSaber";
         this.disableHitbox("bottomRightSaber");
-        this.bottomLeftSaber = this.game.add.sprite(-38, 23, 'bleh');
+        this.bottomLeftSaber = this.game.add.sprite(-38, 23);
         this.bottomLeftSaber.anchor.setTo(0.5, 0.5);
         this.bottomLeftSaber.scale.setTo(2.2, 0.9);
         this.bottomLeftSaber.rotation += 0.6;
