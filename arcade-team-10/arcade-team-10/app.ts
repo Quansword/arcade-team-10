@@ -223,7 +223,7 @@ window.onload = function ()
         console.log(enemyKillCount);
         if (boss.bossStage == boss.bossStageEnum.STEP_0)
         {
-            if (enemyKillCount == 4)
+            if (enemyKillCount == 7)
             {
                 boss.bossStage = boss.bossStageEnum.STEP_1;
                 laserGate4.deactivate();
@@ -233,23 +233,22 @@ window.onload = function ()
 		//render();
 	}
 
-	//function render()
-	//{
-	//	if (pClearCircle.alive)
-	//	{
-	//		game.debug.bodyInfo(pClearCircle, 32, 32);
-	//		game.debug.body(pClearCircle);
-	//	}
-	//	game.debug.bodyInfo(player, 32, 32);
-	//	game.debug.body(player);
-	//	game.debug.rectangle(bossRoom);
+	function render()
+	{
+		if (pClearCircle.alive)
+		{
+			game.debug.bodyInfo(pClearCircle, 32, 32);
+			game.debug.body(pClearCircle);
+		}
+		game.debug.bodyInfo(player, 32, 32);
+		game.debug.body(player);
 
-	//	for (var i = 0; i < enemies.children.length; i++)
-	//	{
-	//		game.debug.bodyInfo(enemies.children[i], 32, 32);
-	//		game.debug.body(enemies.children[i]);
-	//	}
-	//}
+		for (var i = 0; i < enemies.children.length; i++)
+		{
+			game.debug.bodyInfo(enemies.children[i], 32, 32);
+			game.debug.body(enemies.children[i]);
+		}
+	}
 
 	function fullScreen()
 	{
@@ -635,14 +634,14 @@ class Player extends Phaser.Sprite
 	constructor(xPos: number, yPos: number, game: Phaser.Game)
 	{
 		super(game, xPos, yPos, 'pSprite');
-		this.rAttack = this.animations.add('rAttack', [6, 7, 8, 9, 10, 11], 15);
-		this.lAttack = this.animations.add('lAttack', [12, 13, 14, 15, 16, 17], 15);
-		this.uAttack = this.animations.add('uAttack', [18, 19, 20, 21, 22, 23], 15);
-		this.dAttack = this.animations.add('dAttack', [24, 25, 26, 27, 28, 29], 15);
-		this.urAttack = this.animations.add('urAttack', [30, 31, 32, 33, 34, 35], 15);
-		this.ulAttack = this.animations.add('ulAttack', [36, 37, 38, 39, 40, 41], 15);
-		this.drAttack = this.animations.add('drAttack', [42, 43, 44, 45, 46, 47], 15);
-		this.dlAttack = this.animations.add('dlAttack', [48, 49, 50, 51, 52, 53], 15);
+		this.rAttack = this.animations.add('rAttack', [6, 7, 8, 9, 10, 11], 90);
+		this.lAttack = this.animations.add('lAttack', [12, 13, 14, 15, 16, 17], 90);
+		this.uAttack = this.animations.add('uAttack', [18, 19, 20, 21, 22, 23], 90);
+		this.dAttack = this.animations.add('dAttack', [24, 25, 26, 27, 28, 29], 90);
+		this.urAttack = this.animations.add('urAttack', [30, 31, 32, 33, 34, 35], 90);
+		this.ulAttack = this.animations.add('ulAttack', [36, 37, 38, 39, 40, 41], 90);
+		this.drAttack = this.animations.add('drAttack', [42, 43, 44, 45, 46, 47], 90);
+		this.dlAttack = this.animations.add('dlAttack', [48, 49, 50, 51, 52, 53], 90);
 		this.attacked = false;
 
 		this.frame = this.pDirEnum.RIGHT;
@@ -654,7 +653,7 @@ class Player extends Phaser.Sprite
 		this.scale.setTo(2.25, 2.25);
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
-		this.body.setSize(24, 42, 48, 48);
+		this.body.setSize(12, 12, 54, 64);
 		this.body.collideWorldBounds = true;
 		this.maxHealth = 5;
 		this.health = this.maxHealth;
