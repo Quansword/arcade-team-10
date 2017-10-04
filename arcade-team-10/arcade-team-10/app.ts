@@ -261,6 +261,7 @@ window.onload = function ()
             }
         }
 
+        boss.update();
 		//render();
 	}
 
@@ -642,6 +643,18 @@ class Boss extends Phaser.Sprite
         this.maxHealth = 100;
         this.health = 100;
         this.canDamage = true;
+    }
+
+    update()
+    {
+        if (this.bossStage == this.bossStageEnum.STEP_1)
+        {
+
+        }
+        else if (this.bossStage == this.bossStageEnum.STEP_2)
+        {
+
+        }
     }
 }
 
