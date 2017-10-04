@@ -17,7 +17,6 @@ window.onload = function ()
 	let keyState: Phaser.Keyboard;
 	let player: Player;
 	var enemies;
-	let enemyBullets: Phaser.Group;
 
 	//let walls: Phaser.Group;
 	let bossRoom: Room;
@@ -82,10 +81,6 @@ window.onload = function ()
 		enemies.enableBody = true;
 		enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
-		enemyBullets = game.add.physicsGroup();
-		enemyBullets.enableBody = true;
-		enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
-
 		createEnemies();
 
 		hud = game.add.group();
@@ -121,7 +116,6 @@ window.onload = function ()
 
 		game.physics.arcade.collide(player.weapon.bullets, layer, killBullet);
 		//game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
-		//game.physics.arcade.collide(enemyBullets, walls, killBullet);
 
 		game.physics.arcade.overlap(player, enemies, enemyHitPlayer);
 		game.physics.arcade.collide(enemies, enemies);
@@ -256,28 +250,28 @@ window.onload = function ()
 		dropHealth(enemy.position.x, enemy.position.y);
 	}
 
-//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████    ▄███████▄    ▄████████  ▄█     █▄  ███▄▄▄▄        
-//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███   ███    ███   ███    ███ ███     ███ ███▀▀▀██▄      
-//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███        ███    █▀    ███    ███   ███    ███ ███     ███ ███   ███      
-// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███        ███          ███    ███   ███    ███ ███     ███ ███   ███      
-//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ▀███████████ ▀█████████▀  ▀███████████ ███     ███ ███   ███      
-//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███               ███   ███          ███    ███ ███     ███ ███   ███      
-//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███         ▄█    ███   ███          ███    ███ ███ ▄█▄ ███ ███   ███      
-//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀        ▄████████▀   ▄████▀        ███    █▀   ▀███▀███▀   ▀█   █▀                                                                                                                                   
+	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████    ▄███████▄    ▄████████  ▄█     █▄  ███▄▄▄▄        
+	//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███   ███    ███   ███    ███ ███     ███ ███▀▀▀██▄      
+	//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███        ███    █▀    ███    ███   ███    ███ ███     ███ ███   ███      
+	// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███        ███          ███    ███   ███    ███ ███     ███ ███   ███      
+	//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ▀███████████ ▀█████████▀  ▀███████████ ███     ███ ███   ███      
+	//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███               ███   ███          ███    ███ ███     ███ ███   ███      
+	//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███         ▄█    ███   ███          ███    ███ ███ ▄█▄ ███ ███   ███      
+	//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀        ▄████████▀   ▄████▀        ███    █▀   ▀███▀███▀   ▀█   █▀                                                                                                                                   
 
 	function createEnemies()
 	{
 		var enemy1 = new Enemy(8500, 900, 0, player, bossRoom, game);
 		enemies.add(enemy1);
-		enemyBullets.add(enemy1.weapon.bullets);
 
 		var enemy2 = new Enemy(8500, 800, 1, player, bossRoom, game);
 		enemies.add(enemy2);
-		enemyBullets.add(enemy2.weapon.bullets);
 
 		var enemy3 = new Enemy(8500, 700, 2, player, bossRoom, game);
 		enemies.add(enemy3);
-		enemyBullets.add(enemy3.weapon.bullets);
+
+		var enemy4 = new Enemy(8500, 600, 3, player, bossRoom, game);
+		enemies.add(enemy4);
 	}
 
 	//function createWalls()
@@ -913,7 +907,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	eMoveRight: boolean;
 	eAim: boolean;
 	aim: boolean;
-	linedUp: boolean;
+	fireBreak: boolean;
 
 	fireTimer: number;
 	dead: boolean;
@@ -956,7 +950,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 		this.eAim = false;
 		this.aim = false;
-		this.linedUp = false;
+		this.fireBreak = false;
 
 		this.eVelocityX = 0;
 		this.eVelocityY = 0;
@@ -1007,6 +1001,15 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.player = player;
 		game.add.existing(this);
 	}
+
+//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
+//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███ ███  
+//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███        ███    ███ ███▌ 
+// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███        ███    ███ ███▌ 
+//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ▀███████████ ███▌ 
+//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███        ███    ███ ███  
+//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███        ███    ███ ███  
+//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀         ███    █▀  █▀   
 
 	ePathfinding(time: number)
 	{
@@ -1561,6 +1564,15 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 	}
 
+//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄        ███    █▄     ▄███████▄ ████████▄     ▄████████     ███        ▄████████ 
+//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄      ███    ███   ███    ███ ███   ▀███   ███    ███ ▀█████████▄   ███    ███ 
+//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███      ███    ███   ███    ███ ███    ███   ███    ███    ▀███▀▀██   ███    █▀  
+// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███      ███    ███   ███    ███ ███    ███   ███    ███     ███   ▀  ▄███▄▄▄     
+//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ███    ███ ▀█████████▀  ███    ███ ▀███████████     ███     ▀▀███▀▀▀     
+//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███      ███    ███   ███        ███    ███   ███    ███     ███       ███    █▄  
+//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███      ███    ███   ███        ███   ▄███   ███    ███     ███       ███    ███ 
+//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀       ████████▀   ▄████▀      ████████▀    ███    █▀     ▄████▀     ██████████ 
+
 	eUpdate(time: number)
 	{
 		if (this.alive)
@@ -1660,6 +1672,15 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						this.weapon.fireAngle += 15;
 						this.weapon.fire();
 					}
+					else if (this.eType == this.enemyTypeEnum.LASER)
+					{
+						this.weapon.fire();
+						if (!this.fireBreak)
+						{
+							this.fireBreak = true;
+							this.game.time.events.add(4000, this.eLaserDelay, this);
+						}
+					}
 					else
 					{
 						this.weapon.fire();
@@ -1674,5 +1695,11 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 				this.aim = false;
 			}
 		}
+	}
+
+	eLaserDelay()
+	{
+		this.fireTimer = this.game.time.now + 3500;
+		this.fireBreak = false;
 	}
 }

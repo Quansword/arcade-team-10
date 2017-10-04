@@ -24,7 +24,6 @@ window.onload = function () {
     var keyState;
     var player;
     var enemies;
-    var enemyBullets;
     //let walls: Phaser.Group;
     var bossRoom;
     var background;
@@ -71,9 +70,6 @@ window.onload = function () {
         enemies = game.add.group();
         enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
-        enemyBullets = game.add.physicsGroup();
-        enemyBullets.enableBody = true;
-        enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
         createEnemies();
         hud = game.add.group();
         hud.fixedToCamera = true;
@@ -99,7 +95,6 @@ window.onload = function () {
         game.physics.arcade.overlap(player, healthDrops, pickupHealth);
         game.physics.arcade.collide(player.weapon.bullets, layer, killBullet);
         //game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
-        //game.physics.arcade.collide(enemyBullets, walls, killBullet);
         game.physics.arcade.overlap(player, enemies, enemyHitPlayer);
         game.physics.arcade.collide(enemies, enemies);
         game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
@@ -203,13 +198,12 @@ window.onload = function () {
     function createEnemies() {
         var enemy1 = new Enemy(8500, 900, 0, player, bossRoom, game);
         enemies.add(enemy1);
-        enemyBullets.add(enemy1.weapon.bullets);
         var enemy2 = new Enemy(8500, 800, 1, player, bossRoom, game);
         enemies.add(enemy2);
-        enemyBullets.add(enemy2.weapon.bullets);
         var enemy3 = new Enemy(8500, 700, 2, player, bossRoom, game);
         enemies.add(enemy3);
-        enemyBullets.add(enemy3.weapon.bullets);
+        var enemy4 = new Enemy(8500, 600, 3, player, bossRoom, game);
+        enemies.add(enemy4);
     }
     //function createWalls()
     //{
@@ -697,7 +691,7 @@ var Enemy = (function (_super) {
         _this.maxHealth = 1;
         _this.eAim = false;
         _this.aim = false;
-        _this.linedUp = false;
+        _this.fireBreak = false;
         _this.eVelocityX = 0;
         _this.eVelocityY = 0;
         _this.fireTimer = _this.game.time.now + 3000;
@@ -737,6 +731,14 @@ var Enemy = (function (_super) {
         game.add.existing(_this);
         return _this;
     }
+    //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
+    //  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███ ███  
+    //  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███        ███    ███ ███▌ 
+    // ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███        ███    ███ ███▌ 
+    //▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ▀███████████ ███▌ 
+    //  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███        ███    ███ ███  
+    //  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███        ███    ███ ███  
+    //  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀         ███    █▀  █▀   
     Enemy.prototype.ePathfinding = function (time) {
         this.eMoveUp = false;
         this.eMoveRight = false;
@@ -1157,6 +1159,14 @@ var Enemy = (function (_super) {
             }
         }
     };
+    //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄        ███    █▄     ▄███████▄ ████████▄     ▄████████     ███        ▄████████ 
+    //  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄      ███    ███   ███    ███ ███   ▀███   ███    ███ ▀█████████▄   ███    ███ 
+    //  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███      ███    ███   ███    ███ ███    ███   ███    ███    ▀███▀▀██   ███    █▀  
+    // ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███      ███    ███   ███    ███ ███    ███   ███    ███     ███   ▀  ▄███▄▄▄     
+    //▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ███    ███ ▀█████████▀  ███    ███ ▀███████████     ███     ▀▀███▀▀▀     
+    //  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███      ███    ███   ███        ███    ███   ███    ███     ███       ███    █▄  
+    //  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███      ███    ███   ███        ███   ▄███   ███    ███     ███       ███    ███ 
+    //  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀       ████████▀   ▄████▀      ████████▀    ███    █▀     ▄████▀     ██████████ 
     Enemy.prototype.eUpdate = function (time) {
         if (this.alive) {
             if (this.room.active) {
@@ -1226,6 +1236,13 @@ var Enemy = (function (_super) {
                         this.weapon.fireAngle += 15;
                         this.weapon.fire();
                     }
+                    else if (this.eType == this.enemyTypeEnum.LASER) {
+                        this.weapon.fire();
+                        if (!this.fireBreak) {
+                            this.fireBreak = true;
+                            this.game.time.events.add(4000, this.eLaserDelay, this);
+                        }
+                    }
                     else {
                         this.weapon.fire();
                     }
@@ -1236,6 +1253,10 @@ var Enemy = (function (_super) {
                 this.aim = false;
             }
         }
+    };
+    Enemy.prototype.eLaserDelay = function () {
+        this.fireTimer = this.game.time.now + 3500;
+        this.fireBreak = false;
     };
     return Enemy;
 }(Phaser.Sprite // -----------------------------------------------------Enemy code
