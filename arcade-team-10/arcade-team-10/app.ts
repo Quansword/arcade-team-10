@@ -38,6 +38,7 @@ window.onload = function ()
     var boss: Boss;
     var healthBar;
     var healthBarCrop;
+    var bossHealthText;
 
     let enemyKillCount: number;
 
@@ -120,6 +121,11 @@ window.onload = function ()
         hud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
         hud.children[player.maxHealth + 1].scale.setTo(6.5, 2);
         hud.children[player.maxHealth + 1].position.set(game.camera.width / 4, game.camera.height/1.2, 5);
+
+        var style = { font: "bold 32px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
+        bossHealthText = game.add.text(game.camera.width / 3.3, game.camera.height /1.25, 'Boss Health ', style);
+        bossHealthText.setTextBounds(0, 0, 100, 100);
+        bossHealthText.fixedToCamera = true;
 
 		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
 		pClearCircle.anchor.setTo(0.5, 0.5);
