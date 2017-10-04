@@ -32,6 +32,9 @@ window.onload = function ()
     var laserGate1: Barrier;
     var laserGate2: Barrier;
     var laserGate3: Barrier;
+    var laserGate4: Barrier;
+
+    var boss: Boss;
 
 	function preload()
 	{
@@ -49,6 +52,7 @@ window.onload = function ()
         game.load.spritesheet('laserH', 'assets/LaserH.png', 224, 64, 6, 0, 0);
 
 		game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
+        game.load.image('boss', 'assets/Boss.png');
 	}
 
 	function create()
@@ -98,9 +102,13 @@ window.onload = function ()
 			hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
 		}
 
-        laserGate1 = new Barrier(8500, 1410, game);
-        laserGate2 = new Barrier(8500, 1510, game);
-        laserGate3 = new Barrier(8500, 1610, game);
+        laserGate1 = new Barrier(8500, 1410, 1.25, 1, game);
+        laserGate2 = new Barrier(8500, 1510, 1.25, 1, game);
+        laserGate3 = new Barrier(8500, 1610, 1.25, 1, game);
+        laserGate4 = new Barrier(7825, 400, 7.5, 1, game);
+        laserGate4.activate();
+
+        boss = new Boss (8400, 100, game);
 	}
 
 	function update()
@@ -135,6 +143,7 @@ window.onload = function ()
 			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
+            game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
 
             if (player.alive)
             {
@@ -178,9 +187,16 @@ window.onload = function ()
             game.physics.arcade.overlap(player, laserGate3, activateGate, null, this);
         }
 
+        if (laserGate4.isActivated)
+        {
+            game.physics.arcade.collide(player, laserGate4);
+        }
+
         laserGate1.update();
         laserGate2.update();
         laserGate3.update();
+
+        laserGate4.update();
 
 		//render();
 	}
@@ -389,20 +405,20 @@ class Barrier extends Phaser.Sprite
 {
     isActivated: boolean;
 	off: Phaser.Animation;
-	turnOn: Phaser.Animation;
+	switch: Phaser.Animation;
 	on: Phaser.Animation;
-	constructor(xPos: number, yPos: number, game: Phaser.Game)
+	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game)
 	{
 		super(game, xPos, yPos, "laserH");
 		game.physics.arcade.enable(this);
 		this.body.immovable = true;
-		this.scale.setTo(1.25, 1);
+		this.scale.setTo(width, height);
         game.add.existing(this);
 
 
         this.frame = 1;
 		this.off = this.animations.add('off', [5], 15, true);
-		this.turnOn = this.animations.add('turnOn', [1, 2, 3, 4], 15, false);
+		this.switch= this.animations.add('switch', [1, 2, 3, 4], 15, false);
 		this.on = this.animations.add('on', [1, 2], 15, true);
         this.play("off");
 	}
@@ -410,7 +426,13 @@ class Barrier extends Phaser.Sprite
     activate()
     {
         this.isActivated = true;
-        this.play("turnOn");
+        this.play("switch");
+    }
+
+    deactivate()
+    {
+        this.isActivated = false;
+        this.play("switch");
     }
 
     update()
@@ -420,6 +442,13 @@ class Barrier extends Phaser.Sprite
             if (this.animations.currentAnim.isFinished)
             {
                 this.play("on");
+            }
+        }
+        else if (!this.isActivated)
+        {
+            if (this.animations.currentAnim.isFinished)
+            {
+                this.play("off");
             }
         }
 
@@ -448,6 +477,27 @@ class Room extends Phaser.Sprite
 		this.active = false;
 
 	}
+}
+
+//▀█████████▄   ▄██████▄     ▄████████    ▄████████ 
+//  ███    ███ ███    ███   ███    ███   ███    ███ 
+//  ███    ███ ███    ███   ███    █▀    ███    █▀  
+// ▄███▄▄▄██▀  ███    ███   ███          ███        
+//▀▀███▀▀▀██▄  ███    ███ ▀███████████ ▀███████████ 
+//  ███    ██▄ ███    ███          ███          ███ 
+//  ███    ███ ███    ███    ▄█    ███    ▄█    ███ 
+//▄█████████▀   ▀██████▀   ▄████████▀   ▄████████▀  
+                                                  
+class Boss extends Phaser.Sprite 
+{
+    constructor(xPos: number, yPos: number, game: Phaser.Game)
+    {
+        super(game, xPos, yPos, "boss");
+        game.physics.arcade.enable(this);
+        this.body.immovable = true;
+        this.scale.setTo(2, 2);
+        game.add.existing(this);
+    }
 }
 
 //   ▄███████▄  ▄█          ▄████████ ▄██   ▄      ▄████████    ▄████████ 
@@ -1767,4 +1817,4 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.fireTimer = this.game.time.now + 3500;
 		this.fireBreak = false;
 	}
-}
+};
