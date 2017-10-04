@@ -220,7 +220,6 @@ window.onload = function ()
 
         laserGate4.update();
 
-        console.log(enemyKillCount);
         if (boss.bossStage == boss.bossStageEnum.STEP_0)
         {
             if (enemyKillCount == 7)
@@ -294,7 +293,7 @@ window.onload = function ()
 
     function activateGate(player: Player, laserGate: Barrier)
     {
-        if (player.body.position.y < laserGate.position.y - 30)
+        if (player.body.position.y < laserGate.position.y)
         {
             laserGate.activate();
         }
@@ -480,7 +479,7 @@ class Barrier extends Phaser.Sprite
 		this.scale.setTo(width, height);
         game.add.existing(this);
 
-
+        this.isActivated = false;
         this.frame = 1;
 		this.off = this.animations.add('off', [5], 15, true);
 		this.switch= this.animations.add('switch', [1, 2, 3, 4], 15, false);
@@ -1147,7 +1146,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.eVelocityX = 0;
 		this.eVelocityY = 0;
 
-		this.fireTimer = this.game.time.now + 3000;
+        this.fireTimer = this.game.time.now + game.rnd.integerInRange(1000, 6000);
 
 		if (this.eType == this.enemyTypeEnum.LASER)
 		{
