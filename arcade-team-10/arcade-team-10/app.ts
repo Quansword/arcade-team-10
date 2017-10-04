@@ -44,7 +44,9 @@ window.onload = function ()
 		game.stage.backgroundColor = '#eee';
 		game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
 
-		game.load.image('bullet', 'assets/Bullet.png');
+		game.load.image('bulletGreen', 'assets/BulletGreen.png');
+		game.load.image('bulletRed', 'assets/BulletRed.png');
+		game.load.image('bulletBlue', 'assets/BulletBlue.png');
 		game.load.image('laser', 'assets/Laser.png');
 
 		game.load.tilemap('map', 'assets/Map.csv', null, Phaser.Tilemap.CSV);
@@ -1157,11 +1159,20 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		if (this.eType == this.enemyTypeEnum.LASER)
 		{
 			this.weapon = game.add.weapon(200, 'laser');
-		}
-		else
+        }
+        else if (this.eType == this.enemyTypeEnum.BASE)
 		{
-			this.weapon = game.add.weapon(100, 'bullet');
+			this.weapon = game.add.weapon(100, 'bulletBlue');
+        }
+        else if (this.eType == this.enemyTypeEnum.SHOTGUN)
+		{
+			this.weapon = game.add.weapon(100, 'bulletRed');
 		}
+        else 
+		{
+			this.weapon = game.add.weapon(100, 'bulletGreen');
+		}
+
 		this.weapon.bullets.forEach((b: Phaser.Bullet) =>
 		{
 			b.scale.setTo(1.5, 1.5);
