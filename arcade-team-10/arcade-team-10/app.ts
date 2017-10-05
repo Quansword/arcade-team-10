@@ -314,11 +314,13 @@ window.onload = function ()
 			game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
 			game.physics.arcade.collide(boss.speakerL.bullets, layer, killBullet);
 			game.physics.arcade.collide(boss.speakerR.bullets, layer, killBullet);
+			game.physics.arcade.collide(boss.laptop.bullets, layer, killBullet);
 
 			game.physics.arcade.overlap(boss.headsetL.bullets, player, bulletHitPlayer);
 			game.physics.arcade.overlap(boss.headsetR.bullets, player, bulletHitPlayer);
 			game.physics.arcade.overlap(boss.speakerL.bullets, player, bulletHitPlayer);
 			game.physics.arcade.overlap(boss.speakerR.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(boss.laptop.bullets, player, bulletHitPlayer);
 
 			game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
 		}
@@ -740,6 +742,7 @@ class Boss extends Phaser.Sprite
 	speakerML: Phaser.Weapon;
 	speakerMR: Phaser.Weapon;
 	speakerR: Phaser.Weapon;
+	laptop: Phaser.Weapon;
 
 	fireTimerHL: number;
 	fireTimerHR: number;
@@ -747,6 +750,7 @@ class Boss extends Phaser.Sprite
 	fireTimerSML: number;
 	fireTimerSMR: number;
 	fireTimerSR: number;
+	fireTimerLT: number;
 
 	aimHL: boolean;
 	aimHR: boolean;
@@ -754,12 +758,15 @@ class Boss extends Phaser.Sprite
 	aimSML: boolean;
 	aimSMR: boolean;
 	aimSR: boolean;
+	aimLT: boolean;
 
 	isCrosshatch: boolean;
 	crosshatchFired: boolean;
 	fireTimerCH: number;
 	alternateCHL: boolean;
 	alternateCHR: boolean;
+	fireBreak: boolean;
+	playerStill: boolean;
 
 	prediction: Phaser.Rectangle;
 
@@ -786,6 +793,7 @@ class Boss extends Phaser.Sprite
 		this.speakerML = game.add.weapon(100, 'bulletGreen');
 		this.speakerMR = game.add.weapon(100, 'bulletGreen');
 		this.speakerR = game.add.weapon(100, 'bulletRed');
+		this.laptop = game.add.weapon(300, 'laser');
 
 		this.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
 		this.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
@@ -793,9 +801,10 @@ class Boss extends Phaser.Sprite
 		this.speakerML.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
 		this.speakerMR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
 		this.speakerR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+		this.laptop.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
 
 		this.headsetL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.headsetL.bulletSpeed = 300
+		this.headsetL.bulletSpeed = 300;
 		this.headsetL.fireRate = 0;
 		this.headsetL.bulletAngleOffset = 90;
 		this.headsetL.bulletAngleVariance = 3;
@@ -805,7 +814,7 @@ class Boss extends Phaser.Sprite
 		this.aimHL = false;
 
 		this.headsetR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.headsetR.bulletSpeed = 300
+		this.headsetR.bulletSpeed = 300;
 		this.headsetR.fireRate = 0;
 		this.headsetR.bulletAngleOffset = 90;
 		this.headsetR.bulletAngleVariance = 3;
@@ -815,7 +824,7 @@ class Boss extends Phaser.Sprite
 		this.aimHR = false;
 
 		this.speakerL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.speakerL.bulletSpeed = 300
+		this.speakerL.bulletSpeed = 300;
 		this.speakerL.fireRate = 0;
 		this.speakerL.bulletAngleOffset = 90;
 		this.speakerL.x = 740;
@@ -824,7 +833,7 @@ class Boss extends Phaser.Sprite
 		this.aimSL = false;
 
 		this.speakerML.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.speakerML.bulletSpeed = 300
+		this.speakerML.bulletSpeed = 300;
 		this.speakerML.fireRate = 0;
 		this.speakerML.bulletAngleOffset = 90;
 		this.speakerML.x = 830;
@@ -833,7 +842,7 @@ class Boss extends Phaser.Sprite
 		this.aimSML = false;
 
 		this.speakerMR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.speakerMR.bulletSpeed = 300
+		this.speakerMR.bulletSpeed = 300;
 		this.speakerMR.fireRate = 0;
 		this.speakerMR.bulletAngleOffset = 90;
 		this.speakerMR.x = 1090;
@@ -842,7 +851,7 @@ class Boss extends Phaser.Sprite
 		this.aimSMR = false;
 
 		this.speakerR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.speakerR.bulletSpeed = 300
+		this.speakerR.bulletSpeed = 300;
 		this.speakerR.fireRate = 0;
 		this.speakerR.bulletAngleOffset = 90;
 		this.speakerR.x = 1180;
@@ -850,10 +859,21 @@ class Boss extends Phaser.Sprite
 		this.fireTimerSR = 0;
 		this.aimSR = false;
 
+		this.laptop.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.laptop.bulletSpeed = 500;
+		this.laptop.fireRate = 0;
+		this.laptop.bulletAngleOffset = 90;
+		this.laptop.x = 960;
+		this.laptop.y = 195;
+		this.fireTimerLT = 0;
+		this.aimLT = false;
+
 		this.isCrosshatch = false;
 		this.crosshatchFired = false;
 		this.alternateCHL = false;
 		this.alternateCHR = false;
+		this.fireBreak = false;
+		this.playerStill = false;
 		this.fireTimerCH = 0;
 		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
 	}
@@ -881,6 +901,22 @@ class Boss extends Phaser.Sprite
 			{
 				this.fireTimerSR = this.game.time.now + this.game.rnd.integerInRange(1450, 3350);
 				this.aimSR = true;
+			}
+			if (this.game.time.now > this.fireTimerLT)
+			{
+				if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0)
+				{
+					if (this.playerStill)
+					{
+						this.aimLT = true;
+						this.playerStill = false;
+					}
+					else
+					{
+						this.fireTimerLT = this.game.time.now + 500;
+						this.playerStill = true;
+					}
+				}
 			}
 			if (this.game.time.now > this.fireTimerCH && !this.isCrosshatch)
 			{
@@ -958,6 +994,16 @@ class Boss extends Phaser.Sprite
 					this.speakerR.fire();
 					this.game.time.events.add(750, this.bSecondShotR, this);
 					this.aimSR = false;
+				}
+				if (this.aimLT)
+				{
+					if (!this.fireBreak)
+					{
+						this.fireBreak = true;
+						this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
+						this.game.time.events.add(3000, this.bFireDelay, this);
+					}
+					this.laptop.fire();
 				}
 			}
 			else
@@ -1147,6 +1193,13 @@ class Boss extends Phaser.Sprite
 		this.isCrosshatch = false;
 		this.crosshatchFired = false;
 		this.fireTimerCH = this.game.time.now + this.game.rnd.integerInRange(10000, 15000);
+	}
+
+	bFireDelay()
+	{
+		this.fireTimerLT = this.game.time.now;
+		this.fireBreak = false;
+		this.aimLT = false;
 	}
 }
 
