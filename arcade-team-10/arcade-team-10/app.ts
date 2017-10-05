@@ -45,11 +45,11 @@ window.onload = function ()
 
 	let enemyKillCount: number;
 
-    var loop;
-    var drop;
+	var loop;
+	var drop;
 
-    var healthPickup;
-    var playerHit;
+	var healthPickup;
+	var playerHit;
 
 	function preload()
 	{
@@ -71,6 +71,7 @@ window.onload = function ()
 
 		game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
 		game.load.image('boss', 'assets/Boss.png');
+		game.load.spritesheet('turret', 'assets/laserTurret.png', 128, 128, 9, 0, 2);
 
 		game.load.image('bossHealth', 'assets/BossHealth.png');
 		game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
@@ -97,14 +98,14 @@ window.onload = function ()
 
 	function create()
 	{
-        loop = game.add.audio('loop', 1, true);
-        loop.play();
+		loop = game.add.audio('loop', 1, true);
+		loop.play();
 
-        drop = game.add.audio('drop', 1, true);
+		drop = game.add.audio('drop', 1, true);
 
-        healthPickup  = game.add.audio('healthPickup');
-        playerHit = game.add.audio('playerHit', 3);
-        playerHit.allowMultiple = true;
+		healthPickup = game.add.audio('healthPickup');
+		playerHit = game.add.audio('playerHit', 3);
+		playerHit.allowMultiple = true;
 
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -323,7 +324,7 @@ window.onload = function ()
 				boss.fireTimerSR = game.time.now + game.rnd.integerInRange(2500, 4500);
 				boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
 				laserGate4.deactivate();
-                boss.taunt();
+				boss.taunt();
 			}
 		}
 		else if (boss.bossStage == boss.bossStageEnum.STAGE_2)
@@ -333,8 +334,8 @@ window.onload = function ()
 				boss.bossStage = boss.bossStageEnum.STAGE_3;
 				boss.canDamage = false;
 				laserGate4.activate();
-                loop.stop();
-                drop.play();
+				loop.stop();
+				drop.play();
 			}
 			game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
 			game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
@@ -383,11 +384,11 @@ window.onload = function ()
 	// -------------------------------------------------------------------------------------------- Enemy Gets Hit
 
 	function saberHitEnemy(saber, enemy: Enemy)
-    {
-        if (enemy.alive)
-        {
-            enemy.eDeath();
-        }
+	{
+		if (enemy.alive)
+		{
+			enemy.eDeath();
+		}
 		enemy.kill();
 		enemyKillCount++;
 		dropHealth(enemy.position.x, enemy.position.y);
@@ -395,7 +396,7 @@ window.onload = function ()
 
 	function bulletHitEnemy(enemy: Enemy, bullet)
 	{
-        bullet.eDeath();
+		bullet.eDeath();
 		bullet.kill();
 		enemy.kill();
 		enemyKillCount++;
@@ -452,17 +453,17 @@ window.onload = function ()
 				playerVisible();
 				game.time.events.repeat(200, 3, playerVisible, this);
 				game.time.events.add(1000, playerInvuln, this);
-                playerHit.play();
+				playerHit.play();
 			}
 
-            if (player.health < 1)
-            {
-                player.pDeath();
-            }
-            else
-            {
-			    playerClear();
-            }
+			if (player.health < 1)
+			{
+				player.pDeath();
+			}
+			else
+			{
+				playerClear();
+			}
 		}
 	}
 
@@ -588,8 +589,8 @@ window.onload = function ()
 		if (player.health != player.maxHealth)
 		{
 			healPlayer(player, 1);
-            healthDrop.kill();
-            healthPickup.play();
+			healthDrop.kill();
+			healthPickup.play();
 		}
 	}
 
@@ -654,8 +655,8 @@ class Barrier extends Phaser.Sprite
 	switch: Phaser.Animation;
 	on: Phaser.Animation;
 
-    laserOn: Phaser.Sound;
-    laserOff: Phaser.Sound;
+	laserOn: Phaser.Sound;
+	laserOff: Phaser.Sound;
 	constructor(xPos: number, yPos: number, width: number, height: number, key: string, game: Phaser.Game)
 	{
 		super(game, xPos, yPos, key);
@@ -670,44 +671,44 @@ class Barrier extends Phaser.Sprite
 		this.switch = this.animations.add('switch', [1, 2, 3, 4], 15, false);
 		this.on = this.animations.add('on', [1, 2], 15, true);
 
-        this.play("off");
+		this.play("off");
 
-        this.laserOn = this.game.add.audio('laserOn');
-        this.laserOff = this.game.add.audio('laserOff');
+		this.laserOn = this.game.add.audio('laserOn');
+		this.laserOff = this.game.add.audio('laserOff');
 	}
 
-    activate()
-    {
-        this.isActivated = true;
-        this.play("switch");
-        this.laserOn.play();
-    }
+	activate()
+	{
+		this.isActivated = true;
+		this.play("switch");
+		this.laserOn.play();
+	}
 
-    deactivate()
-    {
-        this.isActivated = false;
-        this.play("switch");
-        this.laserOff.play();
-    }
+	deactivate()
+	{
+		this.isActivated = false;
+		this.play("switch");
+		this.laserOff.play();
+	}
 
-    update()
-    {
-        if (this.isActivated)
-        {
-            if (this.animations.currentAnim.isFinished)
-            {
-                this.play("on");
-            }
-        }
-        else if (!this.isActivated)
-        {
-            if (this.animations.currentAnim.isFinished)
-            {
-                this.play("off");
-            }
-        }
+	update()
+	{
+		if (this.isActivated)
+		{
+			if (this.animations.currentAnim.isFinished)
+			{
+				this.play("on");
+			}
+		}
+		else if (!this.isActivated)
+		{
+			if (this.animations.currentAnim.isFinished)
+			{
+				this.play("off");
+			}
+		}
 
-    }
+	}
 }
 
 //   ▄████████  ▄██████▄   ▄██████▄    ▄▄▄▄███▄▄▄▄   
@@ -791,10 +792,10 @@ class Boss extends Phaser.Sprite
 
 	prediction: Phaser.Rectangle;
 
-    taunt1: Phaser.Sound;
-    laser: Phaser.Sound;
-    bulletBasic: Phaser.Sound;
-    bulletShotgun: Phaser.Sound;
+	taunt1: Phaser.Sound;
+	laser: Phaser.Sound;
+	bulletBasic: Phaser.Sound;
+	bulletShotgun: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
 	{
@@ -903,21 +904,21 @@ class Boss extends Phaser.Sprite
 		this.fireTimerCH = 0;
 		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
 
-        this.taunt1 = game.add.audio("taunt1", 3);
-        this.laser = this.game.add.audio('laser');
-        this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
-        this.bulletBasic.allowMultiple = true;
-        this.bulletShotgun = this.game.add.audio('bulletShotgun');
-        this.bulletShotgun.allowMultiple = true;
+		this.taunt1 = game.add.audio("taunt1", 3);
+		this.laser = this.game.add.audio('laser');
+		this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
+		this.bulletBasic.allowMultiple = true;
+		this.bulletShotgun = this.game.add.audio('bulletShotgun');
+		this.bulletShotgun.allowMultiple = true;
 	}
 
-    taunt()
-    {
-        if (this.bossStage == this.bossStageEnum.STAGE_2)
-        {
-            this.taunt1.play();
-        }
-    }
+	taunt()
+	{
+		if (this.bossStage == this.bossStageEnum.STAGE_2)
+		{
+			this.taunt1.play();
+		}
+	}
 
 	update()
 	{
@@ -974,8 +975,8 @@ class Boss extends Phaser.Sprite
 					this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
 					this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
 					this.headsetL.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.prediction) * 57.2958;
-                    this.headsetL.fire();
-                    this.bulletBasic.play();
+					this.headsetL.fire();
+					this.bulletBasic.play();
 					this.aimHL = false;
 				}
 				if (this.aimHR)
@@ -984,7 +985,7 @@ class Boss extends Phaser.Sprite
 					this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
 					this.headsetR.fireAngle = this.game.physics.arcade.angleBetween(this.headsetR.fireFrom, this.prediction) * 57.2958;
 					this.headsetR.fire();
-                    this.bulletBasic.play();
+					this.bulletBasic.play();
 					this.aimHR = false;
 				}
 				if (this.aimSL)
@@ -1012,7 +1013,7 @@ class Boss extends Phaser.Sprite
 					this.speakerL.fireAngle -= 15;
 					this.speakerL.fire();
 					this.game.time.events.add(750, this.bSecondShotL, this);
-                    this.bulletShotgun.play();
+					this.bulletShotgun.play();
 					this.aimSL = false;
 				}
 				if (this.aimSR)
@@ -1040,7 +1041,7 @@ class Boss extends Phaser.Sprite
 					this.speakerR.fireAngle -= 15;
 					this.speakerR.fire();
 					this.game.time.events.add(750, this.bSecondShotR, this);
-                    this.bulletShotgun.play();
+					this.bulletShotgun.play();
 					this.aimSR = false;
 				}
 			}
@@ -1086,17 +1087,17 @@ class Boss extends Phaser.Sprite
 				}
 			}
 
-            if (this.aimLT)
-            {
-                if (!this.fireBreak)
-                {
-                    this.fireBreak = true;
-                    this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
-                    this.game.time.events.add(1000, this.bFireDelay, this);
-                    this.laser.play();
-                }
-                this.laptop.fire();
-            }
+			if (this.aimLT)
+			{
+				if (!this.fireBreak)
+				{
+					this.fireBreak = true;
+					this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
+					this.game.time.events.add(1000, this.bFireDelay, this);
+					this.laser.play();
+				}
+				this.laptop.fire();
+			}
 		}
 	}
 
@@ -1167,7 +1168,7 @@ class Boss extends Phaser.Sprite
 				this.speakerL.fireAngle -= 15;
 				this.speakerL.fire();
 			}
-            this.bulletShotgun.play();
+			this.bulletShotgun.play();
 		}
 	}
 
@@ -1236,7 +1237,7 @@ class Boss extends Phaser.Sprite
 				this.speakerR.fireAngle -= 15;
 				this.speakerR.fire();
 			}
-            this.bulletShotgun.play();
+			this.bulletShotgun.play();
 		}
 	}
 
@@ -1310,8 +1311,8 @@ class Player extends Phaser.Sprite
 		DOWNLEFT: 7
 	};
 
-    slash: Phaser.Sound;
-    death: Phaser.Sound;
+	slash: Phaser.Sound;
+	death: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, game: Phaser.Game)
 	{
@@ -1358,16 +1359,16 @@ class Player extends Phaser.Sprite
 
 		this.createSaberHitBoxes();
 
-        this.slash = this.game.add.audio('slash');
-        this.slash.allowMultiple = true;
+		this.slash = this.game.add.audio('slash');
+		this.slash.allowMultiple = true;
 
-        this.death = this.game.add.audio('playerDeath');
+		this.death = this.game.add.audio('playerDeath');
 	}
 
-    pDeath()
-    {
-        this.death.play();
-    }
+	pDeath()
+	{
+		this.death.play();
+	}
 
 	createSaberHitBoxes()
 	{
@@ -1652,7 +1653,7 @@ class Player extends Phaser.Sprite
 						this.animations.play('dAttack');
 						this.attacked = true;
 						this.enableHitbox("bottomSaber");
-                       this.slash.play();
+						this.slash.play();
 					}
 				}
 				else if (this.weapon.fireAngle == 45)
@@ -1663,7 +1664,7 @@ class Player extends Phaser.Sprite
 						this.animations.play('drAttack');
 						this.attacked = true;
 						this.enableHitbox("bottomRightSaber");
-                       this.slash.play();
+						this.slash.play();
 					}
 				}
 				else if (this.weapon.fireAngle == 135)
@@ -1674,7 +1675,7 @@ class Player extends Phaser.Sprite
 						this.animations.play('dlAttack');
 						this.attacked = true;
 						this.enableHitbox("bottomLeftSaber");
-                       this.slash.play();
+						this.slash.play();
 					}
 				}
 				else if (this.weapon.fireAngle == 0)
@@ -1685,7 +1686,7 @@ class Player extends Phaser.Sprite
 						this.animations.play('rAttack');
 						this.attacked = true;
 						this.enableHitbox("rightSaber");
-                       this.slash.play();
+						this.slash.play();
 					}
 				}
 				else if (this.weapon.fireAngle == 180)
@@ -1696,7 +1697,7 @@ class Player extends Phaser.Sprite
 						this.animations.play('lAttack');
 						this.attacked = true;
 						this.enableHitbox("leftSaber");
-                       this.slash.play();
+						this.slash.play();
 					}
 				}
 				else if (this.weapon.fireAngle == 270)
@@ -1707,7 +1708,7 @@ class Player extends Phaser.Sprite
 						this.animations.play('uAttack');
 						this.attacked = true;
 						this.enableHitbox("topSaber");
-                       this.slash.play();
+						this.slash.play();
 					}
 				}
 				else if (this.weapon.fireAngle == 225)
@@ -1718,7 +1719,7 @@ class Player extends Phaser.Sprite
 						this.animations.play('ulAttack');
 						this.attacked = true;
 						this.enableHitbox("topLeftSaber");
-                       this.slash.play();
+						this.slash.play();
 					}
 				}
 				else if (this.weapon.fireAngle == 315)
@@ -1729,7 +1730,7 @@ class Player extends Phaser.Sprite
 						this.animations.play('urAttack');
 						this.attacked = true;
 						this.enableHitbox("topRightSaber");
-                       this.slash.play();
+						this.slash.play();
 					}
 				}
 			}
@@ -1815,11 +1816,11 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		LASER: 3
 	};
 
-    enemyDeath: Phaser.Sound;
-    laser: Phaser.Sound;
-    bulletBasic: Phaser.Sound;
-    bulletRapid: Phaser.Sound;
-    bulletShotgun: Phaser.Sound;
+	enemyDeath: Phaser.Sound;
+	laser: Phaser.Sound;
+	bulletBasic: Phaser.Sound;
+	bulletRapid: Phaser.Sound;
+	bulletShotgun: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, enemyType: number, player: Player, room: Room, game: Phaser.Game)
 	{
@@ -1927,15 +1928,15 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 		this.room = room;
 		this.player = player;
-        game.add.existing(this);
+		game.add.existing(this);
 
-        this.enemyDeath = this.game.add.audio('enemyDeath');
-        this.laser = this.game.add.audio('laser');
-        this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
-        this.bulletRapid= this.game.add.audio('bulletRapid', 0.15);
-        this.bulletRapid.allowMultiple = true;
-        this.bulletShotgun = this.game.add.audio('bulletShotgun');
-        this.bulletShotgun.allowMultiple = true;
+		this.enemyDeath = this.game.add.audio('enemyDeath');
+		this.laser = this.game.add.audio('laser');
+		this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
+		this.bulletRapid = this.game.add.audio('bulletRapid', 0.15);
+		this.bulletRapid.allowMultiple = true;
+		this.bulletShotgun = this.game.add.audio('bulletShotgun');
+		this.bulletShotgun.allowMultiple = true;
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
@@ -2600,7 +2601,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						prediction.x = prediction.x + (this.player.body.velocity.x * 1.2);
 						prediction.y = prediction.y + (this.player.body.velocity.y * 1.2);
 						this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, prediction) * 57.2958;
-                        this.laser.play();
+						this.laser.play();
 					}
 					else if (this.eType != this.enemyTypeEnum.LASER)
 					{
@@ -2609,7 +2610,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 					if (this.eType == this.enemyTypeEnum.SHOTGUN)
 					{
-                        this.bulletShotgun.play();
+						this.bulletShotgun.play();
 						this.weapon.fire();
 						this.weapon.fireAngle -= 30;
 						this.weapon.fire();
@@ -2634,7 +2635,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					else if (this.eType == this.enemyTypeEnum.RAPID)
 					{
 						this.weapon.fire();
-                        this.bulletRapid.play();
+						this.bulletRapid.play();
 						if (!this.fireBreak)
 						{
 							this.fireBreak = true;
@@ -2642,8 +2643,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						}
 					}
 					else
-                    {
-                        this.bulletBasic.play();
+					{
+						this.bulletBasic.play();
 						this.weapon.fire();
 					}
 
@@ -2660,7 +2661,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 	eSecondShot()
 	{
-        this.bulletShotgun.play();
+		this.bulletShotgun.play();
 		this.weapon.fireAngle = this.secondShot;
 		this.weapon.fire();
 		this.weapon.fireAngle -= 15;
@@ -2686,8 +2687,26 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.fireBreak = false;
 	}
 
-    eDeath()
-    {
-        this.enemyDeath.play();
-    }
+	eDeath()
+	{
+		this.enemyDeath.play();
+	}
+}
+
+//    ███     ███    █▄     ▄████████    ▄████████    ▄████████     ███     
+//▀█████████▄ ███    ███   ███    ███   ███    ███   ███    ███ ▀█████████▄ 
+//   ▀███▀▀██ ███    ███   ███    ███   ███    ███   ███    █▀     ▀███▀▀██ 
+//    ███   ▀ ███    ███  ▄███▄▄▄▄██▀  ▄███▄▄▄▄██▀  ▄███▄▄▄         ███   ▀ 
+//    ███     ███    ███ ▀▀███▀▀▀▀▀   ▀▀███▀▀▀▀▀   ▀▀███▀▀▀         ███     
+//    ███     ███    ███ ▀███████████ ▀███████████   ███    █▄      ███     
+//    ███     ███    ███   ███    ███   ███    ███   ███    ███     ███     
+//   ▄████▀   ████████▀    ███    ███   ███    ███   ██████████    ▄████▀   
+//                         ███    ███   ███    ███                          
+
+class Turret extends Phaser.Sprite
+{
+	constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
+	{
+		super(game, xPos, yPos, 'turret', 0);
+	}
 }
