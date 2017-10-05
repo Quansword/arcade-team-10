@@ -43,7 +43,10 @@ window.onload = function ()
 
 	let enemyKillCount: number;
 
-    var music;
+    var loop;
+    var drop;
+
+    var healthPickup;
 
 	function preload()
 	{
@@ -69,17 +72,27 @@ window.onload = function ()
 		game.load.image('bossHealth', 'assets/BossHealth.png');
 		game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
 
-		game.load.audio('music', 'assets/audio/Ricochet.mp3');
+		game.load.audio('loop', 'assets/audio/Loop.wav');
+		game.load.audio('drop', 'assets/audio/Drop.wav');
+
 		game.load.audio('slash', 'assets/audio/Slash.wav');
 		game.load.audio('laserOn', 'assets/audio/LaserOn.wav');
 		game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
 		game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
+
+		game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
+
+		game.load.audio('laser', 'assets/audio/Laser.wav');
 	}
 
 	function create()
 	{
-        music = game.add.audio('music', 1, true);
-        music.play();
+        loop = game.add.audio('loop', 1, true);
+        loop.play();
+
+        drop = game.add.audio('drop', 1, true);
+
+        healthPickup  = game.add.audio('healthPickup');
 
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -537,7 +550,8 @@ window.onload = function ()
 		if (player.health != player.maxHealth)
 		{
 			healPlayer(player, 1);
-			healthDrop.kill();
+            healthDrop.kill();
+            healthPickup.play();
 		}
 	}
 
