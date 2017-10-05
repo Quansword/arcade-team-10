@@ -433,6 +433,14 @@ window.onload = function ()
 				turret4.active = true;
 				turret5.active = true;
 				turret6.active = true;
+
+				boss.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+				boss.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+				boss.speakerL.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+				boss.speakerML.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+				boss.speakerMR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+				boss.speakerR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+				boss.laptop.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
 			}
 			game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
 			game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
