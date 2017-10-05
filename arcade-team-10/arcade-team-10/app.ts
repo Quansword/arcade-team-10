@@ -498,7 +498,7 @@ window.onload = function ()
 
 				game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
 
-				if (boss.alive)
+				if (!boss.alive)
 				{
 					boss.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
 					boss.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
