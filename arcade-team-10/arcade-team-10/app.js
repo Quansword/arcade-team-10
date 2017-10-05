@@ -66,6 +66,7 @@ window.onload = function () {
         game.load.audio('playerDeath', 'assets/audio/PlayerDeath.mp3');
         game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
         game.load.audio('laser', 'assets/audio/Laser.wav');
+        game.load.audio('bulletBasic', 'assets/audio/BulletBasic.mp3');
     }
     function create() {
         loop = game.add.audio('loop', 1, true);
@@ -1331,6 +1332,8 @@ var Enemy = (function (_super) {
         game.add.existing(this);
         this.enemyDeath = this.game.add.audio('enemyDeath');
         this.laser = this.game.add.audio('laser');
+        this.bulletBasic = this.game.add.audio('bulletBasic');
+        this.bulletBasic.allowMultiple = true;
     }
     //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
     //  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███ ███  
@@ -1862,6 +1865,7 @@ var Enemy = (function (_super) {
                         }
                     }
                     else {
+                        this.bulletBasic.play();
                         this.weapon.fire();
                     }
                     this.eAim = false;
