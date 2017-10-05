@@ -1427,8 +1427,8 @@ var Enemy = (function (_super) {
                 if (this.aim) {
                     if (this.eType == this.enemyTypeEnum.LASER && !this.fireBreak) {
                         var prediction = new Phaser.Rectangle(this.player.body.position.x, this.player.body.position.y, this.player.body.width, this.player.body.height);
-                        prediction.x = prediction.x + (this.player.body.velocity.x * 2);
-                        prediction.y = prediction.y + (this.player.body.velocity.y * 2);
+                        prediction.x = prediction.x + (this.player.body.velocity.x * 1.2);
+                        prediction.y = prediction.y + (this.player.body.velocity.y * 1.2);
                         var fireDegree = this.game.physics.arcade.angleBetween(this.body, prediction);
                         fireDegree = fireDegree * 57.2958;
                         this.weapon.fireAngle = fireDegree;
