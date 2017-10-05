@@ -738,7 +738,7 @@ var Boss = (function (_super) {
         }
     };
     Boss.prototype.bSecondShotL = function () {
-        if (this.bossStage != this.bossStageEnum.STAGE_2 || this.bossStage != this.bossStageEnum.STAGE_4) {
+        if (this.bossStage != this.bossStageEnum.STAGE_3) {
             if (this.aimSL) {
                 this.speakerL.fireAngle = 172;
                 this.speakerL.fire();
@@ -801,7 +801,7 @@ var Boss = (function (_super) {
         }
     };
     Boss.prototype.bSecondShotR = function () {
-        if (this.bossStage != this.bossStageEnum.STAGE_2 || this.bossStage != this.bossStageEnum.STAGE_4) {
+        if (this.bossStage != this.bossStageEnum.STAGE_3) {
             if (this.aimSR) {
                 this.speakerR.fireAngle = 172;
                 this.speakerR.fire();

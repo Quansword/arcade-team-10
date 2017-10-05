@@ -992,7 +992,7 @@ class Boss extends Phaser.Sprite
 
 	bSecondShotL()
 	{
-		if (this.bossStage != this.bossStageEnum.STAGE_2 || this.bossStage != this.bossStageEnum.STAGE_4)
+		if (this.bossStage != this.bossStageEnum.STAGE_3)
 		{
 			if (this.aimSL)
 			{
@@ -1062,7 +1062,7 @@ class Boss extends Phaser.Sprite
 
 	bSecondShotR()
 	{
-		if (this.bossStage != this.bossStageEnum.STAGE_2 || this.bossStage != this.bossStageEnum.STAGE_4)
+		if (this.bossStage != this.bossStageEnum.STAGE_3)
 		{
 			if (this.aimSR)
 			{
