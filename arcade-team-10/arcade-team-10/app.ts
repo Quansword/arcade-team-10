@@ -341,14 +341,19 @@ window.onload = function ()
 	// -------------------------------------------------------------------------------------------- Enemy Gets Hit
 
 	function saberHitEnemy(saber, enemy: Enemy)
-	{
+    {
+        if (enemy.alive)
+        {
+            enemy.eDeath();
+        }
 		enemy.kill();
 		enemyKillCount++;
 		dropHealth(enemy.position.x, enemy.position.y);
 	}
 
-	function bulletHitEnemy(enemy: Enemy, bullet: Phaser.Bullet)
+	function bulletHitEnemy(enemy: Enemy, bullet)
 	{
+        bullet.eDeath();
 		bullet.kill();
 		enemy.kill();
 		enemyKillCount++;
@@ -1683,6 +1688,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		LASER: 3
 	};
 
+    enemyDeath: Phaser.Sound;
+
 	constructor(xPos: number, yPos: number, enemyType: number, player: Player, room: Room, game: Phaser.Game)
 	{
 		super(game, xPos, yPos, 'eSprite');
@@ -1789,7 +1796,9 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 		this.room = room;
 		this.player = player;
-		game.add.existing(this);
+        game.add.existing(this);
+
+        this.enemyDeath = this.game.add.audio('enemyDeath');
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
@@ -2534,4 +2543,9 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 		this.fireBreak = false;
 	}
+
+    eDeath()
+    {
+        this.enemyDeath.play();
+    }
 }

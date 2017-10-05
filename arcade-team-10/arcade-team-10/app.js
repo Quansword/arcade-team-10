@@ -261,11 +261,15 @@ window.onload = function () {
     }
     // -------------------------------------------------------------------------------------------- Enemy Gets Hit
     function saberHitEnemy(saber, enemy) {
+        if (enemy.alive) {
+            enemy.eDeath();
+        }
         enemy.kill();
         enemyKillCount++;
         dropHealth(enemy.position.x, enemy.position.y);
     }
     function bulletHitEnemy(enemy, bullet) {
+        bullet.eDeath();
         bullet.kill();
         enemy.kill();
         enemyKillCount++;
@@ -1328,6 +1332,7 @@ var Enemy = (function (_super) {
         _this.room = room;
         _this.player = player;
         game.add.existing(_this);
+        _this.enemyDeath = _this.game.add.audio('enemyDeath');
         return _this;
     }
     //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
@@ -1889,6 +1894,9 @@ var Enemy = (function (_super) {
             this.fireTimer = this.game.time.now + 2000;
         }
         this.fireBreak = false;
+    };
+    Enemy.prototype.eDeath = function () {
+        this.enemyDeath.play();
     };
     return Enemy;
 }(Phaser.Sprite // -----------------------------------------------------Enemy code
