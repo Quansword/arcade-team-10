@@ -125,12 +125,12 @@ window.onload = function ()
 	{
 
 
-		loop = game.add.audio('loop', 2, true);
+		loop = game.add.audio('loop', 3, true);
 
-		drop = game.add.audio('drop', 3, true);
+		drop = game.add.audio('drop', 4, true);
 
 		healthPickup = game.add.audio('healthPickup');
-		playerHit = game.add.audio('playerHit', 3);
+		playerHit = game.add.audio('playerHit', 2);
 		playerHit.allowMultiple = true;
 
 
