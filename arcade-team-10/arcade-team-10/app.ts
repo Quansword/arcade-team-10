@@ -49,6 +49,7 @@ window.onload = function ()
     var drop;
 
     var healthPickup;
+    var playerHit;
 
 	function preload()
 	{
@@ -82,6 +83,7 @@ window.onload = function ()
 		game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
 		game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
 		game.load.audio('playerDeath', 'assets/audio/PlayerDeath.mp3');
+		game.load.audio('playerHit', 'assets/audio/PlayerHit.mp3');
 
 		game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
 
@@ -101,6 +103,8 @@ window.onload = function ()
         drop = game.add.audio('drop', 1, true);
 
         healthPickup  = game.add.audio('healthPickup');
+        playerHit = game.add.audio('playerHit', 3);
+        playerHit.allowMultiple = true;
 
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -444,6 +448,7 @@ window.onload = function ()
 				playerVisible();
 				game.time.events.repeat(200, 3, playerVisible, this);
 				game.time.events.add(1000, playerInvuln, this);
+                playerHit.play();
 			}
 
             if (player.health < 1)

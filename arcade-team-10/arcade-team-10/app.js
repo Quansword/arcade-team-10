@@ -48,6 +48,7 @@ window.onload = function () {
     var loop;
     var drop;
     var healthPickup;
+    var playerHit;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
@@ -71,6 +72,7 @@ window.onload = function () {
         game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
         game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
         game.load.audio('playerDeath', 'assets/audio/PlayerDeath.mp3');
+        game.load.audio('playerHit', 'assets/audio/PlayerHit.mp3');
         game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
         game.load.audio('laser', 'assets/audio/Laser.wav');
         game.load.audio('bulletBasic', 'assets/audio/BulletBasic.mp3');
@@ -83,6 +85,8 @@ window.onload = function () {
         loop.play();
         drop = game.add.audio('drop', 1, true);
         healthPickup = game.add.audio('healthPickup');
+        playerHit = game.add.audio('playerHit', 3);
+        playerHit.allowMultiple = true;
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
         background = game.add.sprite(0, 0, 'background');
@@ -335,6 +339,7 @@ window.onload = function () {
                 playerVisible();
                 game.time.events.repeat(200, 3, playerVisible, this);
                 game.time.events.add(1000, playerInvuln, this);
+                playerHit.play();
             }
             if (player.health < 1) {
                 player.pDeath();
