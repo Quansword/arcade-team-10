@@ -72,6 +72,7 @@ window.onload = function ()
 		game.load.audio('slash', 'assets/audio/Slash.wav');
 		game.load.audio('laserOn', 'assets/audio/LaserOn.wav');
 		game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
+		game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
 	}
 
 	function create()
