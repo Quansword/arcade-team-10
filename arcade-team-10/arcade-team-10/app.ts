@@ -333,6 +333,8 @@ window.onload = function ()
 				boss.bossStage = boss.bossStageEnum.STAGE_3;
 				boss.canDamage = false;
 				laserGate4.activate();
+                loop.stop();
+                drop.play();
 			}
 			game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
 			game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
@@ -790,6 +792,9 @@ class Boss extends Phaser.Sprite
 	prediction: Phaser.Rectangle;
 
     taunt1: Phaser.Sound;
+    laser: Phaser.Sound;
+    bulletBasic: Phaser.Sound;
+    bulletShotgun: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
 	{
@@ -899,6 +904,11 @@ class Boss extends Phaser.Sprite
 		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
 
         this.taunt1 = game.add.audio("taunt1", 3);
+        this.laser = this.game.add.audio('laser');
+        this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
+        this.bulletBasic.allowMultiple = true;
+        this.bulletShotgun = this.game.add.audio('bulletShotgun');
+        this.bulletShotgun.allowMultiple = true;
 	}
 
     taunt()
@@ -961,7 +971,8 @@ class Boss extends Phaser.Sprite
 					this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
 					this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
 					this.headsetL.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.prediction) * 57.2958;
-					this.headsetL.fire();
+                    this.headsetL.fire();
+                    this.bulletBasic.play();
 					this.aimHL = false;
 				}
 				if (this.aimHR)
@@ -970,6 +981,7 @@ class Boss extends Phaser.Sprite
 					this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
 					this.headsetR.fireAngle = this.game.physics.arcade.angleBetween(this.headsetR.fireFrom, this.prediction) * 57.2958;
 					this.headsetR.fire();
+                    this.bulletBasic.play();
 					this.aimHR = false;
 				}
 				if (this.aimSL)
@@ -997,6 +1009,7 @@ class Boss extends Phaser.Sprite
 					this.speakerL.fireAngle -= 15;
 					this.speakerL.fire();
 					this.game.time.events.add(750, this.bSecondShotL, this);
+                    this.bulletShotgun.play();
 					this.aimSL = false;
 				}
 				if (this.aimSR)
@@ -1024,6 +1037,7 @@ class Boss extends Phaser.Sprite
 					this.speakerR.fireAngle -= 15;
 					this.speakerR.fire();
 					this.game.time.events.add(750, this.bSecondShotR, this);
+                    this.bulletShotgun.play();
 					this.aimSR = false;
 				}
 				if (this.aimLT)
@@ -1033,8 +1047,9 @@ class Boss extends Phaser.Sprite
 						this.fireBreak = true;
 						this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
 						this.game.time.events.add(3000, this.bFireDelay, this);
+                        this.laser.play();
 					}
-					this.laptop.fire();
+                    this.laptop.fire();
 				}
 			}
 			else
@@ -1148,6 +1163,7 @@ class Boss extends Phaser.Sprite
 				this.speakerL.fireAngle -= 15;
 				this.speakerL.fire();
 			}
+            this.bulletShotgun.play();
 		}
 	}
 
@@ -1216,6 +1232,7 @@ class Boss extends Phaser.Sprite
 				this.speakerR.fireAngle -= 15;
 				this.speakerR.fire();
 			}
+            this.bulletShotgun.play();
 		}
 	}
 

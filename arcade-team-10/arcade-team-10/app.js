@@ -256,6 +256,8 @@ window.onload = function () {
                 boss.bossStage = boss.bossStageEnum.STAGE_3;
                 boss.canDamage = false;
                 laserGate4.activate();
+                loop.stop();
+                drop.play();
             }
             game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
             game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
@@ -650,6 +652,11 @@ var Boss = (function (_super) {
         _this.fireTimerCH = 0;
         _this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
         _this.taunt1 = game.add.audio("taunt1", 3);
+        _this.laser = _this.game.add.audio('laser');
+        _this.bulletBasic = _this.game.add.audio('bulletBasic', 1.5);
+        _this.bulletBasic.allowMultiple = true;
+        _this.bulletShotgun = _this.game.add.audio('bulletShotgun');
+        _this.bulletShotgun.allowMultiple = true;
         return _this;
     }
     Boss.prototype.taunt = function () {
@@ -696,6 +703,7 @@ var Boss = (function (_super) {
                     this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
                     this.headsetL.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.prediction) * 57.2958;
                     this.headsetL.fire();
+                    this.bulletBasic.play();
                     this.aimHL = false;
                 }
                 if (this.aimHR) {
@@ -703,6 +711,7 @@ var Boss = (function (_super) {
                     this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
                     this.headsetR.fireAngle = this.game.physics.arcade.angleBetween(this.headsetR.fireFrom, this.prediction) * 57.2958;
                     this.headsetR.fire();
+                    this.bulletBasic.play();
                     this.aimHR = false;
                 }
                 if (this.aimSL) {
@@ -729,6 +738,7 @@ var Boss = (function (_super) {
                     this.speakerL.fireAngle -= 15;
                     this.speakerL.fire();
                     this.game.time.events.add(750, this.bSecondShotL, this);
+                    this.bulletShotgun.play();
                     this.aimSL = false;
                 }
                 if (this.aimSR) {
@@ -755,6 +765,7 @@ var Boss = (function (_super) {
                     this.speakerR.fireAngle -= 15;
                     this.speakerR.fire();
                     this.game.time.events.add(750, this.bSecondShotR, this);
+                    this.bulletShotgun.play();
                     this.aimSR = false;
                 }
                 if (this.aimLT) {
@@ -762,6 +773,7 @@ var Boss = (function (_super) {
                         this.fireBreak = true;
                         this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
                         this.game.time.events.add(3000, this.bFireDelay, this);
+                        this.laser.play();
                     }
                     this.laptop.fire();
                 }
@@ -867,6 +879,7 @@ var Boss = (function (_super) {
                 this.speakerL.fireAngle -= 15;
                 this.speakerL.fire();
             }
+            this.bulletShotgun.play();
         }
     };
     Boss.prototype.bSecondShotR = function () {
@@ -928,6 +941,7 @@ var Boss = (function (_super) {
                 this.speakerR.fireAngle -= 15;
                 this.speakerR.fire();
             }
+            this.bulletShotgun.play();
         }
     };
     Boss.prototype.bEndCrosshatch = function () {
