@@ -26,7 +26,8 @@ window.onload = function ()
 	var healthDrops;
 	var hud;
 	var bossHud;
-	let pClearCircle: Phaser.Sprite;
+    let pClearCircle: Phaser.Sprite;
+    let clear: Phaser.Animation;
 
 	var map;
 	var layer;
@@ -58,6 +59,11 @@ window.onload = function ()
 	var healthPickup;
 	var playerHit;
 
+    var intro;
+    var introSprite;
+
+    let introPlaying: boolean;
+    let gameOver: Phaser.Sprite;
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -82,6 +88,7 @@ window.onload = function ()
 		game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
 		game.load.image('boss', 'assets/Boss.png');
 		game.load.spritesheet('turret', 'assets/laserTurret.png', 128, 128, 9, 0, 2);
+		game.load.spritesheet('clear', 'assets/clear.png', 128, 128, 4, 0, 2);
 
 		game.load.image('bossHealth', 'assets/BossHealth.png');
 		game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
@@ -104,12 +111,16 @@ window.onload = function ()
 		game.load.audio('bulletShotgun', 'assets/audio/BulletShotgun.mp3');
 
 		game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
+
+        game.load.video('intro', 'assets/Intro.webm');
+        game.load.image('gameOver', 'assets/GameOver.png');
 	}
 
 	function create()
 	{
+
+
 		loop = game.add.audio('loop', 1, true);
-		loop.play();
 
 		drop = game.add.audio('drop', 1, true);
 
@@ -177,11 +188,13 @@ window.onload = function ()
 
 		boss = new Boss(960, 200, player, game);
 
-		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
-		pClearCircle.anchor.setTo(0.5, 0.5);
+        pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y, 'clear');
+        pClearCircle.frame = 0;
+        pClearCircle.scale.setTo(2, 2);
+        clear = pClearCircle.animations.add('clear', [0, 1, 2, 3], 30, true);
 		game.physics.arcade.enable(pClearCircle);
-		pClearCircle.body.setCircle(player.body.width * 4);
-		pClearCircle.body.immovable = true;
+		pClearCircle.body.setCircle(player.body.width * 1.5, 0, 0);
+        pClearCircle.body.immovable = true;
 		pClearCircle.kill();
 
 		laserGate1 = new Barrier(832, 1410, 1, 1, "laserH", game);
@@ -206,13 +219,13 @@ window.onload = function ()
 		bossHud.enableBody = false;
 
 		bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
-		bossHud.children[0].scale.setTo(6.5, 2);
+		bossHud.children[0].scale.setTo(1, 1);
 		bossHud.children[0].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
 		bossHud.children[0].alpha = 0;
 
 		bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
-		bossHud.children[1].scale.setTo(6.5, 2);
-		bossHud.children[1].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+		bossHud.children[1].scale.setTo(6.3, 1.2);
+		bossHud.children[1].position.set((game.camera.width / 4) + 14, (game.camera.height / 1.2) + 9, 5);
 		bossHud.children[1].alpha = 0;
 
 		var style = { font: "bold 32px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
@@ -221,7 +234,19 @@ window.onload = function ()
 		bossHealthText.fixedToCamera = true;
 		bossHealthText.alpha = 0;
 
-		enemyKillCount = 0;
+        enemyKillCount = 0;
+
+        intro = game.add.video('intro');
+        introSprite = intro.addToWorld(0, 0, 0, 0, 1, 1);
+        introSprite.fixedToCamera = true;
+        intro.play();
+        introPlaying = true;
+        intro.onComplete.add(introEnd, this);
+
+        gameOver = game.add.sprite(0, 0, 'gameOver');
+        gameOver.fixedToCamera = true;
+        gameOver.scale.setTo(1.25, 1.25);
+        gameOver.renderable = false;
 	}
 
 	function update()
@@ -315,6 +340,17 @@ window.onload = function ()
 		}
 		else
 		{
+				if (this.aimLT)
+				{
+					if (!this.fireBreak)
+					{
+						this.fireBreak = true;
+						this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
+						this.game.time.events.add(1000, this.bFireDelay, this);
+                        this.laser.play();
+					}
+                    this.laptop.fire();
+				}
 			game.physics.arcade.overlap(player, laserGate1, activateGate, null, this);
 		}
 
@@ -357,6 +393,7 @@ window.onload = function ()
 				boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
 				laserGate4.deactivate();
 				boss.taunt();
+		        game.world.setBounds(0, 0, 1920, 1500);
 			}
 		}
 		else if (boss.bossStage == boss.bossStageEnum.STAGE_2)
@@ -408,8 +445,14 @@ window.onload = function ()
 			game.physics.arcade.overlap(boss.speakerL.bullets, player, bulletHitPlayer);
 			game.physics.arcade.overlap(boss.speakerR.bullets, player, bulletHitPlayer);
 			game.physics.arcade.overlap(boss.laptop.bullets, player, bulletHitPlayer);
+            
+            game.physics.arcade.overlap(boss.headsetL.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(boss.headsetR.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(boss.speakerL.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(boss.speakerR.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(boss.laptop.bullets, pClearCircle, clearBullet);
 
-			game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
+            game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
 		}
 		else if (boss.bossStage == boss.bossStageEnum.STAGE_3)
 		{
@@ -461,16 +504,30 @@ window.onload = function ()
 		}
 
 		boss.update();
+
+        if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && introPlaying)
+        {
+            introEnd();
+        }
 		//render();
 	}
 
+    function introEnd()
+    {
+        introSprite.kill();
+        intro.stop();
+
+        loop.play();
+        introPlaying = false;
+    }
+
 	function render()
 	{
-		//if (pClearCircle.alive)
-		//{
-		//	game.debug.bodyInfo(pClearCircle, 32, 32);
-		//	game.debug.body(pClearCircle);
-		//}
+		if (pClearCircle.alive)
+		{
+			game.debug.bodyInfo(pClearCircle, 32, 32);
+			game.debug.body(pClearCircle);
+		}
 		game.debug.bodyInfo(player, 32, 32);
 		game.debug.body(player);
 
@@ -587,6 +644,7 @@ window.onload = function ()
 			if (player.health < 1)
 			{
 				player.pDeath();
+                gameOver.renderable = true;
 			}
 			else
 			{
@@ -615,7 +673,7 @@ window.onload = function ()
 			bossHud.children[0].alpha = 1;
 			bossHud.children[1].alpha = 1;
 			bossHealthText.alpha = 1;
-			boss.bossStage = boss.bossStageEnum.STAGE_1;
+            boss.bossStage = boss.bossStageEnum.STAGE_1;
 		}
 	}
 
@@ -625,7 +683,7 @@ window.onload = function ()
 		{
 			bullet.kill();
 			boss.damage(2);
-			bossHud.children[1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
+			bossHud.children[1].scale.setTo(6.3 * (boss.health / boss.maxHealth), 1.2);
 			console.log(boss.health);
 
 			if (boss.health != 0)
@@ -641,7 +699,7 @@ window.onload = function ()
 		if (boss.canDamage)
 		{
 			boss.damage(1);
-			bossHud.children[1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
+		    bossHud.children[1].scale.setTo(6.3 * (boss.health / boss.maxHealth), 1.2);
 			console.log(boss.health);
 
 			if (boss.health != 0)
@@ -662,9 +720,11 @@ window.onload = function ()
 	function playerClear()
 	{
 		pClearCircle.revive();
-		pClearCircle.position.x = player.body.position.x - (player.body.width * 4);
-		pClearCircle.position.y = player.body.position.y - (player.body.width * 4);
+		pClearCircle.position.x = player.body.position.x - (player.body.width * 2.5);
+		pClearCircle.position.y = player.body.position.y - (player.body.width * 2.5);
 		game.time.events.add(2000, endClear, this);
+        clear.play();
+        pClearCircle.play('clear');
 	}
 
 	function endClear()
