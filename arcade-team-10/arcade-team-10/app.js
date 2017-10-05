@@ -60,7 +60,7 @@ window.onload = function () {
         game.load.image('bossHealth', 'assets/BossHealth.png');
         game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
         game.load.audio('music', 'assets/audio/Ricochet.mp3');
-        game.load.audio('slash', 'assets/audio/Slash.mp3');
+        game.load.audio('slash', 'assets/audio/Slash.wav');
         game.load.audio('laserOn', 'assets/audio/LaserOn.wav');
         game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
     }
@@ -554,6 +554,7 @@ var Player = (function (_super) {
         _this.lives = 1;
         _this.createSaberHitBoxes();
         _this.slash = _this.game.add.audio('slash');
+        _this.slash.allowMultiple = true;
         return _this;
     }
     Player.prototype.createSaberHitBoxes = function () {
@@ -770,6 +771,7 @@ var Player = (function (_super) {
                         this.animations.play('dAttack');
                         this.attacked = true;
                         this.enableHitbox("bottomSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 45) {
@@ -778,6 +780,7 @@ var Player = (function (_super) {
                         this.animations.play('drAttack');
                         this.attacked = true;
                         this.enableHitbox("bottomRightSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 135) {
@@ -786,6 +789,7 @@ var Player = (function (_super) {
                         this.animations.play('dlAttack');
                         this.attacked = true;
                         this.enableHitbox("bottomLeftSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 0) {
@@ -794,6 +798,7 @@ var Player = (function (_super) {
                         this.animations.play('rAttack');
                         this.attacked = true;
                         this.enableHitbox("rightSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 180) {
@@ -802,6 +807,7 @@ var Player = (function (_super) {
                         this.animations.play('lAttack');
                         this.attacked = true;
                         this.enableHitbox("leftSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 270) {
@@ -810,6 +816,7 @@ var Player = (function (_super) {
                         this.animations.play('uAttack');
                         this.attacked = true;
                         this.enableHitbox("topSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 225) {
@@ -818,6 +825,7 @@ var Player = (function (_super) {
                         this.animations.play('ulAttack');
                         this.attacked = true;
                         this.enableHitbox("topLeftSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 315) {
@@ -826,11 +834,9 @@ var Player = (function (_super) {
                         this.animations.play('urAttack');
                         this.attacked = true;
                         this.enableHitbox("topRightSaber");
+                        this.slash.play();
                     }
                 }
-            }
-            if (this.attacked) {
-                this.slash.play();
             }
             if (this.newPFrame == this.pDirEnum.DOWNLEFT || this.newPFrame == this.pDirEnum.DOWNRIGHT) {
                 this.newPFrame = this.pDirEnum.DOWN;
