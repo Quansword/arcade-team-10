@@ -49,6 +49,7 @@ window.onload = function ()
     var drop;
 
     var healthPickup;
+    var playerHit;
 
 	function preload()
 	{
@@ -82,12 +83,16 @@ window.onload = function ()
 		game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
 		game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
 		game.load.audio('playerDeath', 'assets/audio/PlayerDeath.mp3');
+		game.load.audio('playerHit', 'assets/audio/PlayerHit.mp3');
 
 		game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
 
 		game.load.audio('laser', 'assets/audio/Laser.wav');
-
 		game.load.audio('bulletBasic', 'assets/audio/BulletBasic.mp3');
+		game.load.audio('bulletRapid', 'assets/audio/BulletRapid.mp3');
+		game.load.audio('bulletShotgun', 'assets/audio/BulletShotgun.mp3');
+
+		game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
 	}
 
 	function create()
@@ -98,6 +103,8 @@ window.onload = function ()
         drop = game.add.audio('drop', 1, true);
 
         healthPickup  = game.add.audio('healthPickup');
+        playerHit = game.add.audio('playerHit', 3);
+        playerHit.allowMultiple = true;
 
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -316,6 +323,7 @@ window.onload = function ()
 				boss.fireTimerSR = game.time.now + game.rnd.integerInRange(2500, 4500);
 				boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
 				laserGate4.deactivate();
+                boss.taunt();
 			}
 		}
 		else if (boss.bossStage == boss.bossStageEnum.STAGE_2)
@@ -442,6 +450,7 @@ window.onload = function ()
 				playerVisible();
 				game.time.events.repeat(200, 3, playerVisible, this);
 				game.time.events.add(1000, playerInvuln, this);
+                playerHit.play();
 			}
 
             if (player.health < 1)
@@ -780,6 +789,8 @@ class Boss extends Phaser.Sprite
 
 	prediction: Phaser.Rectangle;
 
+    taunt1: Phaser.Sound;
+
 	constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
 	{
 		super(game, xPos, yPos, "boss");
@@ -886,7 +897,17 @@ class Boss extends Phaser.Sprite
 		this.playerStill = false;
 		this.fireTimerCH = 0;
 		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
+
+        this.taunt1 = game.add.audio("taunt1", 3);
 	}
+
+    taunt()
+    {
+        if (this.bossStage == this.bossStageEnum.STAGE_2)
+        {
+            this.taunt1.play();
+        }
+    }
 
 	update()
 	{
@@ -1779,6 +1800,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
     enemyDeath: Phaser.Sound;
     laser: Phaser.Sound;
     bulletBasic: Phaser.Sound;
+    bulletRapid: Phaser.Sound;
+    bulletShotgun: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, enemyType: number, player: Player, room: Room, game: Phaser.Game)
 	{
@@ -1890,8 +1913,11 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
         this.enemyDeath = this.game.add.audio('enemyDeath');
         this.laser = this.game.add.audio('laser');
-        this.bulletBasic = this.game.add.audio('bulletBasic');
-        this.bulletBasic.allowMultiple = true;
+        this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
+        this.bulletRapid= this.game.add.audio('bulletRapid', 0.15);
+        this.bulletRapid.allowMultiple = true;
+        this.bulletShotgun = this.game.add.audio('bulletShotgun');
+        this.bulletShotgun.allowMultiple = true;
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
@@ -2565,6 +2591,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 					if (this.eType == this.enemyTypeEnum.SHOTGUN)
 					{
+                        this.bulletShotgun.play();
 						this.weapon.fire();
 						this.weapon.fireAngle -= 30;
 						this.weapon.fire();
@@ -2589,6 +2616,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					else if (this.eType == this.enemyTypeEnum.RAPID)
 					{
 						this.weapon.fire();
+                        this.bulletRapid.play();
 						if (!this.fireBreak)
 						{
 							this.fireBreak = true;
@@ -2614,6 +2642,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 	eSecondShot()
 	{
+        this.bulletShotgun.play();
 		this.weapon.fireAngle = this.secondShot;
 		this.weapon.fire();
 		this.weapon.fireAngle -= 15;
