@@ -218,15 +218,17 @@ window.onload = function ()
 		bossHud.fixedToCamera = true;
 		bossHud.enableBody = false;
 
-		bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
-		bossHud.children[0].scale.setTo(1, 1);
-		bossHud.children[0].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+		bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
+		bossHud.children[0].scale.setTo(6.4, 1.2);
+		bossHud.children[0].position.set((game.camera.width / 4) , (game.camera.height / 1.2) + 9, 5);
 		bossHud.children[0].alpha = 0;
 
-		bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
-		bossHud.children[1].scale.setTo(6.3, 1.2);
-		bossHud.children[1].position.set((game.camera.width / 4) + 14, (game.camera.height / 1.2) + 9, 5);
+		bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
+		bossHud.children[1].scale.setTo(1, 1);
+		bossHud.children[1].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
 		bossHud.children[1].alpha = 0;
+
+
 
 		var style = { font: "bold 32px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
 		bossHealthText = game.add.text(game.camera.width / 3.3, game.camera.height / 1.25, 'D3AD M30W', style);
@@ -683,7 +685,7 @@ window.onload = function ()
 		{
 			bullet.kill();
 			boss.damage(2);
-			bossHud.children[1].scale.setTo(6.3 * (boss.health / boss.maxHealth), 1.2);
+			bossHud.children[0].scale.setTo(6.4 * (boss.health / boss.maxHealth), 1.2);
 			console.log(boss.health);
 
 			if (boss.health != 0)
@@ -699,7 +701,7 @@ window.onload = function ()
 		if (boss.canDamage)
 		{
 			boss.damage(1);
-		    bossHud.children[1].scale.setTo(6.3 * (boss.health / boss.maxHealth), 1.2);
+		    bossHud.children[0].scale.setTo(6.4 * (boss.health / boss.maxHealth), 1.2);
 			console.log(boss.health);
 
 			if (boss.health != 0)
