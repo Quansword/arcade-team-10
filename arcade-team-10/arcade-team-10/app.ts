@@ -86,8 +86,11 @@ window.onload = function ()
 		game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
 
 		game.load.audio('laser', 'assets/audio/Laser.wav');
-
 		game.load.audio('bulletBasic', 'assets/audio/BulletBasic.mp3');
+		game.load.audio('bulletRapid', 'assets/audio/BulletRapid.mp3');
+		game.load.audio('bulletShotgun', 'assets/audio/BulletShotgun.mp3');
+
+		game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
 	}
 
 	function create()
@@ -316,6 +319,7 @@ window.onload = function ()
 				boss.fireTimerSR = game.time.now + game.rnd.integerInRange(2500, 4500);
 				boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
 				laserGate4.deactivate();
+                boss.taunt();
 			}
 		}
 		else if (boss.bossStage == boss.bossStageEnum.STAGE_2)
@@ -731,142 +735,153 @@ class Room extends Phaser.Sprite
 
 class Boss extends Phaser.Sprite 
 {
-	bossStageEnum =
-	{
-		STAGE_0: 0,
-		STAGE_1: 1,
-		STAGE_2: 2,
-		STAGE_3: 3,
-		STAGE_4: 4
-	};
+    bossStageEnum =
+    {
+        STAGE_0: 0,
+        STAGE_1: 1,
+        STAGE_2: 2,
+        STAGE_3: 3,
+        STAGE_4: 4
+    };
 
-	bossStage: number | string;
-	canDamage: boolean;
-	player: Player;
+    bossStage: number | string;
+    canDamage: boolean;
+    player: Player;
 
-	headsetL: Phaser.Weapon;
-	headsetR: Phaser.Weapon;
-	speakerL: Phaser.Weapon;
-	speakerML: Phaser.Weapon;
-	speakerMR: Phaser.Weapon;
-	speakerR: Phaser.Weapon;
+    headsetL: Phaser.Weapon;
+    headsetR: Phaser.Weapon;
+    speakerL: Phaser.Weapon;
+    speakerML: Phaser.Weapon;
+    speakerMR: Phaser.Weapon;
+    speakerR: Phaser.Weapon;
 
-	fireTimerHL: number;
-	fireTimerHR: number;
-	fireTimerSL: number;
-	fireTimerSML: number;
-	fireTimerSMR: number;
-	fireTimerSR: number;
+    fireTimerHL: number;
+    fireTimerHR: number;
+    fireTimerSL: number;
+    fireTimerSML: number;
+    fireTimerSMR: number;
+    fireTimerSR: number;
 
-	aimHL: boolean;
-	aimHR: boolean;
-	aimSL: boolean;
-	aimSML: boolean;
-	aimSMR: boolean;
-	aimSR: boolean;
+    aimHL: boolean;
+    aimHR: boolean;
+    aimSL: boolean;
+    aimSML: boolean;
+    aimSMR: boolean;
+    aimSR: boolean;
 
-	isCrosshatch: boolean;
-	crosshatchFired: boolean;
-	fireTimerCH: number;
-	alternateCHL: boolean;
-	alternateCHR: boolean;
+    isCrosshatch: boolean;
+    crosshatchFired: boolean;
+    fireTimerCH: number;
+    alternateCHL: boolean;
+    alternateCHR: boolean;
 
-	prediction: Phaser.Rectangle;
+    prediction: Phaser.Rectangle;
 
-	constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
-	{
-		super(game, xPos, yPos, "boss");
+    taunt1: Phaser.Sound;
+    constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
+    {
+        super(game, xPos, yPos, "boss");
 
-		this.anchor.setTo(0.5, 0.5);
-		game.physics.arcade.enable(this);
-		this.body.immovable = true;
-		this.scale.setTo(2.2, 2.2);
-		this.body.setSize(this.body.width * 1.2, this.body.height, -(this.body.width * 0.1), -2);
+        this.anchor.setTo(0.5, 0.5);
+        game.physics.arcade.enable(this);
+        this.body.immovable = true;
+        this.scale.setTo(2.2, 2.2);
+        this.body.setSize(this.body.width * 1.2, this.body.height, -(this.body.width * 0.1), -2);
 
-		this.bossStage = this.bossStageEnum.STAGE_0;
-		this.maxHealth = 100;
-		this.health = 100;
-		this.canDamage = false;
-		this.player = player;
-		game.add.existing(this);
+        this.bossStage = this.bossStageEnum.STAGE_0;
+        this.maxHealth = 100;
+        this.health = 100;
+        this.canDamage = false;
+        this.player = player;
+        game.add.existing(this);
 
-		this.headsetL = game.add.weapon(100, 'bulletBlue');
-		this.headsetR = game.add.weapon(100, 'bulletBlue');
-		this.speakerL = game.add.weapon(100, 'bulletRed');
-		this.speakerML = game.add.weapon(100, 'bulletGreen');
-		this.speakerMR = game.add.weapon(100, 'bulletGreen');
-		this.speakerR = game.add.weapon(100, 'bulletRed');
+        this.headsetL = game.add.weapon(100, 'bulletBlue');
+        this.headsetR = game.add.weapon(100, 'bulletBlue');
+        this.speakerL = game.add.weapon(100, 'bulletRed');
+        this.speakerML = game.add.weapon(100, 'bulletGreen');
+        this.speakerMR = game.add.weapon(100, 'bulletGreen');
+        this.speakerR = game.add.weapon(100, 'bulletRed');
 
-		this.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
-		this.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
-		this.speakerL.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
-		this.speakerML.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
-		this.speakerMR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
-		this.speakerR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+        this.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
+        this.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
+        this.speakerL.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+        this.speakerML.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+        this.speakerMR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+        this.speakerR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
 
-		this.headsetL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.headsetL.bulletSpeed = 300
-		this.headsetL.fireRate = 0;
-		this.headsetL.bulletAngleOffset = 90;
-		this.headsetL.bulletAngleVariance = 3;
-		this.headsetL.x = 940;
-		this.headsetL.y = 120;
-		this.fireTimerHL = 0;
-		this.aimHL = false;
+        this.headsetL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.headsetL.bulletSpeed = 300
+        this.headsetL.fireRate = 0;
+        this.headsetL.bulletAngleOffset = 90;
+        this.headsetL.bulletAngleVariance = 3;
+        this.headsetL.x = 940;
+        this.headsetL.y = 120;
+        this.fireTimerHL = 0;
+        this.aimHL = false;
 
-		this.headsetR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.headsetR.bulletSpeed = 300
-		this.headsetR.fireRate = 0;
-		this.headsetR.bulletAngleOffset = 90;
-		this.headsetR.bulletAngleVariance = 3;
-		this.headsetR.x = 980;
-		this.headsetR.y = 120;
-		this.fireTimerHR = 0;
-		this.aimHR = false;
+        this.headsetR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.headsetR.bulletSpeed = 300
+        this.headsetR.fireRate = 0;
+        this.headsetR.bulletAngleOffset = 90;
+        this.headsetR.bulletAngleVariance = 3;
+        this.headsetR.x = 980;
+        this.headsetR.y = 120;
+        this.fireTimerHR = 0;
+        this.aimHR = false;
 
-		this.speakerL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.speakerL.bulletSpeed = 300
-		this.speakerL.fireRate = 0;
-		this.speakerL.bulletAngleOffset = 90;
-		this.speakerL.x = 740;
-		this.speakerL.y = 240;
-		this.fireTimerSL = 0;
-		this.aimSL = false;
+        this.speakerL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.speakerL.bulletSpeed = 300
+        this.speakerL.fireRate = 0;
+        this.speakerL.bulletAngleOffset = 90;
+        this.speakerL.x = 740;
+        this.speakerL.y = 240;
+        this.fireTimerSL = 0;
+        this.aimSL = false;
 
-		this.speakerML.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.speakerML.bulletSpeed = 300
-		this.speakerML.fireRate = 0;
-		this.speakerML.bulletAngleOffset = 90;
-		this.speakerML.x = 830;
-		this.speakerML.y = 224;
-		this.fireTimerSML = 0;
-		this.aimSML = false;
+        this.speakerML.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.speakerML.bulletSpeed = 300
+        this.speakerML.fireRate = 0;
+        this.speakerML.bulletAngleOffset = 90;
+        this.speakerML.x = 830;
+        this.speakerML.y = 224;
+        this.fireTimerSML = 0;
+        this.aimSML = false;
 
-		this.speakerMR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.speakerMR.bulletSpeed = 300
-		this.speakerMR.fireRate = 0;
-		this.speakerMR.bulletAngleOffset = 90;
-		this.speakerMR.x = 1090;
-		this.speakerMR.y = 224;
-		this.fireTimerSMR = 0;
-		this.aimSMR = false;
+        this.speakerMR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.speakerMR.bulletSpeed = 300
+        this.speakerMR.fireRate = 0;
+        this.speakerMR.bulletAngleOffset = 90;
+        this.speakerMR.x = 1090;
+        this.speakerMR.y = 224;
+        this.fireTimerSMR = 0;
+        this.aimSMR = false;
 
-		this.speakerR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-		this.speakerR.bulletSpeed = 300
-		this.speakerR.fireRate = 0;
-		this.speakerR.bulletAngleOffset = 90;
-		this.speakerR.x = 1180;
-		this.speakerR.y = 240;
-		this.fireTimerSR = 0;
-		this.aimSR = false;
+        this.speakerR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.speakerR.bulletSpeed = 300
+        this.speakerR.fireRate = 0;
+        this.speakerR.bulletAngleOffset = 90;
+        this.speakerR.x = 1180;
+        this.speakerR.y = 240;
+        this.fireTimerSR = 0;
+        this.aimSR = false;
 
-		this.isCrosshatch = false;
-		this.crosshatchFired = false;
-		this.alternateCHL = false;
-		this.alternateCHR = false;
-		this.fireTimerCH = 0;
-		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
-	}
+        this.isCrosshatch = false;
+        this.crosshatchFired = false;
+        this.alternateCHL = false;
+        this.alternateCHR = false;
+        this.fireTimerCH = 0;
+        this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
+
+        this.taunt1 = game.add.audio("taunt1", 3);
+    }
+
+    taunt()
+    {
+        if (this.bossStage == this.bossStageEnum.STAGE_2)
+        {
+            this.taunt1.play();
+        }
+    }
 
 	update()
 	{
@@ -1724,6 +1739,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
     enemyDeath: Phaser.Sound;
     laser: Phaser.Sound;
     bulletBasic: Phaser.Sound;
+    bulletRapid: Phaser.Sound;
+    bulletShotgun: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, enemyType: number, player: Player, room: Room, game: Phaser.Game)
 	{
@@ -1835,8 +1852,11 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
         this.enemyDeath = this.game.add.audio('enemyDeath');
         this.laser = this.game.add.audio('laser');
-        this.bulletBasic = this.game.add.audio('bulletBasic');
-        this.bulletBasic.allowMultiple = true;
+        this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
+        this.bulletRapid= this.game.add.audio('bulletRapid', 0.15);
+        this.bulletRapid.allowMultiple = true;
+        this.bulletShotgun = this.game.add.audio('bulletShotgun');
+        this.bulletShotgun.allowMultiple = true;
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
@@ -2510,6 +2530,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 					if (this.eType == this.enemyTypeEnum.SHOTGUN)
 					{
+                        this.bulletShotgun.play();
 						this.weapon.fire();
 						this.weapon.fireAngle -= 30;
 						this.weapon.fire();
@@ -2534,6 +2555,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					else if (this.eType == this.enemyTypeEnum.RAPID)
 					{
 						this.weapon.fire();
+                        this.bulletRapid.play();
 						if (!this.fireBreak)
 						{
 							this.fireBreak = true;
@@ -2559,6 +2581,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 	eSecondShot()
 	{
+        this.bulletShotgun.play();
 		this.weapon.fireAngle = this.secondShot;
 		this.weapon.fire();
 		this.weapon.fireAngle -= 15;
