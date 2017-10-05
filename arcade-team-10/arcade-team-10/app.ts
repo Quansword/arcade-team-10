@@ -58,13 +58,13 @@ window.onload = function ()
 
 	var healthPickup;
 	var playerHit;
-    var shake;
 
 	var intro;
 	var introSprite;
 
     let introPlaying: boolean;
     let gameOver: Phaser.Sprite;
+    let victory: Phaser.Sprite;
 
 	function preload()
 	{
@@ -114,9 +114,11 @@ window.onload = function ()
 
 		game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
 		game.load.audio('shake', 'assets/audio/Shake.wav');
+		game.load.audio('bossDeath', 'assets/audio/BossDeath.wav');
 
 		game.load.video('intro', 'assets/Intro.webm');
 		game.load.image('gameOver', 'assets/GameOver.png');
+		game.load.image('victory', 'assets/Victory.png');
 	}
 
 	function create()
@@ -131,7 +133,6 @@ window.onload = function ()
 		playerHit = game.add.audio('playerHit', 3);
 		playerHit.allowMultiple = true;
 
-		shake = game.add.audio('shake', 3);
 
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -254,6 +255,11 @@ window.onload = function ()
 		gameOver.fixedToCamera = true;
 		gameOver.scale.setTo(1.25, 1.25);
 		gameOver.renderable = false;
+
+		victory = game.add.sprite(0, 0, 'victory');
+		victory.fixedToCamera = true;
+		victory.scale.setTo(1.25, 1.25);
+		victory.renderable = false;
 	}
 
 	function update()
@@ -715,24 +721,30 @@ window.onload = function ()
 
 	function bulletHitBoss(boss: Boss, bullet: Phaser.Bullet)
 	{
-		if (boss.canDamage)
-		{
-			bullet.kill();
-			boss.damage(2);
-			bossHud.children[0].scale.setTo(6.4 * (boss.health / boss.maxHealth), 1.2);
-			console.log(boss.health);
+        if (boss.canDamage && boss.health > 0)
+        {
+            bullet.kill();
+            boss.damage(2);
+            bossHud.children[0].scale.setTo(6.4 * (boss.health / boss.maxHealth), 1.2);
+            console.log(boss.health);
 
-			if (boss.health != 0)
-			{
-				bossInvuln();
-				game.time.events.add(100, bossInvuln, this);
-			}
-		}
+            if (boss.health != 0)
+            {
+                bossInvuln();
+                game.time.events.add(100, bossInvuln, this);
+            }
+            else
+            {
+                victory.renderable = true;
+                boss.bDeath();
+            }
+        }
+
 	}
 
 	function saberHitBoss(saber, temp: Boss)
 	{
-		if (boss.canDamage)
+		if (boss.canDamage && boss.health > 0)
 		{
 			boss.damage(1);
 		    bossHud.children[0].scale.setTo(6.4 * (boss.health / boss.maxHealth), 1.2);
@@ -743,7 +755,12 @@ window.onload = function ()
 				bossInvuln();
 				game.time.events.add(300, bossInvuln, this);
 			}
-		}
+            else
+            {
+                victory.renderable = true;
+                boss.bDeath();
+            }
+        }
 	}
 
 	function bossInvuln()
@@ -1024,8 +1041,9 @@ class Boss extends Phaser.Sprite
 	taunt1: Phaser.Sound;
 	laser: Phaser.Sound;
 	bulletBasic: Phaser.Sound;
-	bulletShotgun: Phaser.Sound;
-
+    bulletShotgun: Phaser.Sound;
+    shake: Phaser.Sound;
+    bossDeath: Phaser.Sound;
 	constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
 	{
 		super(game, xPos, yPos, "boss");
@@ -1141,6 +1159,8 @@ class Boss extends Phaser.Sprite
 		this.bulletBasic.allowMultiple = true;
 		this.bulletShotgun = this.game.add.audio('bulletShotgun');
 		this.bulletShotgun.allowMultiple = true;
+		this.shake = this.game.add.audio('shake', 3);
+		this.bossDeath = this.game.add.audio('bossDeath', 3);
 	}
 
 	taunt()
@@ -1150,6 +1170,11 @@ class Boss extends Phaser.Sprite
 			this.taunt1.play();
 		}
 	}
+
+    bDeath()
+    {
+        this.bossDeath.play();
+    }
 
 	update()
 	{
@@ -1600,6 +1625,8 @@ class Boss extends Phaser.Sprite
 			b.body.velocity.y = -b.body.velocity.y;
 			b.body.velocity.x = -b.body.velocity.x;
 		}, this);
+
+        this.shake.play();
 	}
 }
 
