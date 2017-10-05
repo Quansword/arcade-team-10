@@ -1912,9 +1912,9 @@ class Player extends Phaser.Sprite
 
 			this.weapon.trackSprite(this, 0, 0);
 
-			if ((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.S)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.A)) && !((keyState.isDown(Phaser.KeyCode.W) && keyState.isDown(Phaser.KeyCode.S)) || (keyState.isDown(Phaser.KeyCode.A) && keyState.isDown(Phaser.KeyCode.D))))
+			if (((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.UP)) || (keyState.isDown(Phaser.KeyCode.S) || keyState.isDown(Phaser.KeyCode.DOWN))) && ((keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.RIGHT)) || (keyState.isDown(Phaser.KeyCode.A) || keyState.isDown(Phaser.KeyCode.LEFT))) && !(((keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.UP)) && (keyState.isDown(Phaser.KeyCode.S) || keyState.isDown(Phaser.KeyCode.DOWN))) || ((keyState.isDown(Phaser.KeyCode.A) || keyState.isDown(Phaser.KeyCode.LEFT)) && (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.RIGHT)))))
 			{
-				if (keyState.isDown(Phaser.KeyCode.W))
+				if (keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.UP))
 				{
 					this.pVelocityY -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
 					this.weapon.fireAngle = 270;
@@ -1925,7 +1925,7 @@ class Player extends Phaser.Sprite
 					this.weapon.fireAngle = 90;
 				}
 
-				if (keyState.isDown(Phaser.KeyCode.A))
+				if (keyState.isDown(Phaser.KeyCode.A) || keyState.isDown(Phaser.KeyCode.LEFT))
 				{
 					this.pVelocityX -= Math.sqrt(Math.pow(this.pSpeed, 2) / 2);
 					if (this.weapon.fireAngle > 180)
@@ -1952,12 +1952,12 @@ class Player extends Phaser.Sprite
 			}
 			else
 			{
-				if (keyState.isDown(Phaser.KeyCode.W))
+				if (keyState.isDown(Phaser.KeyCode.W) || keyState.isDown(Phaser.KeyCode.UP))
 				{
 					this.pVelocityY -= this.pSpeed;
 					this.weapon.fireAngle = 270;
 				}
-				if (keyState.isDown(Phaser.KeyCode.S))
+				if (keyState.isDown(Phaser.KeyCode.S) || keyState.isDown(Phaser.KeyCode.DOWN))
 				{
 					this.pVelocityY += this.pSpeed;
 					if (this.weapon.fireAngle == 270)
@@ -1970,12 +1970,12 @@ class Player extends Phaser.Sprite
 					}
 				}
 
-				if (keyState.isDown(Phaser.KeyCode.A))
+				if (keyState.isDown(Phaser.KeyCode.A) || keyState.isDown(Phaser.KeyCode.LEFT))
 				{
 					this.pVelocityX -= this.pSpeed;
 					this.weapon.fireAngle = 180;
 				}
-				if (keyState.isDown(Phaser.KeyCode.D))
+				if (keyState.isDown(Phaser.KeyCode.D) || keyState.isDown(Phaser.KeyCode.RIGHT))
 				{
 					this.pVelocityX += this.pSpeed;
 					this.weapon.fireAngle = 0;
