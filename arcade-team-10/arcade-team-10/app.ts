@@ -549,6 +549,7 @@ window.onload = function ()
 				laserGate4.deactivate();
 				boss.taunt();
 				boss.animations.stop('bob');
+				boss.frame = 0;
 			}
 		}
 
@@ -1057,7 +1058,7 @@ class Boss extends Phaser.Sprite
 		super(game, xPos, yPos, "boss", 0);
 
 		this.animations.add('scratch', [6, 7], 4);
-		this.animations.add('crosshatch', [2, 3], 6);
+		this.animations.add('crosshatch', [2, 3], 10);
 		this.animations.add('bob', [4, 5], 4, true);
 
 		this.anchor.setTo(0.5, 0.5);
