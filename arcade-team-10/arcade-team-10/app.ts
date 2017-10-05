@@ -130,7 +130,7 @@ window.onload = function ()
 		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
 		pClearCircle.anchor.setTo(0.5, 0.5);
 		game.physics.arcade.enable(pClearCircle);
-		pClearCircle.body.setCircle(player.body.width * 2.5);
+		pClearCircle.body.setCircle(player.body.width * 4);
 		pClearCircle.body.immovable = true;
 		pClearCircle.kill();
 
@@ -182,7 +182,7 @@ window.onload = function ()
 				game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
 			}
 			game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
-			game.physics.arcade.collide(enemies.children[i].weapon.bullets, pClearCircle, clearBullet);
+			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, pClearCircle, clearBullet);
 
 			game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
 			game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
@@ -246,7 +246,7 @@ window.onload = function ()
 
         if (boss.bossStage == boss.bossStageEnum.STEP_0)
         {
-            if (enemyKillCount >= 7)
+            if (enemyKillCount >= 8)
             {
                 boss.bossStage = boss.bossStageEnum.STEP_1;
                 laserGate4.deactivate();
@@ -267,19 +267,19 @@ window.onload = function ()
 
 	function render()
 	{
-		if (pClearCircle.alive)
-		{
-			game.debug.bodyInfo(pClearCircle, 32, 32);
-			game.debug.body(pClearCircle);
-		}
+		//if (pClearCircle.alive)
+		//{
+		//	game.debug.bodyInfo(pClearCircle, 32, 32);
+		//	game.debug.body(pClearCircle);
+		//}
 		game.debug.bodyInfo(player, 32, 32);
 		game.debug.body(player);
 
-		for (var i = 0; i < enemies.children.length; i++)
-		{
-			game.debug.bodyInfo(enemies.children[i], 32, 32);
-			game.debug.body(enemies.children[i]);
-		}
+		//for (var i = 0; i < enemies.children.length; i++)
+		//{
+		//	game.debug.bodyInfo(enemies.children[i], 32, 32);
+		//	game.debug.body(enemies.children[i]);
+		//}
 	}
 
 	function fullScreen()
@@ -317,9 +317,7 @@ window.onload = function ()
 			if (boss.health != 0)
 			{
 				bossInvuln();
-				bossVisible();
-				game.time.events.repeat(200, 3, bossVisible, this);
-				game.time.events.add(1000, bossInvuln, this);
+				game.time.events.add(300, bossInvuln, this);
 			}
         }
 	}
@@ -382,12 +380,6 @@ window.onload = function ()
 		player.canDamage = !player.canDamage;
 	}
 
-	function bossVisible()
-	{
-		boss.alpha = (boss.alpha + 1) % 2;
-	}
-
-
     function bossInvuln()
     {
         boss.canDamage = !boss.canDamage;
@@ -396,8 +388,8 @@ window.onload = function ()
 	function playerClear()
 	{
 		pClearCircle.revive();
-		pClearCircle.position.x = player.body.position.x - (player.body.width * 2);
-		pClearCircle.position.y = player.body.position.y - (player.body.width * 2);
+		pClearCircle.position.x = player.body.position.x - (player.body.width * 4);
+		pClearCircle.position.y = player.body.position.y - (player.body.width * 4);
 		game.time.events.add(2000, endClear, this);
 	}
 
@@ -456,7 +448,7 @@ window.onload = function ()
 		var enemy3 = new Enemy(8800, 800, 0, player, bossRoom, game);
 		enemies.add(enemy3);
 
-		var enemy4 = new Enemy(8500, 700, 1, player, bossRoom, game);
+		var enemy4 = new Enemy(8300, 700, 1, player, bossRoom, game);
 		enemies.add(enemy4);
 
 		var enemy5 = new Enemy(8300, 700, 2, player, bossRoom, game);
@@ -467,6 +459,9 @@ window.onload = function ()
 
 		var enemy7 = new Enemy(8500, 600, 3, player, bossRoom, game);
 		enemies.add(enemy7);
+
+		var enemy8 = new Enemy(8700, 700, 1, player, bossRoom, game);
+		enemies.add(enemy8);
 	}
 
 	function killPlayer(player: Player)
@@ -682,6 +677,7 @@ class Player extends Phaser.Sprite
 
 	newPFrame: number | string;
 	attacked: boolean;
+	attackTimer: number;
 	rAttack: Phaser.Animation;
 	lAttack: Phaser.Animation;
 	uAttack: Phaser.Animation;
@@ -735,7 +731,7 @@ class Player extends Phaser.Sprite
 		this.scale.setTo(2.25, 2.25);
 
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
-		this.body.setSize(12, 12, 54, 64);
+		this.body.setSize(18, 28, 51, 57);
 		this.body.collideWorldBounds = true;
 		this.maxHealth = 5;
 		this.health = this.maxHealth;
@@ -1253,7 +1249,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
             if (this.eType == this.enemyTypeEnum.LASER)
             {
-			    b.scale.setTo(3, 3);
+			    b.scale.setTo(2, 2);
             }
             else if (this.eType == this.enemyTypeEnum.BASE)
             {
@@ -1962,8 +1958,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 					if (this.eType == this.enemyTypeEnum.LASER && !this.fireBreak)
 					{
 						var prediction = new Phaser.Rectangle(this.player.body.position.x, this.player.body.position.y, this.player.body.width, this.player.body.height);
-						prediction.x = prediction.x + (this.player.body.velocity.x * 3);
-						prediction.y = prediction.y + (this.player.body.velocity.y * 3);
+						prediction.x = prediction.x + (this.player.body.velocity.x * 2);
+						prediction.y = prediction.y + (this.player.body.velocity.y * 2);
 						var fireDegree = this.game.physics.arcade.angleBetween(this.body, prediction);
 						fireDegree = fireDegree * 57.2958;
 						this.weapon.fireAngle = fireDegree;

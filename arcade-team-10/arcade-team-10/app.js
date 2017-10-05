@@ -107,7 +107,7 @@ window.onload = function () {
         pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
         pClearCircle.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(pClearCircle);
-        pClearCircle.body.setCircle(player.body.width * 2.5);
+        pClearCircle.body.setCircle(player.body.width * 4);
         pClearCircle.body.immovable = true;
         pClearCircle.kill();
         laserGate1 = new Barrier(8500, 1410, 1.25, 1, game);
@@ -144,7 +144,7 @@ window.onload = function () {
                 game.physics.arcade.overlap(enemies.children[i].weapon.bullets, player, bulletHitPlayer, null, this);
             }
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
-            game.physics.arcade.collide(enemies.children[i].weapon.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(enemies.children[i].weapon.bullets, pClearCircle, clearBullet);
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
             if (player.alive) {
@@ -185,7 +185,7 @@ window.onload = function () {
         laserGate3.update();
         laserGate4.update();
         if (boss.bossStage == boss.bossStageEnum.STEP_0) {
-            if (enemyKillCount >= 7) {
+            if (enemyKillCount >= 8) {
                 boss.bossStage = boss.bossStageEnum.STEP_1;
                 laserGate4.deactivate();
             }
@@ -200,16 +200,18 @@ window.onload = function () {
         //render();
     }
     function render() {
-        if (pClearCircle.alive) {
-            game.debug.bodyInfo(pClearCircle, 32, 32);
-            game.debug.body(pClearCircle);
-        }
+        //if (pClearCircle.alive)
+        //{
+        //	game.debug.bodyInfo(pClearCircle, 32, 32);
+        //	game.debug.body(pClearCircle);
+        //}
         game.debug.bodyInfo(player, 32, 32);
         game.debug.body(player);
-        for (var i = 0; i < enemies.children.length; i++) {
-            game.debug.bodyInfo(enemies.children[i], 32, 32);
-            game.debug.body(enemies.children[i]);
-        }
+        //for (var i = 0; i < enemies.children.length; i++)
+        //{
+        //	game.debug.bodyInfo(enemies.children[i], 32, 32);
+        //	game.debug.body(enemies.children[i]);
+        //}
     }
     function fullScreen() {
         game.scale.pageAlignHorizontally = true;
@@ -235,9 +237,7 @@ window.onload = function () {
             console.log(boss.health);
             if (boss.health != 0) {
                 bossInvuln();
-                bossVisible();
-                game.time.events.repeat(200, 3, bossVisible, this);
-                game.time.events.add(1000, bossInvuln, this);
+                game.time.events.add(300, bossInvuln, this);
             }
         }
     }
@@ -280,16 +280,13 @@ window.onload = function () {
     function playerInvuln() {
         player.canDamage = !player.canDamage;
     }
-    function bossVisible() {
-        boss.alpha = (boss.alpha + 1) % 2;
-    }
     function bossInvuln() {
         boss.canDamage = !boss.canDamage;
     }
     function playerClear() {
         pClearCircle.revive();
-        pClearCircle.position.x = player.body.position.x - (player.body.width * 2);
-        pClearCircle.position.y = player.body.position.y - (player.body.width * 2);
+        pClearCircle.position.x = player.body.position.x - (player.body.width * 4);
+        pClearCircle.position.y = player.body.position.y - (player.body.width * 4);
         game.time.events.add(2000, endClear, this);
     }
     function endClear() {
@@ -331,7 +328,7 @@ window.onload = function () {
         enemies.add(enemy2);
         var enemy3 = new Enemy(8800, 800, 0, player, bossRoom, game);
         enemies.add(enemy3);
-        var enemy4 = new Enemy(8500, 700, 1, player, bossRoom, game);
+        var enemy4 = new Enemy(8300, 700, 1, player, bossRoom, game);
         enemies.add(enemy4);
         var enemy5 = new Enemy(8300, 700, 2, player, bossRoom, game);
         enemies.add(enemy5);
@@ -339,6 +336,8 @@ window.onload = function () {
         enemies.add(enemy6);
         var enemy7 = new Enemy(8500, 600, 3, player, bossRoom, game);
         enemies.add(enemy7);
+        var enemy8 = new Enemy(8700, 700, 1, player, bossRoom, game);
+        enemies.add(enemy8);
     }
     function killPlayer(player) {
         var life = lives.getFirstAlive();
@@ -517,7 +516,7 @@ var Player = (function (_super) {
         _this.anchor.setTo(0.5, 0.5);
         _this.scale.setTo(2.25, 2.25);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(12, 12, 54, 64);
+        _this.body.setSize(18, 28, 51, 57);
         _this.body.collideWorldBounds = true;
         _this.maxHealth = 5;
         _this.health = _this.maxHealth;
@@ -893,7 +892,7 @@ var Enemy = (function (_super) {
         }
         _this.weapon.bullets.forEach(function (b) {
             if (_this.eType == _this.enemyTypeEnum.LASER) {
-                b.scale.setTo(3, 3);
+                b.scale.setTo(2, 2);
             }
             else if (_this.eType == _this.enemyTypeEnum.BASE) {
                 b.scale.setTo(1.5, 1.5);
@@ -1428,8 +1427,8 @@ var Enemy = (function (_super) {
                 if (this.aim) {
                     if (this.eType == this.enemyTypeEnum.LASER && !this.fireBreak) {
                         var prediction = new Phaser.Rectangle(this.player.body.position.x, this.player.body.position.y, this.player.body.width, this.player.body.height);
-                        prediction.x = prediction.x + (this.player.body.velocity.x * 3);
-                        prediction.y = prediction.y + (this.player.body.velocity.y * 3);
+                        prediction.x = prediction.x + (this.player.body.velocity.x * 2);
+                        prediction.y = prediction.y + (this.player.body.velocity.y * 2);
                         var fireDegree = this.game.physics.arcade.angleBetween(this.body, prediction);
                         fireDegree = fireDegree * 57.2958;
                         this.weapon.fireAngle = fireDegree;
