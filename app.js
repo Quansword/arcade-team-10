@@ -60,6 +60,7 @@ window.onload = function () {
     var introSprite;
     var introPlaying;
     var gameOver;
+    var victory;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
@@ -95,8 +96,11 @@ window.onload = function () {
         game.load.audio('bulletRapid', 'assets/audio/BulletRapid.mp3');
         game.load.audio('bulletShotgun', 'assets/audio/BulletShotgun.mp3');
         game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
+        game.load.audio('shake', 'assets/audio/Shake.wav');
+        game.load.audio('bossDeath', 'assets/audio/BossDeath.wav');
         game.load.video('intro', 'assets/Intro.webm');
         game.load.image('gameOver', 'assets/GameOver.png');
+        game.load.image('victory', 'assets/Victory.png');
     }
     function create() {
         loop = game.add.audio('loop', 1, true);
@@ -159,7 +163,7 @@ window.onload = function () {
         pClearCircle.scale.setTo(2, 2);
         clear = pClearCircle.animations.add('clear', [0, 1, 2, 3], 30, true);
         game.physics.arcade.enable(pClearCircle);
-        pClearCircle.body.setCircle(player.body.width * 1.5, 0, 0);
+        pClearCircle.body.setCircle(player.body.width * 2.25, 0, 0);
         pClearCircle.body.immovable = true;
         pClearCircle.kill();
         laserGate1 = new Barrier(832, 1410, 1, 1, "laserH", game);
@@ -202,6 +206,10 @@ window.onload = function () {
         gameOver.fixedToCamera = true;
         gameOver.scale.setTo(1.25, 1.25);
         gameOver.renderable = false;
+        victory = game.add.sprite(0, 0, 'victory');
+        victory.fixedToCamera = true;
+        victory.scale.setTo(1.25, 1.25);
+        victory.renderable = false;
     }
     function update() {
         var deltaTime = game.time.elapsed / 10;
@@ -244,11 +252,15 @@ window.onload = function () {
                         game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
                     }
                     game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss, saberHitBoss, null, this);
-                    if (boss.bossStage == boss.bossStageEnum.STAGE_2) {
+                    if (boss.bossStage == boss.bossStageEnum.STAGE_2 || boss.bossStage == boss.bossStageEnum.STAGE_4) {
                         game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.headsetL.bullets, bulletHitSaber);
                         game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.headsetR.bullets, bulletHitSaber);
                         game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerL.bullets, bulletHitSaber);
                         game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerR.bullets, bulletHitSaber);
+                        if (boss.bossStage == boss.bossStageEnum.STAGE_4) {
+                            game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerML.bullets, bulletHitSaber);
+                            game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerMR.bullets, bulletHitSaber);
+                        }
                     }
                     else if (boss.bossStage == boss.bossStageEnum.STAGE_3) {
                         game.physics.arcade.overlap(player.saberHitBoxes.children[j], turret1, saberHitTurret);
@@ -310,8 +322,8 @@ window.onload = function () {
                 game.world.setBounds(0, 0, 1920, 1500);
             }
         }
-        else if (boss.bossStage == boss.bossStageEnum.STAGE_2) {
-            if (boss.health <= 70) {
+        else if (boss.bossStage == boss.bossStageEnum.STAGE_2 || boss.bossStage == boss.bossStageEnum.STAGE_4) {
+            if (boss.bossStage == boss.bossStageEnum.STAGE_2 && boss.health <= 70) {
                 boss.bossStage = boss.bossStageEnum.STAGE_3;
                 boss.canDamage = false;
                 laserGate4.activate();
@@ -323,6 +335,12 @@ window.onload = function () {
                 turret4.revive();
                 turret5.revive();
                 turret6.revive();
+                turret1.fireTimer = game.time.now + 1000;
+                turret2.fireTimer = game.time.now + 1000;
+                turret3.fireTimer = game.time.now + 1000;
+                turret4.fireTimer = game.time.now + 1000;
+                turret5.fireTimer = game.time.now + 1000;
+                turret6.fireTimer = game.time.now + 1000;
                 turret1.animations.play('activate');
                 turret2.animations.play('activate');
                 turret3.animations.play('activate');
@@ -344,8 +362,6 @@ window.onload = function () {
                 boss.headsetL.bullets.forEach(function (b) { b.kill(); }, this);
                 boss.headsetR.bullets.forEach(function (b) { b.kill(); }, this);
                 boss.speakerL.bullets.forEach(function (b) { b.kill(); }, this);
-                boss.speakerML.bullets.forEach(function (b) { b.kill(); }, this);
-                boss.speakerMR.bullets.forEach(function (b) { b.kill(); }, this);
                 boss.speakerR.bullets.forEach(function (b) { b.kill(); }, this);
                 boss.laptop.bullets.forEach(function (b) { b.kill(); }, this);
             }
@@ -365,6 +381,15 @@ window.onload = function () {
             game.physics.arcade.overlap(boss.speakerR.bullets, pClearCircle, clearBullet);
             game.physics.arcade.overlap(boss.laptop.bullets, pClearCircle, clearBullet);
             game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
+            if (boss.bossStage == boss.bossStageEnum.STAGE_4) {
+                game.physics.arcade.collide(boss.speakerML.bullets, layer, killBullet);
+                game.physics.arcade.collide(boss.speakerMR.bullets, layer, killBullet);
+                game.physics.arcade.overlap(boss.speakerML.bullets, player, bulletHitPlayer);
+                game.physics.arcade.overlap(boss.speakerMR.bullets, player, bulletHitPlayer);
+                game.physics.arcade.overlap(boss.speakerML.bullets, pClearCircle, clearBullet);
+                game.physics.arcade.overlap(boss.speakerMR.bullets, pClearCircle, clearBullet);
+                game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
+            }
         }
         else if (boss.bossStage == boss.bossStageEnum.STAGE_3) {
             game.physics.arcade.collide(player, turret1, enemyHitPlayer);
@@ -398,12 +423,17 @@ window.onload = function () {
             turret5.tUpdate();
             turret6.tUpdate();
             if (!turret1.alive && !turret2.alive && !turret3.alive && !turret4.alive && !turret5.alive && !turret6.alive) {
-                laserGate4.deactivate();
-                boss.canDamage = true;
                 boss.bossStage = boss.bossStageEnum.STAGE_4;
+                boss.canDamage = true;
+                boss.fireTimerSL = game.time.now + game.rnd.integerInRange(2000, 4000);
+                boss.fireTimerSR = game.time.now + game.rnd.integerInRange(2500, 4500);
+                boss.fireTimerSML = game.time.now + game.rnd.integerInRange(5000, 7000);
+                boss.fireTimerSMR = game.time.now + game.rnd.integerInRange(5500, 7500);
+                boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
+                boss.fireTimerBS = game.time.now + game.rnd.integerInRange(7000, 10000);
+                laserGate4.deactivate();
+                boss.taunt();
             }
-        }
-        else if (boss.bossStage == boss.bossStageEnum.STAGE_4) {
         }
         boss.update();
         if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && introPlaying) {
@@ -528,7 +558,7 @@ window.onload = function () {
         }
     }
     function bulletHitBoss(boss, bullet) {
-        if (boss.canDamage) {
+        if (boss.canDamage && boss.health > 0) {
             bullet.kill();
             boss.damage(2);
             bossHud.children[0].scale.setTo(6.4 * (boss.health / boss.maxHealth), 1.2);
@@ -537,16 +567,26 @@ window.onload = function () {
                 bossInvuln();
                 game.time.events.add(100, bossInvuln, this);
             }
+            else {
+                victory.renderable = true;
+                boss.bDeath();
+                boss.kill();
+            }
         }
     }
     function saberHitBoss(saber, temp) {
-        if (boss.canDamage) {
+        if (boss.canDamage && boss.health > 0) {
             boss.damage(1);
             bossHud.children[0].scale.setTo(6.4 * (boss.health / boss.maxHealth), 1.2);
             console.log(boss.health);
             if (boss.health != 0) {
                 bossInvuln();
                 game.time.events.add(300, bossInvuln, this);
+            }
+            else {
+                victory.renderable = true;
+                boss.bDeath();
+                boss.kill();
             }
         }
     }
@@ -556,8 +596,8 @@ window.onload = function () {
     // -------------------------------------------------------------------------------------------- Player Clear When Hit
     function playerClear() {
         pClearCircle.revive();
-        pClearCircle.position.x = player.body.position.x - (player.body.width * 2.5);
-        pClearCircle.position.y = player.body.position.y - (player.body.width * 2.5);
+        pClearCircle.position.x = player.body.position.x - (player.body.width * 3);
+        pClearCircle.position.y = player.body.position.y - (player.body.width * 3);
         game.time.events.add(2000, endClear, this);
         clear.play();
         pClearCircle.play('clear');
@@ -806,12 +846,14 @@ var Boss = (function (_super) {
         _this.fireTimerLT = 0;
         _this.aimLT = false;
         _this.isCrosshatch = false;
+        _this.isBulletShake = false;
         _this.crosshatchFired = false;
         _this.alternateCHL = false;
         _this.alternateCHR = false;
         _this.fireBreak = false;
         _this.playerStill = false;
         _this.fireTimerCH = 0;
+        _this.fireTimerBS = 0;
         _this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
         _this.taunt1 = game.add.audio("taunt1", 3);
         _this.laser = _this.game.add.audio('laser');
@@ -819,6 +861,8 @@ var Boss = (function (_super) {
         _this.bulletBasic.allowMultiple = true;
         _this.bulletShotgun = _this.game.add.audio('bulletShotgun');
         _this.bulletShotgun.allowMultiple = true;
+        _this.shake = _this.game.add.audio('shake', 3);
+        _this.bossDeath = _this.game.add.audio('bossDeath', 3);
         return _this;
     }
     Boss.prototype.taunt = function () {
@@ -826,8 +870,11 @@ var Boss = (function (_super) {
             this.taunt1.play();
         }
     };
+    Boss.prototype.bDeath = function () {
+        this.bossDeath.play();
+    };
     Boss.prototype.update = function () {
-        if (this.bossStage == this.bossStageEnum.STAGE_2) {
+        if (this.bossStage == this.bossStageEnum.STAGE_2 || this.bossStage == this.bossStageEnum.STAGE_4) {
             if (this.game.time.now > this.fireTimerHL) {
                 this.fireTimerHL = this.game.time.now + this.game.rnd.integerInRange(300, 750);
                 this.aimHL = true;
@@ -984,6 +1031,77 @@ var Boss = (function (_super) {
                 this.laptop.fire();
             }
         }
+        if (this.bossStage == this.bossStageEnum.STAGE_4) {
+            if (this.game.time.now > this.fireTimerSML) {
+                this.fireTimerSML = this.game.time.now + this.game.rnd.integerInRange(3000, 6000);
+                this.aimSML = true;
+            }
+            if (this.game.time.now > this.fireTimerSMR) {
+                this.fireTimerSMR = this.game.time.now + this.game.rnd.integerInRange(2950, 6050);
+                this.aimSMR = true;
+            }
+            if (this.game.time.now > this.fireTimerBS) {
+                this.fireTimerBS = this.game.time.now + this.game.rnd.integerInRange(10000, 15000);
+                this.isBulletShake = true;
+            }
+            if (this.aimSML) {
+                this.speakerML.fireAngle = 165;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.speakerML.fireAngle -= 15;
+                this.speakerML.fire();
+                this.bulletShotgun.play();
+                this.aimSML = false;
+            }
+            if (this.aimSMR) {
+                this.speakerMR.fireAngle = 165;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.speakerMR.fireAngle -= 15;
+                this.speakerMR.fire();
+                this.bulletShotgun.play();
+                this.aimSMR = false;
+            }
+            if (this.isBulletShake) {
+                this.bBulletShake();
+                this.game.time.events.add(1000, this.bBulletShake, this);
+                this.isBulletShake = false;
+            }
+        }
     };
     Boss.prototype.bSecondShotL = function () {
         if (this.bossStage != this.bossStageEnum.STAGE_3) {
@@ -1120,6 +1238,33 @@ var Boss = (function (_super) {
         this.fireBreak = false;
         this.aimLT = false;
     };
+    Boss.prototype.bBulletShake = function () {
+        this.headsetL.bullets.forEach(function (b) {
+            b.body.velocity.y = -b.body.velocity.y;
+            b.body.velocity.x = -b.body.velocity.x;
+        }, this);
+        this.headsetR.bullets.forEach(function (b) {
+            b.body.velocity.y = -b.body.velocity.y;
+            b.body.velocity.x = -b.body.velocity.x;
+        }, this);
+        this.speakerL.bullets.forEach(function (b) {
+            b.body.velocity.y = -b.body.velocity.y;
+            b.body.velocity.x = -b.body.velocity.x;
+        }, this);
+        this.speakerML.bullets.forEach(function (b) {
+            b.body.velocity.y = -b.body.velocity.y;
+            b.body.velocity.x = -b.body.velocity.x;
+        }, this);
+        this.speakerMR.bullets.forEach(function (b) {
+            b.body.velocity.y = -b.body.velocity.y;
+            b.body.velocity.x = -b.body.velocity.x;
+        }, this);
+        this.speakerR.bullets.forEach(function (b) {
+            b.body.velocity.y = -b.body.velocity.y;
+            b.body.velocity.x = -b.body.velocity.x;
+        }, this);
+        this.shake.play();
+    };
     return Boss;
 }(Phaser.Sprite));
 //   ▄███████▄  ▄█          ▄████████ ▄██   ▄      ▄████████    ▄████████ 
@@ -1161,7 +1306,7 @@ var Player = (function (_super) {
         _this.anchor.setTo(0.5, 0.5);
         _this.scale.setTo(2.25, 2.25);
         _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(18, 28, 51, 57);
+        _this.body.setSize(12, 18, 54, 62);
         _this.body.collideWorldBounds = true;
         _this.maxHealth = 10;
         _this.health = _this.maxHealth;
@@ -2183,7 +2328,7 @@ var Turret = (function (_super) {
     __extends(Turret, _super);
     function Turret(xPos, yPos, player, laserColor, game) {
         var _this = _super.call(this, game, xPos, yPos, 'turret', 8) || this;
-        _this.activate = _this.animations.add('activate', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 30);
+        _this.activate = _this.animations.add('activate', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 10);
         _this.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(_this);
         _this.body.immovable = true;
@@ -2205,7 +2350,7 @@ var Turret = (function (_super) {
         _this.weapon = game.add.weapon(300, laserColor);
         _this.weapon.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
         _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 500;
+        _this.weapon.bulletSpeed = 700;
         _this.weapon.fireRate = 0;
         _this.weapon.bulletAngleOffset = 90;
         _this.weapon.x = _this.body.x;
@@ -2241,7 +2386,7 @@ var Turret = (function (_super) {
                         this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.2);
                         this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.weapon.fireFrom, this.prediction) * 57.2958;
                     }
-                    this.game.time.events.add(2000, this.tFireDelay, this);
+                    this.game.time.events.add(1000, this.tFireDelay, this);
                     this.laser.play();
                 }
                 this.weapon.fire();
@@ -2250,13 +2395,13 @@ var Turret = (function (_super) {
     };
     Turret.prototype.tFireDelay = function () {
         if (this.tType == 0) {
-            this.fireTimer = this.game.time.now + this.game.rnd.integerInRange(750, 1250);
+            this.fireTimer = this.game.time.now + this.game.rnd.integerInRange(500, 750);
         }
         else if (this.tType == 1) {
             this.fireTimer = this.game.time.now + this.game.rnd.integerInRange(1000, 1500);
         }
         else {
-            this.fireTimer = this.game.time.now + this.game.rnd.integerInRange(500, 1500);
+            this.fireTimer = this.game.time.now + this.game.rnd.integerInRange(750, 1000);
         }
         this.fireBreak = false;
         this.aim = false;
