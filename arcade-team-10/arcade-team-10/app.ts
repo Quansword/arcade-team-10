@@ -26,7 +26,8 @@ window.onload = function ()
 	var healthDrops;
 	var hud;
 	var bossHud;
-	let pClearCircle: Phaser.Sprite;
+    let pClearCircle: Phaser.Sprite;
+    let clear: Phaser.Animation;
 
 	var map;
 	var layer;
@@ -55,6 +56,7 @@ window.onload = function ()
     var introSprite;
 
     let introPlaying: boolean;
+
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -76,6 +78,7 @@ window.onload = function ()
 		game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
 		game.load.image('boss', 'assets/Boss.png');
 		game.load.spritesheet('turret', 'assets/laserTurret.png', 128, 128, 9, 0, 2);
+		game.load.spritesheet('clear', 'assets/clear.png', 128, 128, 4, 0, 2);
 
 		game.load.image('bossHealth', 'assets/BossHealth.png');
 		game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
@@ -161,11 +164,13 @@ window.onload = function ()
 
 		boss = new Boss(960, 200, player, game);
 
-		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
-		pClearCircle.anchor.setTo(0.5, 0.5);
+        pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y, 'clear');
+        pClearCircle.frame = 0;
+        pClearCircle.scale.setTo(2, 2);
+        clear = pClearCircle.animations.add('clear', [0, 1, 2, 3], 30, true);
 		game.physics.arcade.enable(pClearCircle);
-		pClearCircle.body.setCircle(player.body.width * 4);
-		pClearCircle.body.immovable = true;
+		pClearCircle.body.setCircle(player.body.width * 1.5, 0, 0);
+        pClearCircle.body.immovable = true;
 		pClearCircle.kill();
 
 		laserGate1 = new Barrier(832, 1410, 1, 1, "laserH", game);
@@ -398,11 +403,11 @@ window.onload = function ()
 
 	function render()
 	{
-		//if (pClearCircle.alive)
-		//{
-		//	game.debug.bodyInfo(pClearCircle, 32, 32);
-		//	game.debug.body(pClearCircle);
-		//}
+		if (pClearCircle.alive)
+		{
+			game.debug.bodyInfo(pClearCircle, 32, 32);
+			game.debug.body(pClearCircle);
+		}
 		game.debug.bodyInfo(player, 32, 32);
 		game.debug.body(player);
 
@@ -571,9 +576,11 @@ window.onload = function ()
 	function playerClear()
 	{
 		pClearCircle.revive();
-		pClearCircle.position.x = player.body.position.x - (player.body.width * 4);
-		pClearCircle.position.y = player.body.position.y - (player.body.width * 4);
+		pClearCircle.position.x = player.body.position.x - (player.body.width * 2.5);
+		pClearCircle.position.y = player.body.position.y - (player.body.width * 2.5);
 		game.time.events.add(2000, endClear, this);
+        clear.play();
+        pClearCircle.play('clear');
 	}
 
 	function endClear()
