@@ -43,6 +43,7 @@ window.onload = function () {
     var healthBarCrop;
     var bossHealthText;
     var enemyKillCount;
+    var music;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
@@ -59,8 +60,15 @@ window.onload = function () {
         game.load.image('boss', 'assets/Boss.png');
         game.load.image('bossHealth', 'assets/BossHealth.png');
         game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
+        game.load.audio('music', 'assets/audio/Ricochet.mp3');
+        game.load.audio('slash', 'assets/audio/Slash.wav');
+        game.load.audio('laserOn', 'assets/audio/LaserOn.wav');
+        game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
+        game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
     }
     function create() {
+        music = game.add.audio('music', 1, true);
+        music.play();
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
         background = game.add.sprite(0, 0, 'background');
@@ -452,15 +460,19 @@ var Barrier = (function (_super) {
         _this.switch = _this.animations.add('switch', [1, 2, 3, 4], 15, false);
         _this.on = _this.animations.add('on', [1, 2], 15, true);
         _this.play("off");
+        _this.laserOn = _this.game.add.audio('laserOn');
+        _this.laserOff = _this.game.add.audio('laserOff');
         return _this;
     }
     Barrier.prototype.activate = function () {
         this.isActivated = true;
         this.play("switch");
+        this.laserOn.play();
     };
     Barrier.prototype.deactivate = function () {
         this.isActivated = false;
         this.play("switch");
+        this.laserOff.play();
     };
     Barrier.prototype.update = function () {
         if (this.isActivated) {
@@ -907,6 +919,8 @@ var Player = (function (_super) {
         _this.weapon.bulletAngleOffset = 90;
         _this.lives = 1;
         _this.createSaberHitBoxes();
+        _this.slash = _this.game.add.audio('slash');
+        _this.slash.allowMultiple = true;
         return _this;
     }
     Player.prototype.createSaberHitBoxes = function () {
@@ -1121,6 +1135,7 @@ var Player = (function (_super) {
                         this.animations.play('dAttack');
                         this.attacked = true;
                         this.enableHitbox("bottomSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 45) {
@@ -1129,6 +1144,7 @@ var Player = (function (_super) {
                         this.animations.play('drAttack');
                         this.attacked = true;
                         this.enableHitbox("bottomRightSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 135) {
@@ -1137,6 +1153,7 @@ var Player = (function (_super) {
                         this.animations.play('dlAttack');
                         this.attacked = true;
                         this.enableHitbox("bottomLeftSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 0) {
@@ -1145,6 +1162,7 @@ var Player = (function (_super) {
                         this.animations.play('rAttack');
                         this.attacked = true;
                         this.enableHitbox("rightSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 180) {
@@ -1153,6 +1171,7 @@ var Player = (function (_super) {
                         this.animations.play('lAttack');
                         this.attacked = true;
                         this.enableHitbox("leftSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 270) {
@@ -1161,6 +1180,7 @@ var Player = (function (_super) {
                         this.animations.play('uAttack');
                         this.attacked = true;
                         this.enableHitbox("topSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 225) {
@@ -1169,6 +1189,7 @@ var Player = (function (_super) {
                         this.animations.play('ulAttack');
                         this.attacked = true;
                         this.enableHitbox("topLeftSaber");
+                        this.slash.play();
                     }
                 }
                 else if (this.weapon.fireAngle == 315) {
@@ -1177,6 +1198,7 @@ var Player = (function (_super) {
                         this.animations.play('urAttack');
                         this.attacked = true;
                         this.enableHitbox("topRightSaber");
+                        this.slash.play();
                     }
                 }
             }
