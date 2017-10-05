@@ -79,6 +79,7 @@ window.onload = function ()
 		game.load.audio('laserOn', 'assets/audio/LaserOn.wav');
 		game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
 		game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
+		game.load.audio('playerDeath', 'assets/audio/PlayerDeath.mp3');
 
 		game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
 
@@ -424,7 +425,15 @@ window.onload = function ()
 				game.time.events.repeat(200, 3, playerVisible, this);
 				game.time.events.add(1000, playerInvuln, this);
 			}
-			playerClear();
+
+            if (player.health < 1)
+            {
+                player.pDeath();
+            }
+            else
+            {
+			    playerClear();
+            }
 		}
 	}
 
@@ -560,26 +569,6 @@ window.onload = function ()
 		player.maxHealth += 1;
 		player.heal(1);
 		hud.add(new Phaser.Sprite(game, (hud.children[0].width * (player.maxHealth - 1)) + (hud.children[0].width / 2), hud.children[0].height / 2, 'heart'));
-	}
-
-	// -------------------------------------------------------------------------------------------- Kill Player
-
-	function killPlayer(player: Player)
-	{
-		var life = lives.getFirstAlive();
-
-		if (life)
-		{
-			life.kill();
-			player.kill();
-			player.lives--;
-			player.reset(300, 300, 1);
-		}
-
-		if (player.lives < 1)
-		{
-			player.kill();
-		}
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████    ▄███████▄    ▄████████  ▄█     █▄  ███▄▄▄▄        
@@ -1207,6 +1196,7 @@ class Player extends Phaser.Sprite
 	};
 
     slash: Phaser.Sound;
+    death: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, game: Phaser.Game)
 	{
@@ -1252,9 +1242,17 @@ class Player extends Phaser.Sprite
 		this.lives = 1;
 
 		this.createSaberHitBoxes();
+
         this.slash = this.game.add.audio('slash');
         this.slash.allowMultiple = true;
+
+        this.death = this.game.add.audio('playerDeath');
 	}
+
+    pDeath()
+    {
+        this.death.play();
+    }
 
 	createSaberHitBoxes()
 	{
