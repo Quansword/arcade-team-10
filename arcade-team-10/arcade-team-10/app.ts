@@ -125,9 +125,9 @@ window.onload = function ()
 	{
 
 
-		loop = game.add.audio('loop', 1, true);
+		loop = game.add.audio('loop', 2, true);
 
-		drop = game.add.audio('drop', 1, true);
+		drop = game.add.audio('drop', 3, true);
 
 		healthPickup = game.add.audio('healthPickup');
 		playerHit = game.add.audio('playerHit', 3);
@@ -498,17 +498,6 @@ window.onload = function ()
 				game.physics.arcade.overlap(boss.speakerMR.bullets, pClearCircle, clearBullet);
 
 				game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
-
-				if (!boss.alive)
-				{
-					boss.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
-					boss.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
-					boss.speakerML.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
-					boss.speakerMR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
-					boss.speakerL.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
-					boss.speakerR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
-					boss.laptop.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
-				}
 			}
 		}
 		else if (boss.bossStage == boss.bossStageEnum.STAGE_3)
@@ -794,7 +783,7 @@ window.onload = function ()
 		pClearCircle.revive();
 		pClearCircle.position.x = player.body.position.x - (player.body.width * 3);
 		pClearCircle.position.y = player.body.position.y - (player.body.width * 3);
-		game.time.events.add(1000, endClear, this);
+		game.time.events.add(2000, endClear, this);
 		clear.play();
 		pClearCircle.play('clear');
 	}
@@ -1172,14 +1161,14 @@ class Boss extends Phaser.Sprite
 		this.fireTimerBS = 0;
 		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
 
-		this.taunt1 = game.add.audio("taunt1", 3);
+		this.taunt1 = game.add.audio("taunt1", 6);
 		this.laser = this.game.add.audio('laser');
 		this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
 		this.bulletBasic.allowMultiple = true;
 		this.bulletShotgun = this.game.add.audio('bulletShotgun');
 		this.bulletShotgun.allowMultiple = true;
 		this.shake = this.game.add.audio('shake', 3);
-		this.bossDeath = this.game.add.audio('bossDeath', 3);
+		this.bossDeath = this.game.add.audio('bossDeath', 6);
 	}
 
 	taunt()
@@ -1197,267 +1186,264 @@ class Boss extends Phaser.Sprite
 
 	update()
 	{
-		if (this.alive)
+		if (this.bossStage == this.bossStageEnum.STAGE_2 || this.bossStage == this.bossStageEnum.STAGE_4)
 		{
-			if (this.bossStage == this.bossStageEnum.STAGE_2 || this.bossStage == this.bossStageEnum.STAGE_4)
+			if (this.game.time.now > this.fireTimerHL)
 			{
-				if (this.game.time.now > this.fireTimerHL)
+				this.fireTimerHL = this.game.time.now + this.game.rnd.integerInRange(300, 750);
+				this.aimHL = true;
+			}
+			if (this.game.time.now > this.fireTimerHR)
+			{
+				this.fireTimerHR = this.game.time.now + this.game.rnd.integerInRange(250, 1000);
+				this.aimHR = true;
+			}
+			if (this.game.time.now > this.fireTimerSL)
+			{
+				this.fireTimerSL = this.game.time.now + this.game.rnd.integerInRange(1500, 3500);
+				this.aimSL = true;
+			}
+			if (this.game.time.now > this.fireTimerSR)
+			{
+				this.fireTimerSR = this.game.time.now + this.game.rnd.integerInRange(1450, 3350);
+				this.aimSR = true;
+			}
+			if (this.game.time.now > this.fireTimerLT)
+			{
+				if (!this.fireBreak)
 				{
-					this.fireTimerHL = this.game.time.now + this.game.rnd.integerInRange(300, 750);
-					this.aimHL = true;
-				}
-				if (this.game.time.now > this.fireTimerHR)
-				{
-					this.fireTimerHR = this.game.time.now + this.game.rnd.integerInRange(250, 1000);
-					this.aimHR = true;
-				}
-				if (this.game.time.now > this.fireTimerSL)
-				{
-					this.fireTimerSL = this.game.time.now + this.game.rnd.integerInRange(1500, 3500);
-					this.aimSL = true;
-				}
-				if (this.game.time.now > this.fireTimerSR)
-				{
-					this.fireTimerSR = this.game.time.now + this.game.rnd.integerInRange(1450, 3350);
-					this.aimSR = true;
-				}
-				if (this.game.time.now > this.fireTimerLT)
-				{
-					if (!this.fireBreak)
+					if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0)
 					{
-						if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0)
+						if (this.playerStill)
 						{
-							if (this.playerStill)
-							{
-								this.aimLT = true;
-								this.playerStill = false;
-							}
-							else
-							{
-								this.fireTimerLT = this.game.time.now + 1000;
-								this.playerStill = true;
-							}
+							this.aimLT = true;
+							this.playerStill = false;
 						}
 						else
 						{
-							this.playerStill = false;
+							this.fireTimerLT = this.game.time.now + 1000;
+							this.playerStill = true;
 						}
 					}
-				}
-				if (this.game.time.now > this.fireTimerCH && !this.isCrosshatch)
-				{
-					this.isCrosshatch = true;
-				}
-
-				if (!this.isCrosshatch)
-				{
-					if (this.aimHL)
+					else
 					{
-						this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
-						this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
-						this.headsetL.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.prediction) * 57.2958;
-						this.headsetL.fire();
-						this.bulletBasic.play();
-						this.aimHL = false;
+						this.playerStill = false;
 					}
-					if (this.aimHR)
-					{
-						this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
-						this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
-						this.headsetR.fireAngle = this.game.physics.arcade.angleBetween(this.headsetR.fireFrom, this.prediction) * 57.2958;
-						this.headsetR.fire();
-						this.bulletBasic.play();
-						this.aimHR = false;
-					}
-					if (this.aimSL)
-					{
-						this.speakerL.fireAngle = 165;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.speakerL.fireAngle -= 15;
-						this.speakerL.fire();
-						this.game.time.events.add(750, this.bSecondShotL, this);
-						this.bulletShotgun.play();
-						this.aimSL = false;
-					}
-					if (this.aimSR)
-					{
-						this.speakerR.fireAngle = 165;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.speakerR.fireAngle -= 15;
-						this.speakerR.fire();
-						this.game.time.events.add(750, this.bSecondShotR, this);
-						this.bulletShotgun.play();
-						this.aimSR = false;
-					}
-				}
-				else
-				{
-					this.aimHL = false;
-					this.aimHR = false;
-					this.aimSL = false;
-					this.aimSR = false;
-
-					if (!this.crosshatchFired)
-					{
-						this.game.time.events.add(2000, this.bSecondShotL, this);
-						this.game.time.events.add(2000, this.bSecondShotR, this);
-						this.game.time.events.add(2500, this.bSecondShotL, this);
-						this.game.time.events.add(2500, this.bSecondShotR, this);
-						this.game.time.events.add(3000, this.bSecondShotL, this);
-						this.game.time.events.add(3000, this.bSecondShotR, this);
-						this.game.time.events.add(3500, this.bSecondShotL, this);
-						this.game.time.events.add(3500, this.bSecondShotR, this);
-						this.game.time.events.add(4000, this.bSecondShotL, this);
-						this.game.time.events.add(4000, this.bSecondShotR, this);
-						this.game.time.events.add(4500, this.bSecondShotL, this);
-						this.game.time.events.add(4500, this.bSecondShotR, this);
-						this.game.time.events.add(5000, this.bSecondShotL, this);
-						this.game.time.events.add(5000, this.bSecondShotR, this);
-						this.game.time.events.add(5500, this.bSecondShotL, this);
-						this.game.time.events.add(5500, this.bSecondShotR, this);
-						this.game.time.events.add(6000, this.bSecondShotL, this);
-						this.game.time.events.add(6000, this.bSecondShotR, this);
-						this.game.time.events.add(6500, this.bSecondShotL, this);
-						this.game.time.events.add(6500, this.bSecondShotR, this);
-						this.game.time.events.add(7000, this.bSecondShotL, this);
-						this.game.time.events.add(7000, this.bSecondShotR, this);
-						this.game.time.events.add(7500, this.bSecondShotL, this);
-						this.game.time.events.add(7500, this.bSecondShotR, this);
-						this.game.time.events.add(8000, this.bSecondShotL, this);
-						this.game.time.events.add(8000, this.bSecondShotR, this);
-						this.game.time.events.add(8500, this.bSecondShotL, this);
-						this.game.time.events.add(8500, this.bSecondShotR, this);
-						this.game.time.events.add(11000, this.bEndCrosshatch, this);
-						this.crosshatchFired = true;
-					}
-				}
-
-				if (this.aimLT)
-				{
-					if (!this.fireBreak)
-					{
-						this.fireBreak = true;
-						this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
-						this.game.time.events.add(750, this.bFireDelay, this);
-						this.laser.play();
-					}
-					this.laptop.fire();
 				}
 			}
-			if (this.bossStage == this.bossStageEnum.STAGE_4)
+			if (this.game.time.now > this.fireTimerCH && !this.isCrosshatch)
 			{
-				if (this.game.time.now > this.fireTimerSML)
-				{
-					this.fireTimerSML = this.game.time.now + this.game.rnd.integerInRange(3000, 6000);
-					this.aimSML = true;
-				}
-				if (this.game.time.now > this.fireTimerSMR)
-				{
-					this.fireTimerSMR = this.game.time.now + this.game.rnd.integerInRange(2950, 6050);
-					this.aimSMR = true;
-				}
-				if (this.game.time.now > this.fireTimerBS)
-				{
-					this.fireTimerBS = this.game.time.now + this.game.rnd.integerInRange(10000, 15000);
-					this.isBulletShake = true;
-				}
+				this.isCrosshatch = true;
+			}
 
-				if (this.aimSML)
+			if (!this.isCrosshatch)
+			{
+				if (this.aimHL)
 				{
-					this.speakerML.fireAngle = 165;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
-					this.speakerML.fireAngle -= 15;
-					this.speakerML.fire();
+					this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
+					this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
+					this.headsetL.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.prediction) * 57.2958;
+					this.headsetL.fire();
+					this.bulletBasic.play();
+					this.aimHL = false;
+				}
+				if (this.aimHR)
+				{
+					this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
+					this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
+					this.headsetR.fireAngle = this.game.physics.arcade.angleBetween(this.headsetR.fireFrom, this.prediction) * 57.2958;
+					this.headsetR.fire();
+					this.bulletBasic.play();
+					this.aimHR = false;
+				}
+				if (this.aimSL)
+				{
+					this.speakerL.fireAngle = 165;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.game.time.events.add(750, this.bSecondShotL, this);
 					this.bulletShotgun.play();
-					this.aimSML = false;
+					this.aimSL = false;
 				}
-				if (this.aimSMR)
+				if (this.aimSR)
 				{
-					this.speakerMR.fireAngle = 165;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
-					this.speakerMR.fireAngle -= 15;
-					this.speakerMR.fire();
+					this.speakerR.fireAngle = 165;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.game.time.events.add(750, this.bSecondShotR, this);
 					this.bulletShotgun.play();
-					this.aimSMR = false;
+					this.aimSR = false;
 				}
-				if (this.isBulletShake)
+			}
+			else
+			{
+				this.aimHL = false;
+				this.aimHR = false;
+				this.aimSL = false;
+				this.aimSR = false;
+
+				if (!this.crosshatchFired)
 				{
-					this.bBulletShake();
-					this.game.time.events.add(1000, this.bBulletShake, this);
-					this.isBulletShake = false;
+					this.game.time.events.add(2000, this.bSecondShotL, this);
+					this.game.time.events.add(2000, this.bSecondShotR, this);
+					this.game.time.events.add(2500, this.bSecondShotL, this);
+					this.game.time.events.add(2500, this.bSecondShotR, this);
+					this.game.time.events.add(3000, this.bSecondShotL, this);
+					this.game.time.events.add(3000, this.bSecondShotR, this);
+					this.game.time.events.add(3500, this.bSecondShotL, this);
+					this.game.time.events.add(3500, this.bSecondShotR, this);
+					this.game.time.events.add(4000, this.bSecondShotL, this);
+					this.game.time.events.add(4000, this.bSecondShotR, this);
+					this.game.time.events.add(4500, this.bSecondShotL, this);
+					this.game.time.events.add(4500, this.bSecondShotR, this);
+					this.game.time.events.add(5000, this.bSecondShotL, this);
+					this.game.time.events.add(5000, this.bSecondShotR, this);
+					this.game.time.events.add(5500, this.bSecondShotL, this);
+					this.game.time.events.add(5500, this.bSecondShotR, this);
+					this.game.time.events.add(6000, this.bSecondShotL, this);
+					this.game.time.events.add(6000, this.bSecondShotR, this);
+					this.game.time.events.add(6500, this.bSecondShotL, this);
+					this.game.time.events.add(6500, this.bSecondShotR, this);
+					this.game.time.events.add(7000, this.bSecondShotL, this);
+					this.game.time.events.add(7000, this.bSecondShotR, this);
+					this.game.time.events.add(7500, this.bSecondShotL, this);
+					this.game.time.events.add(7500, this.bSecondShotR, this);
+					this.game.time.events.add(8000, this.bSecondShotL, this);
+					this.game.time.events.add(8000, this.bSecondShotR, this);
+					this.game.time.events.add(8500, this.bSecondShotL, this);
+					this.game.time.events.add(8500, this.bSecondShotR, this);
+					this.game.time.events.add(11000, this.bEndCrosshatch, this);
+					this.crosshatchFired = true;
 				}
+			}
+
+			if (this.aimLT)
+			{
+				if (!this.fireBreak)
+				{
+					this.fireBreak = true;
+					this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
+					this.game.time.events.add(750, this.bFireDelay, this);
+					this.laser.play();
+				}
+				this.laptop.fire();
+			}
+		}
+		if (this.bossStage == this.bossStageEnum.STAGE_4)
+		{
+			if (this.game.time.now > this.fireTimerSML)
+			{
+				this.fireTimerSML = this.game.time.now + this.game.rnd.integerInRange(3000, 6000);
+				this.aimSML = true;
+			}
+			if (this.game.time.now > this.fireTimerSMR)
+			{
+				this.fireTimerSMR = this.game.time.now + this.game.rnd.integerInRange(2950, 6050);
+				this.aimSMR = true;
+			}
+			if (this.game.time.now > this.fireTimerBS)
+			{
+				this.fireTimerBS = this.game.time.now + this.game.rnd.integerInRange(10000, 15000);
+				this.isBulletShake = true;
+			}
+
+			if (this.aimSML)
+			{
+				this.speakerML.fireAngle = 165;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.speakerML.fireAngle -= 15;
+				this.speakerML.fire();
+				this.bulletShotgun.play();
+				this.aimSML = false;
+			}
+			if (this.aimSMR)
+			{
+				this.speakerMR.fireAngle = 165;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.speakerMR.fireAngle -= 15;
+				this.speakerMR.fire();
+				this.bulletShotgun.play();
+				this.aimSMR = false;
+			}
+			if (this.isBulletShake)
+			{
+				this.bBulletShake();
+				this.game.time.events.add(1000, this.bBulletShake, this);
+				this.isBulletShake = false;
 			}
 		}
 	}
