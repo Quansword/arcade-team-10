@@ -598,7 +598,7 @@ window.onload = function () {
         pClearCircle.revive();
         pClearCircle.position.x = player.body.position.x - (player.body.width * 3);
         pClearCircle.position.y = player.body.position.y - (player.body.width * 3);
-        game.time.events.add(2000, endClear, this);
+        game.time.events.add(500, endClear, this);
         clear.play();
         pClearCircle.play('clear');
     }
