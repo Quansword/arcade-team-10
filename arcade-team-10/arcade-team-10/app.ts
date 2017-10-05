@@ -379,8 +379,14 @@ window.onload = function ()
 			game.physics.arcade.overlap(boss.speakerL.bullets, player, bulletHitPlayer);
 			game.physics.arcade.overlap(boss.speakerR.bullets, player, bulletHitPlayer);
 			game.physics.arcade.overlap(boss.laptop.bullets, player, bulletHitPlayer);
+            
+            game.physics.arcade.overlap(boss.headsetL.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(boss.headsetR.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(boss.speakerL.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(boss.speakerR.bullets, pClearCircle, clearBullet);
+            game.physics.arcade.overlap(boss.laptop.bullets, pClearCircle, clearBullet);
 
-			game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
+            game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
 		}
 
 		boss.update();
