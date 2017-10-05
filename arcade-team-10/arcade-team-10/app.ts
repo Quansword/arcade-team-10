@@ -431,6 +431,13 @@ window.onload = function ()
 				turret5.revive();
 				turret6.revive();
 
+				turret1.fireTimer = game.time.now + 1000;
+				turret2.fireTimer = game.time.now + 1000;
+				turret3.fireTimer = game.time.now + 1000;
+				turret4.fireTimer = game.time.now + 1000;
+				turret5.fireTimer = game.time.now + 1000;
+				turret6.fireTimer = game.time.now + 1000;
+
 				turret1.animations.play('activate');
 				turret2.animations.play('activate');
 				turret3.animations.play('activate');
@@ -737,9 +744,9 @@ window.onload = function ()
             {
                 victory.renderable = true;
                 boss.bDeath();
+				boss.kill();
             }
-        }
-
+		}
 	}
 
 	function saberHitBoss(saber, temp: Boss)
@@ -759,6 +766,7 @@ window.onload = function ()
             {
                 victory.renderable = true;
                 boss.bDeath();
+                boss.kill();
             }
         }
 	}
@@ -3100,7 +3108,7 @@ class Turret extends Phaser.Sprite
 	{
 		super(game, xPos, yPos, 'turret', 8);
 
-		this.activate = this.animations.add('activate', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 30);
+		this.activate = this.animations.add('activate', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 10);
 
 		this.anchor.setTo(0.5, 0.5);
 		game.physics.arcade.enable(this);
