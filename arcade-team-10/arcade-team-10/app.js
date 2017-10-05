@@ -34,6 +34,8 @@ window.onload = function () {
     var pClearCircle;
     var map;
     var layer;
+    var bossRoomLCorner;
+    var bossRoomRCorner;
     var laserGate1;
     var laserGate2;
     var laserGate3;
@@ -78,6 +80,16 @@ window.onload = function () {
         layer.resizeWorld();
         map.setCollision(0, true, layer);
         //layer.debug = true;
+        bossRoomLCorner = new Phaser.Sprite(game, 192, 64);
+        bossRoomRCorner = new Phaser.Sprite(game, 1280, 64);
+        bossRoomLCorner.anchor.setTo(0, 0);
+        bossRoomRCorner.anchor.setTo(0, 0);
+        game.physics.enable(bossRoomLCorner, Phaser.Physics.ARCADE);
+        game.physics.enable(bossRoomRCorner, Phaser.Physics.ARCADE);
+        bossRoomLCorner.body.setSize(448, 256);
+        bossRoomRCorner.body.setSize(448, 256);
+        bossRoomLCorner.body.immovable = true;
+        bossRoomRCorner.body.immovable = true;
         bossRoom = new Room(0, 0, 1920, 1480, game);
         player = new Player(1000, 2000, game);
         game.add.existing(player);
@@ -96,7 +108,7 @@ window.onload = function () {
         enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
         createEnemies();
-        boss = new Boss(960, 225, player, game);
+        boss = new Boss(960, 200, player, game);
         pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
         pClearCircle.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(pClearCircle);
@@ -142,6 +154,8 @@ window.onload = function () {
             enemy.eUpdate(deltaTime);
         }, this);
         game.physics.arcade.collide(player, layer);
+        game.physics.arcade.collide(player, bossRoomLCorner);
+        game.physics.arcade.collide(player, bossRoomRCorner);
         game.physics.arcade.collide(enemies, layer);
         game.physics.arcade.collide(enemies, laserGate1);
         game.physics.arcade.collide(enemies, laserGate4);
@@ -530,8 +544,8 @@ var Boss = (function (_super) {
         _this.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(_this);
         _this.body.immovable = true;
-        _this.body.height = _this.body.height * 0.9;
-        _this.scale.setTo(2, 2);
+        _this.scale.setTo(2.2, 2.2);
+        _this.body.setSize(_this.body.width * 1.2, _this.body.height, -(_this.body.width * 0.1), -2);
         _this.bossStage = _this.bossStageEnum.STAGE_0;
         _this.maxHealth = 100;
         _this.health = 100;

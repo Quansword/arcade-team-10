@@ -30,6 +30,8 @@ window.onload = function ()
 
 	var map;
 	var layer;
+	var bossRoomLCorner: Phaser.Sprite;
+	var bossRoomRCorner: Phaser.Sprite;
 
 	var laserGate1: Barrier;
 	var laserGate2: Barrier;
@@ -90,6 +92,16 @@ window.onload = function ()
 		layer.resizeWorld();
 		map.setCollision(0, true, layer);
 		//layer.debug = true;
+		bossRoomLCorner = new Phaser.Sprite(game, 192, 64);
+		bossRoomRCorner = new Phaser.Sprite(game, 1280, 64);
+		bossRoomLCorner.anchor.setTo(0, 0);
+		bossRoomRCorner.anchor.setTo(0, 0);
+		game.physics.enable(bossRoomLCorner, Phaser.Physics.ARCADE);
+		game.physics.enable(bossRoomRCorner, Phaser.Physics.ARCADE);
+		bossRoomLCorner.body.setSize(448, 256);
+		bossRoomRCorner.body.setSize(448, 256);
+		bossRoomLCorner.body.immovable = true;
+		bossRoomRCorner.body.immovable = true;
 
 		bossRoom = new Room(0, 0, 1920, 1480, game);
 
@@ -116,7 +128,7 @@ window.onload = function ()
 
 		createEnemies();
 
-		boss = new Boss(960, 225, player, game);
+		boss = new Boss(960, 200, player, game);
 
 		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
 		pClearCircle.anchor.setTo(0.5, 0.5);
@@ -178,6 +190,8 @@ window.onload = function ()
 		}, this);
 
 		game.physics.arcade.collide(player, layer);
+		game.physics.arcade.collide(player, bossRoomLCorner);
+		game.physics.arcade.collide(player, bossRoomRCorner);
 		game.physics.arcade.collide(enemies, layer);
 		game.physics.arcade.collide(enemies, laserGate1);
 		game.physics.arcade.collide(enemies, laserGate4);
@@ -756,8 +770,8 @@ class Boss extends Phaser.Sprite
 		this.anchor.setTo(0.5, 0.5);
 		game.physics.arcade.enable(this);
 		this.body.immovable = true;
-		this.body.height = this.body.height * 0.9;
-		this.scale.setTo(2, 2);
+		this.scale.setTo(2.2, 2.2);
+		this.body.setSize(this.body.width * 1.2, this.body.height, -(this.body.width * 0.1), -2);
 
 		this.bossStage = this.bossStageEnum.STAGE_0;
 		this.maxHealth = 100;
