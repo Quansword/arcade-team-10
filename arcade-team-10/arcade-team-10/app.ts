@@ -56,7 +56,7 @@ window.onload = function ()
     var introSprite;
 
     let introPlaying: boolean;
-
+    let gameOver: Phaser.Sprite;
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -103,6 +103,7 @@ window.onload = function ()
 		game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
 
         game.load.video('intro', 'assets/Intro.webm');
+        game.load.image('gameOver', 'assets/GameOver.png');
 	}
 
 	function create()
@@ -218,6 +219,11 @@ window.onload = function ()
         intro.play();
         introPlaying = true;
         intro.onComplete.add(introEnd, this);
+
+        gameOver = game.add.sprite(0, 0, 'gameOver');
+        gameOver.fixedToCamera = true;
+        gameOver.scale.setTo(1.25, 1.25);
+        gameOver.renderable = false;
 	}
 
 	function update()
@@ -510,6 +516,7 @@ window.onload = function ()
 			if (player.health < 1)
 			{
 				player.pDeath();
+                gameOver.renderable = true;
 			}
 			else
 			{
