@@ -992,133 +992,139 @@ class Boss extends Phaser.Sprite
 
 	bSecondShotL()
 	{
-		if (this.aimSL)
+		if (this.bossStage != this.bossStageEnum.STAGE_2 || this.bossStage != this.bossStageEnum.STAGE_4)
 		{
-			this.speakerL.fireAngle = 172;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-		}
-		else
-		{
-			if (!this.alternateCHL)
+			if (this.aimSL)
 			{
-				this.speakerL.fireAngle = 165;
-				this.alternateCHL = true;
+				this.speakerL.fireAngle = 172;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
 			}
 			else
 			{
-				this.speakerL.fireAngle = 172;
-				this.alternateCHL = false;
+				if (!this.alternateCHL)
+				{
+					this.speakerL.fireAngle = 165;
+					this.alternateCHL = true;
+				}
+				else
+				{
+					this.speakerL.fireAngle = 172;
+					this.alternateCHL = false;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+				}
 				this.speakerL.fire();
 				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+				this.speakerL.fire();
 			}
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
-			this.speakerL.fireAngle -= 15;
-			this.speakerL.fire();
 		}
 	}
 
 	bSecondShotR()
 	{
-		if (this.aimSR)
+		if (this.bossStage != this.bossStageEnum.STAGE_2 || this.bossStage != this.bossStageEnum.STAGE_4)
 		{
-			this.speakerR.fireAngle = 172;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-		}
-		else
-		{
-			if (!this.alternateCHR)
+			if (this.aimSR)
 			{
-				this.speakerR.fireAngle = 165;
-				this.alternateCHR = true;
+				this.speakerR.fireAngle = 172;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
 			}
 			else
 			{
-				this.speakerR.fireAngle = 172;
-				this.alternateCHR = false;
+				if (!this.alternateCHR)
+				{
+					this.speakerR.fireAngle = 165;
+					this.alternateCHR = true;
+				}
+				else
+				{
+					this.speakerR.fireAngle = 172;
+					this.alternateCHR = false;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+				}
 				this.speakerR.fire();
 				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+				this.speakerR.fire();
 			}
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
-			this.speakerR.fireAngle -= 15;
-			this.speakerR.fire();
 		}
 	}
 
