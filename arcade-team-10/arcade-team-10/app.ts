@@ -497,16 +497,27 @@ window.onload = function ()
 				game.physics.arcade.overlap(boss.speakerMR.bullets, pClearCircle, clearBullet);
 
 				game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
+
+				if (boss.alive)
+				{
+					boss.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+					boss.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+					boss.speakerL.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+					boss.speakerR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+					boss.speakerML.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+					boss.speakerMR.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+					boss.laptop.bullets.forEach((b: Phaser.Bullet) => { b.kill(); }, this);
+				}
 			}
 		}
 		else if (boss.bossStage == boss.bossStageEnum.STAGE_3)
 		{
-			game.physics.arcade.collide(player, turret1, enemyHitPlayer);
-			game.physics.arcade.collide(player, turret2, enemyHitPlayer);
-			game.physics.arcade.collide(player, turret3, enemyHitPlayer);
-			game.physics.arcade.collide(player, turret4, enemyHitPlayer);
-			game.physics.arcade.collide(player, turret5, enemyHitPlayer);
-			game.physics.arcade.collide(player, turret6, enemyHitPlayer);
+			game.physics.arcade.collide(player, turret1);
+			game.physics.arcade.collide(player, turret2);
+			game.physics.arcade.collide(player, turret3);
+			game.physics.arcade.collide(player, turret4);
+			game.physics.arcade.collide(player, turret5);
+			game.physics.arcade.collide(player, turret6);
 
 			game.physics.arcade.collide(turret1.weapon.bullets, layer, killBullet);
 			game.physics.arcade.collide(turret2.weapon.bullets, layer, killBullet);
@@ -593,7 +604,7 @@ window.onload = function ()
 		game.scale.pageAlignHorizontally = true;
 		game.scale.pageAlignVertically = true;
 		game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-		game.scale.setGameSize(1920, 1080);
+		game.scale.setGameSize(1920, 1500);
 	}
 
 	// -------------------------------------------------------------------------------------------- Enemy Gets Hit
@@ -1447,7 +1458,7 @@ class Boss extends Phaser.Sprite
 			if (this.isBulletShake)
 			{
 				this.bBulletShake();
-				this.game.time.events.add(1000, this.bBulletShake, this);
+				this.game.time.events.add(2000, this.bBulletShake, this);
 				this.isBulletShake = false;
 			}
 		}
