@@ -52,12 +52,13 @@ window.onload = function ()
 		game.load.image('bulletBlue', 'assets/BulletBlue.png');
 		game.load.image('laser', 'assets/Laser.png');
 
-		game.load.tilemap('map', 'assets/Map.csv', null, Phaser.Tilemap.CSV);
-		game.load.image('background', 'assets/Level1.png');
+		game.load.tilemap('map', 'assets/BossRoom.csv', null, Phaser.Tilemap.CSV);
+		game.load.image('background', 'assets/BossRoom.png');
 
 		game.load.image('heart', 'assets/Heart.png');
 
-        game.load.spritesheet('laserH', 'assets/LaserH.png', 224, 64, 6, 0, 0);
+		game.load.spritesheet('laserH', 'assets/LaserH.png', 256, 64, 6, 0, 0);
+		game.load.spritesheet('BossLaserH', 'assets/longLaser.png', 1536, 64, 6, 0, 0);
 
 		game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
         game.load.image('boss', 'assets/Boss.png');
@@ -78,12 +79,12 @@ window.onload = function ()
 		map.setCollision(0, true, layer);
 		//layer.debug = true;
 
-		bossRoom = new Room(7800, 0, 1800, 1475, game);
+		bossRoom = new Room(0, 0, 1920, 1480, game);
 
-		player = new Player(8700, 2000, game);
+		player = new Player(1000, 2000, game);
 		game.add.existing(player);
 
-		game.world.setBounds(0, 0, 9600, 4864);
+		game.world.setBounds(0, 0, 1920, 2432);
 		game.camera.follow(player);
 		game.renderer.renderSession.roundPixels = true;
 
@@ -114,19 +115,6 @@ window.onload = function ()
 			hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
 		}
 
-        hud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
-        hud.children[player.maxHealth].scale.setTo(6.5, 2);
-        hud.children[player.maxHealth].position.set(game.camera.width / 4, game.camera.height/1.2, 5);
-
-        hud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
-        hud.children[player.maxHealth + 1].scale.setTo(6.5, 2);
-        hud.children[player.maxHealth + 1].position.set(game.camera.width / 4, game.camera.height/1.2, 5);
-
-        var style = { font: "bold 32px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
-        bossHealthText = game.add.text(game.camera.width / 3.3, game.camera.height /1.25, 'Boss Health ', style);
-        bossHealthText.setTextBounds(0, 0, 100, 100);
-        bossHealthText.fixedToCamera = true;
-
 		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
 		pClearCircle.anchor.setTo(0.5, 0.5);
 		game.physics.arcade.enable(pClearCircle);
@@ -134,13 +122,29 @@ window.onload = function ()
 		pClearCircle.body.immovable = true;
 		pClearCircle.kill();
 
-        laserGate1 = new Barrier(8500, 1410, 1.25, 1, game);
-        laserGate2 = new Barrier(8500, 1510, 1.25, 1, game);
-        laserGate3 = new Barrier(8500, 1610, 1.25, 1, game);
-        laserGate4 = new Barrier(7825, 400, 7.5, 1, game);
+        laserGate1 = new Barrier(832, 1410, 1, 1, "laserH", game);
+		laserGate2 = new Barrier(832, 1475, 1, 1, "laserH", game);
+		laserGate3 = new Barrier(832, 1540, 1, 1, "laserH", game);
+        laserGate4 = new Barrier(192, 350, 1, 1, "BossLaserH", game);
         laserGate4.activate();
 
-        boss = new Boss (8400, 100, game);
+		boss = new Boss(1000, 225, game);
+
+		hud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
+		hud.children[player.maxHealth].scale.setTo(6.5, 2);
+		hud.children[player.maxHealth].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+		hud.children[player.maxHealth].alpha = 0;
+
+		hud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
+		hud.children[player.maxHealth + 1].scale.setTo(6.5, 2);
+		hud.children[player.maxHealth + 1].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+		hud.children[player.maxHealth + 1].alpha = 0;
+
+		var style = { font: "bold 32px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
+		bossHealthText = game.add.text(game.camera.width / 3.3, game.camera.height / 1.25, 'D3AD M30W', style);
+		bossHealthText.setTextBounds(0, 0, 100, 100);
+		bossHealthText.fixedToCamera = true;
+		bossHealthText.alpha = 0;
 
         enemyKillCount = 0;
 	}
@@ -295,6 +299,9 @@ window.onload = function ()
 		if (!bossRoom.active)
 		{
 			bossRoom.active = true;
+			hud.children[player.maxHealth].alpha = 1;
+			hud.children[player.maxHealth + 1].alpha = 1;
+			bossHealthText.alpha = 1;
 		}
 	}
 
@@ -439,28 +446,28 @@ window.onload = function ()
 
 	function createEnemies()
 	{
-		var enemy1 = new Enemy(8200, 800, 0, player, bossRoom, game);
+		var enemy1 = new Enemy(700, 700, 0, player, bossRoom, game);
 		enemies.add(enemy1);
 
-		var enemy2 = new Enemy(8500, 800, 0, player, bossRoom, game);
+		var enemy2 = new Enemy(1000, 700, 0, player, bossRoom, game);
 		enemies.add(enemy2);
 
-		var enemy3 = new Enemy(8800, 800, 0, player, bossRoom, game);
+		var enemy3 = new Enemy(1300, 700, 0, player, bossRoom, game);
 		enemies.add(enemy3);
 
-		var enemy4 = new Enemy(8300, 700, 1, player, bossRoom, game);
+		var enemy4 = new Enemy(800, 600, 1, player, bossRoom, game);
 		enemies.add(enemy4);
 
-		var enemy5 = new Enemy(8300, 700, 2, player, bossRoom, game);
+		var enemy5 = new Enemy(600, 800, 2, player, bossRoom, game);
 		enemies.add(enemy5);
 
-		var enemy6 = new Enemy(8700, 700, 2, player, bossRoom, game);
+		var enemy6 = new Enemy(1400, 800, 2, player, bossRoom, game);
 		enemies.add(enemy6);
 
-		var enemy7 = new Enemy(8500, 600, 3, player, bossRoom, game);
+		var enemy7 = new Enemy(1000, 500, 3, player, bossRoom, game);
 		enemies.add(enemy7);
 
-		var enemy8 = new Enemy(8700, 700, 1, player, bossRoom, game);
+		var enemy8 = new Enemy(1200, 600, 1, player, bossRoom, game);
 		enemies.add(enemy8);
 	}
 
@@ -533,9 +540,9 @@ class Barrier extends Phaser.Sprite
 	off: Phaser.Animation;
 	switch: Phaser.Animation;
 	on: Phaser.Animation;
-	constructor(xPos: number, yPos: number, width: number, height: number, game: Phaser.Game)
+	constructor(xPos: number, yPos: number, width: number, height: number, key: string, game: Phaser.Game)
 	{
-		super(game, xPos, yPos, "laserH");
+		super(game, xPos, yPos, key);
 		game.physics.arcade.enable(this);
 		this.body.immovable = true;
 		this.scale.setTo(width, height);
@@ -601,7 +608,6 @@ class Room extends Phaser.Sprite
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
 		this.body.setSize(width, height);
 		this.active = false;
-
 	}
 }
 
@@ -621,7 +627,8 @@ class Boss extends Phaser.Sprite
 		STEP_0: 0,
 		STEP_1: 1,
 		STEP_2: 2,
-		STEP_3: 3
+		STEP_3: 3,
+		STEP_4: 4
 	};
 
 	bossStage: number | string;
@@ -629,9 +636,11 @@ class Boss extends Phaser.Sprite
 
     constructor(xPos: number, yPos: number, game: Phaser.Game)
     {
-        super(game, xPos, yPos, "boss");
+		super(game, xPos, yPos, "boss");
+		this.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(this);
-        this.body.immovable = true;
+		this.body.immovable = true;
+		this.body.height = this.body.height * 0.9;
         this.scale.setTo(2, 2);
         game.add.existing(this);
         this.bossStage = this.bossStageEnum.STEP_0;
@@ -742,7 +751,7 @@ class Player extends Phaser.Sprite
 		this.pVelocityY = 0;
 		this.pSpeed = 250;
 
-		this.weapon = game.add.weapon(100, 'bullet');
+		this.weapon = game.add.weapon();
 
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 350;
@@ -2027,7 +2036,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.weapon.fire();
 		this.weapon.fireAngle -= 15;
 		this.weapon.fire();
-		this.weapon.fireAngle -= 30;
+		this.weapon.fireAngle -= 15;
 		this.weapon.fire();
 		this.weapon.fireAngle -= 15;
 		this.weapon.fire();
