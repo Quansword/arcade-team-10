@@ -104,7 +104,7 @@ window.onload = function () {
     }
     function create() {
         loop = game.add.audio('loop', 3, true);
-        drop = game.add.audio('drop', 4, true);
+        drop = game.add.audio('drop', 4.5, true);
         healthPickup = game.add.audio('healthPickup');
         playerHit = game.add.audio('playerHit', 2);
         playerHit.allowMultiple = true;
