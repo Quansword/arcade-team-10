@@ -914,17 +914,20 @@ class Boss extends Phaser.Sprite
 			}
 			if (this.game.time.now > this.fireTimerLT)
 			{
-				if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0)
+				if (!this.fireBreak)
 				{
-					if (this.playerStill)
+					if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0)
 					{
-						this.aimLT = true;
-						this.playerStill = false;
-					}
-					else
-					{
-						this.fireTimerLT = this.game.time.now + 500;
-						this.playerStill = true;
+						if (this.playerStill)
+						{
+							this.aimLT = true;
+							this.playerStill = false;
+						}
+						else
+						{
+							this.fireTimerLT = this.game.time.now + 1000;
+							this.playerStill = true;
+						}
 					}
 				}
 			}
@@ -1011,7 +1014,7 @@ class Boss extends Phaser.Sprite
 					{
 						this.fireBreak = true;
 						this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
-						this.game.time.events.add(3000, this.bFireDelay, this);
+						this.game.time.events.add(1000, this.bFireDelay, this);
 					}
 					this.laptop.fire();
 				}
@@ -1207,7 +1210,6 @@ class Boss extends Phaser.Sprite
 
 	bFireDelay()
 	{
-		this.fireTimerLT = this.game.time.now;
 		this.fireBreak = false;
 		this.aimLT = false;
 	}
