@@ -58,12 +58,15 @@ window.onload = function ()
 
 	var healthPickup;
 	var playerHit;
+    var shake;
 
     var intro;
     var introSprite;
 
     let introPlaying: boolean;
     let gameOver: Phaser.Sprite;
+
+
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -111,6 +114,7 @@ window.onload = function ()
 		game.load.audio('bulletShotgun', 'assets/audio/BulletShotgun.mp3');
 
 		game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
+		game.load.audio('shake', 'assets/audio/Shake.wav');
 
         game.load.video('intro', 'assets/Intro.webm');
         game.load.image('gameOver', 'assets/GameOver.png');
@@ -127,6 +131,8 @@ window.onload = function ()
 		healthPickup = game.add.audio('healthPickup');
 		playerHit = game.add.audio('playerHit', 3);
 		playerHit.allowMultiple = true;
+
+		shake = game.add.audio('shake', 3);
 
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
