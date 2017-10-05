@@ -222,10 +222,10 @@ window.onload = function () {
             game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
             game.physics.arcade.collide(boss.speakerL.bullets, layer, killBullet);
             game.physics.arcade.collide(boss.speakerR.bullets, layer, killBullet);
-            game.physics.arcade.collide(boss.headsetL.bullets, player, bulletHitPlayer);
-            game.physics.arcade.collide(boss.headsetR.bullets, player, bulletHitPlayer);
-            game.physics.arcade.collide(boss.speakerL.bullets, player, bulletHitPlayer);
-            game.physics.arcade.collide(boss.speakerR.bullets, player, bulletHitPlayer);
+            game.physics.arcade.overlap(boss.headsetL.bullets, player, bulletHitPlayer);
+            game.physics.arcade.overlap(boss.headsetR.bullets, player, bulletHitPlayer);
+            game.physics.arcade.overlap(boss.speakerL.bullets, player, bulletHitPlayer);
+            game.physics.arcade.overlap(boss.speakerR.bullets, player, bulletHitPlayer);
             game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
         }
         boss.update();
@@ -525,6 +525,7 @@ var Boss = (function (_super) {
         _this.health = 100;
         _this.canDamage = false;
         _this.player = player;
+        game.add.existing(_this);
         _this.headsetL = game.add.weapon(100, 'bulletBlue');
         _this.headsetR = game.add.weapon(100, 'bulletBlue');
         _this.speakerL = game.add.weapon(100, 'bulletRed');
@@ -593,7 +594,6 @@ var Boss = (function (_super) {
         _this.alternateCHR = false;
         _this.fireTimerCH = 0;
         _this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
-        game.add.existing(_this);
         return _this;
     }
     Boss.prototype.update = function () {

@@ -290,10 +290,10 @@ window.onload = function ()
 			game.physics.arcade.collide(boss.speakerL.bullets, layer, killBullet);
 			game.physics.arcade.collide(boss.speakerR.bullets, layer, killBullet);
 
-			game.physics.arcade.collide(boss.headsetL.bullets, player, bulletHitPlayer);
-			game.physics.arcade.collide(boss.headsetR.bullets, player, bulletHitPlayer);
-			game.physics.arcade.collide(boss.speakerL.bullets, player, bulletHitPlayer);
-			game.physics.arcade.collide(boss.speakerR.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(boss.headsetL.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(boss.headsetR.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(boss.speakerL.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(boss.speakerR.bullets, player, bulletHitPlayer);
 
 			game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
 		}
@@ -744,6 +744,7 @@ class Boss extends Phaser.Sprite
 		this.health = 100;
 		this.canDamage = false;
 		this.player = player;
+		game.add.existing(this);
 
 		this.headsetL = game.add.weapon(100, 'bulletBlue');
 		this.headsetR = game.add.weapon(100, 'bulletBlue');
@@ -821,8 +822,6 @@ class Boss extends Phaser.Sprite
 		this.alternateCHR = false;
 		this.fireTimerCH = 0;
 		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
-
-		game.add.existing(this);
 	}
 
 	update()
