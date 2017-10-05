@@ -42,6 +42,8 @@ window.onload = function ()
 
     let enemyKillCount: number;
 
+    var music;
+
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -65,10 +67,14 @@ window.onload = function ()
 
 		game.load.image('bossHealth', 'assets/BossHealth.png');
 		game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
+
+		game.load.audio('music', 'assets/audio/Ricochet.mp3');
 	}
 
 	function create()
     {
+        music = game.add.audio('music', 1, true);
+        music.play();
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 		background = game.add.sprite(0, 0, 'background');

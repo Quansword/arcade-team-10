@@ -42,6 +42,7 @@ window.onload = function () {
     var healthBarCrop;
     var bossHealthText;
     var enemyKillCount;
+    var music;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
@@ -58,8 +59,11 @@ window.onload = function () {
         game.load.image('boss', 'assets/Boss.png');
         game.load.image('bossHealth', 'assets/BossHealth.png');
         game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
+        game.load.audio('music', 'assets/audio/Ricochet.mp3');
     }
     function create() {
+        music = game.add.audio('music', 1, true);
+        music.play();
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
         background = game.add.sprite(0, 0, 'background');
