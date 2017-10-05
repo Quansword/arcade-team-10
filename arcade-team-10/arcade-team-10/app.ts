@@ -45,7 +45,10 @@ window.onload = function ()
 
 	let enemyKillCount: number;
 
-    var music;
+    var loop;
+    var drop;
+
+    var healthPickup;
 
 	function preload()
 	{
@@ -71,17 +74,30 @@ window.onload = function ()
 		game.load.image('bossHealth', 'assets/BossHealth.png');
 		game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
 
-		game.load.audio('music', 'assets/audio/Ricochet.mp3');
+		game.load.audio('loop', 'assets/audio/Loop.wav');
+		game.load.audio('drop', 'assets/audio/Drop.wav');
+
 		game.load.audio('slash', 'assets/audio/Slash.wav');
 		game.load.audio('laserOn', 'assets/audio/LaserOn.wav');
 		game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
 		game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
+		game.load.audio('playerDeath', 'assets/audio/PlayerDeath.mp3');
+
+		game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
+
+		game.load.audio('laser', 'assets/audio/Laser.wav');
+
+		game.load.audio('bulletBasic', 'assets/audio/BulletBasic.mp3');
 	}
 
 	function create()
 	{
-        music = game.add.audio('music', 1, true);
-        music.play();
+        loop = game.add.audio('loop', 1, true);
+        loop.play();
+
+        drop = game.add.audio('drop', 1, true);
+
+        healthPickup  = game.add.audio('healthPickup');
 
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -357,14 +373,19 @@ window.onload = function ()
 	// -------------------------------------------------------------------------------------------- Enemy Gets Hit
 
 	function saberHitEnemy(saber, enemy: Enemy)
-	{
+    {
+        if (enemy.alive)
+        {
+            enemy.eDeath();
+        }
 		enemy.kill();
 		enemyKillCount++;
 		dropHealth(enemy.position.x, enemy.position.y);
 	}
 
-	function bulletHitEnemy(enemy: Enemy, bullet: Phaser.Bullet)
+	function bulletHitEnemy(enemy: Enemy, bullet)
 	{
+        bullet.eDeath();
 		bullet.kill();
 		enemy.kill();
 		enemyKillCount++;
@@ -422,7 +443,15 @@ window.onload = function ()
 				game.time.events.repeat(200, 3, playerVisible, this);
 				game.time.events.add(1000, playerInvuln, this);
 			}
-			playerClear();
+
+            if (player.health < 1)
+            {
+                player.pDeath();
+            }
+            else
+            {
+			    playerClear();
+            }
 		}
 	}
 
@@ -548,7 +577,8 @@ window.onload = function ()
 		if (player.health != player.maxHealth)
 		{
 			healPlayer(player, 1);
-			healthDrop.kill();
+            healthDrop.kill();
+            healthPickup.play();
 		}
 	}
 
@@ -557,26 +587,6 @@ window.onload = function ()
 		player.maxHealth += 1;
 		player.heal(1);
 		hud.add(new Phaser.Sprite(game, (hud.children[0].width * (player.maxHealth - 1)) + (hud.children[0].width / 2), hud.children[0].height / 2, 'heart'));
-	}
-
-	// -------------------------------------------------------------------------------------------- Kill Player
-
-	function killPlayer(player: Player)
-	{
-		var life = lives.getFirstAlive();
-
-		if (life)
-		{
-			life.kill();
-			player.kill();
-			player.lives--;
-			player.reset(300, 300, 1);
-		}
-
-		if (player.lives < 1)
-		{
-			player.kill();
-		}
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████    ▄███████▄    ▄████████  ▄█     █▄  ███▄▄▄▄        
@@ -1260,6 +1270,7 @@ class Player extends Phaser.Sprite
 	};
 
     slash: Phaser.Sound;
+    death: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, game: Phaser.Game)
 	{
@@ -1305,9 +1316,17 @@ class Player extends Phaser.Sprite
 		this.lives = 1;
 
 		this.createSaberHitBoxes();
+
         this.slash = this.game.add.audio('slash');
         this.slash.allowMultiple = true;
+
+        this.death = this.game.add.audio('playerDeath');
 	}
+
+    pDeath()
+    {
+        this.death.play();
+    }
 
 	createSaberHitBoxes()
 	{
@@ -1755,6 +1774,10 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		LASER: 3
 	};
 
+    enemyDeath: Phaser.Sound;
+    laser: Phaser.Sound;
+    bulletBasic: Phaser.Sound;
+
 	constructor(xPos: number, yPos: number, enemyType: number, player: Player, room: Room, game: Phaser.Game)
 	{
 		super(game, xPos, yPos, 'eSprite');
@@ -1861,7 +1884,12 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 		this.room = room;
 		this.player = player;
-		game.add.existing(this);
+        game.add.existing(this);
+
+        this.enemyDeath = this.game.add.audio('enemyDeath');
+        this.laser = this.game.add.audio('laser');
+        this.bulletBasic = this.game.add.audio('bulletBasic');
+        this.bulletBasic.allowMultiple = true;
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
@@ -2526,6 +2554,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						prediction.x = prediction.x + (this.player.body.velocity.x * 1.2);
 						prediction.y = prediction.y + (this.player.body.velocity.y * 1.2);
 						this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, prediction) * 57.2958;
+                        this.laser.play();
 					}
 					else if (this.eType != this.enemyTypeEnum.LASER)
 					{
@@ -2565,7 +2594,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						}
 					}
 					else
-					{
+                    {
+                        this.bulletBasic.play();
 						this.weapon.fire();
 					}
 
@@ -2606,4 +2636,9 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 		this.fireBreak = false;
 	}
+
+    eDeath()
+    {
+        this.enemyDeath.play();
+    }
 }
