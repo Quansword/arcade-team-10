@@ -30,6 +30,7 @@ window.onload = function () {
     var lives;
     var healthDrops;
     var hud;
+    var bossHud;
     var pClearCircle;
     var map;
     var layer;
@@ -87,14 +88,7 @@ window.onload = function () {
         enemies.enableBody = true;
         enemies.physicsBodyType = Phaser.Physics.ARCADE;
         createEnemies();
-        hud = game.add.group();
-        hud.fixedToCamera = true;
-        hud.enableBody = false;
-        for (var i = 0; i < player.maxHealth; i++) {
-            hud.add(new Phaser.Sprite(game, 0, 0, 'heart'));
-            hud.children[i].scale.setTo(1.5, 1.5);
-            hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
-        }
+        boss = new Boss(960, 225, player, game);
         pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
         pClearCircle.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(pClearCircle);
@@ -106,15 +100,25 @@ window.onload = function () {
         laserGate3 = new Barrier(832, 1540, 1, 1, "laserH", game);
         laserGate4 = new Barrier(192, 350, 1, 1, "BossLaserH", game);
         laserGate4.activate();
-        boss = new Boss(1000, 225, game);
-        hud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
-        hud.children[player.maxHealth].scale.setTo(6.5, 2);
-        hud.children[player.maxHealth].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
-        hud.children[player.maxHealth].alpha = 0;
-        hud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
-        hud.children[player.maxHealth + 1].scale.setTo(6.5, 2);
-        hud.children[player.maxHealth + 1].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
-        hud.children[player.maxHealth + 1].alpha = 0;
+        hud = game.add.group();
+        hud.fixedToCamera = true;
+        hud.enableBody = false;
+        for (var i = 0; i < player.maxHealth; i++) {
+            hud.add(new Phaser.Sprite(game, 0, 0, 'heart'));
+            hud.children[i].scale.setTo(1.5, 1.5);
+            hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
+        }
+        bossHud = game.add.group();
+        bossHud.fixedToCamera = true;
+        bossHud.enableBody = false;
+        bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
+        bossHud.children[0].scale.setTo(6.5, 2);
+        bossHud.children[0].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+        bossHud.children[0].alpha = 0;
+        bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
+        bossHud.children[1].scale.setTo(6.5, 2);
+        bossHud.children[1].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+        bossHud.children[1].alpha = 0;
         var style = { font: "bold 32px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
         bossHealthText = game.add.text(game.camera.width / 3.3, game.camera.height / 1.25, 'D3AD M30W', style);
         bossHealthText.setTextBounds(0, 0, 100, 100);
@@ -130,7 +134,6 @@ window.onload = function () {
             enemy.eUpdate(deltaTime);
         }, this);
         game.physics.arcade.collide(player, layer);
-        game.physics.arcade.collide(player, boss, bossHitPlayer, null, this);
         game.physics.arcade.collide(enemies, layer);
         game.physics.arcade.collide(enemies, laserGate1);
         game.physics.arcade.collide(enemies, laserGate4);
@@ -141,6 +144,7 @@ window.onload = function () {
         game.physics.arcade.collide(player.weapon.bullets, layer, killBullet);
         //game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
         game.physics.arcade.overlap(player, enemies, enemyHitPlayer);
+        game.physics.arcade.collide(player, boss);
         game.physics.arcade.collide(enemies, enemies);
         game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
         for (var i = 0; i < enemies.children.length; i++) {
@@ -149,14 +153,24 @@ window.onload = function () {
             }
             game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
             game.physics.arcade.overlap(enemies.children[i].weapon.bullets, pClearCircle, clearBullet);
-            game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
-            game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
+            if (laserGate1.isActivated) {
+                game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
+            }
+            if (laserGate4.isActivated) {
+                game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
+            }
             if (player.alive) {
                 for (var j = 0; j < player.saberHitBoxes.children.length; j++) {
                     if (enemies.children[i].eType != 3) {
                         game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
                     }
                     game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss, saberHitBoss, null, this);
+                    if (boss.bossStage == boss.bossStageEnum.STAGE_2) {
+                        game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.headsetL.bullets, bulletHitSaber);
+                        game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.headsetR.bullets, bulletHitSaber);
+                        game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerL.bullets, bulletHitSaber);
+                        game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerR.bullets, bulletHitSaber);
+                    }
                 }
             }
         }
@@ -188,17 +202,31 @@ window.onload = function () {
         laserGate2.update();
         laserGate3.update();
         laserGate4.update();
-        if (boss.bossStage == boss.bossStageEnum.STEP_0) {
+        if (boss.bossStage == boss.bossStageEnum.STAGE_1) {
             if (enemyKillCount >= 8) {
-                boss.bossStage = boss.bossStageEnum.STEP_1;
+                boss.bossStage = boss.bossStageEnum.STAGE_2;
+                boss.canDamage = true;
+                boss.fireTimerSL = game.time.now + game.rnd.integerInRange(2000, 4000);
+                boss.fireTimerSR = game.time.now + game.rnd.integerInRange(2500, 4500);
+                boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
                 laserGate4.deactivate();
             }
         }
-        else if (boss.bossStage == boss.bossStageEnum.STEP_1) {
+        else if (boss.bossStage == boss.bossStageEnum.STAGE_2) {
             if (boss.health <= 70) {
-                boss.bossStage = boss.bossStageEnum.STEP_2;
+                boss.bossStage = boss.bossStageEnum.STAGE_3;
+                boss.canDamage = false;
                 laserGate4.activate();
             }
+            game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
+            game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
+            game.physics.arcade.collide(boss.speakerL.bullets, layer, killBullet);
+            game.physics.arcade.collide(boss.speakerR.bullets, layer, killBullet);
+            game.physics.arcade.collide(boss.headsetL.bullets, player, bulletHitPlayer);
+            game.physics.arcade.collide(boss.headsetR.bullets, player, bulletHitPlayer);
+            game.physics.arcade.collide(boss.speakerL.bullets, player, bulletHitPlayer);
+            game.physics.arcade.collide(boss.speakerR.bullets, player, bulletHitPlayer);
+            game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
         }
         boss.update();
         //render();
@@ -223,36 +251,19 @@ window.onload = function () {
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.setGameSize(1920, 1080);
     }
-    function activateBossRoom(player, room) {
-        if (!bossRoom.active) {
-            bossRoom.active = true;
-            hud.children[player.maxHealth].alpha = 1;
-            hud.children[player.maxHealth + 1].alpha = 1;
-            bossHealthText.alpha = 1;
-        }
-    }
-    function bulletHitSaber(saber, bullet) {
-        bullet.body.velocity.x = -bullet.body.velocity.x;
-        bullet.body.velocity.y = -bullet.body.velocity.y;
-        player.weapon.bullets.add(bullet);
-        bullet.rotation += Math.PI;
-    }
-    function saberHitBoss(saber, temp) {
-        if (boss.canDamage) {
-            boss.health--;
-            hud.children[player.maxHealth + 1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
-            console.log(boss.health);
-            if (boss.health != 0) {
-                bossInvuln();
-                game.time.events.add(300, bossInvuln, this);
-            }
-        }
-    }
+    // -------------------------------------------------------------------------------------------- Enemy Gets Hit
     function saberHitEnemy(saber, enemy) {
         enemy.kill();
         enemyKillCount++;
         dropHealth(enemy.position.x, enemy.position.y);
     }
+    function bulletHitEnemy(enemy, bullet) {
+        bullet.kill();
+        enemy.kill();
+        enemyKillCount++;
+        dropHealth(enemy.position.x, enemy.position.y);
+    }
+    // -------------------------------------------------------------------------------------------- Stuff Hits Player
     function bulletHitPlayer(player, bullet) {
         bullet.kill();
         damagePlayer(player, 1);
@@ -263,11 +274,19 @@ window.onload = function () {
     function enemyHitPlayer(player, enemy) {
         damagePlayer(player, 1);
     }
+    function bulletHitSaber(saber, bullet) {
+        bullet.body.velocity.x = -bullet.body.velocity.x;
+        bullet.body.velocity.y = -bullet.body.velocity.y;
+        player.weapon.bullets.add(bullet);
+        bullet.rotation += Math.PI;
+    }
+    // -------------------------------------------------------------------------------------------- Gate
     function activateGate(player, laserGate) {
         if (player.body.position.y < laserGate.position.y) {
             laserGate.activate();
         }
     }
+    // -------------------------------------------------------------------------------------------- Player Damage
     function damagePlayer(player, dNum) {
         if (player.canDamage) {
             player.damage(dNum);
@@ -287,9 +306,41 @@ window.onload = function () {
     function playerInvuln() {
         player.canDamage = !player.canDamage;
     }
+    // -------------------------------------------------------------------------------------------- Boss Stuff
+    function activateBossRoom(player, room) {
+        if (!bossRoom.active) {
+            bossRoom.active = true;
+            bossHud.children[0].alpha = 1;
+            bossHud.children[1].alpha = 1;
+            bossHealthText.alpha = 1;
+            boss.bossStage = boss.bossStageEnum.STAGE_1;
+        }
+    }
+    function bulletHitBoss(boss, bullet) {
+        bullet.kill();
+        boss.damage(1);
+        bossHud.children[1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
+        console.log(boss.health);
+        if (boss.health != 0) {
+            bossInvuln();
+            game.time.events.add(100, bossInvuln, this);
+        }
+    }
+    function saberHitBoss(saber, temp) {
+        if (boss.canDamage) {
+            boss.damage(1);
+            bossHud.children[1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
+            console.log(boss.health);
+            if (boss.health != 0) {
+                bossInvuln();
+                game.time.events.add(300, bossInvuln, this);
+            }
+        }
+    }
     function bossInvuln() {
         boss.canDamage = !boss.canDamage;
     }
+    // -------------------------------------------------------------------------------------------- Player Clear When Hit
     function playerClear() {
         pClearCircle.revive();
         pClearCircle.position.x = player.body.position.x - (player.body.width * 4);
@@ -298,6 +349,30 @@ window.onload = function () {
     }
     function endClear() {
         pClearCircle.kill();
+    }
+    // -------------------------------------------------------------------------------------------- Bullet Stuff
+    function killBullet(bullet, other) {
+        bullet.kill();
+    }
+    function clearBullet(bullet, clear) {
+        clear.kill();
+    }
+    function killBulletGate(bullet, layer) {
+        layer.kill();
+    }
+    // -------------------------------------------------------------------------------------------- Player Health Stuff
+    function dropHealth(x, y) {
+        var rand = game.rnd.integerInRange(1, 100);
+        if (rand > 97) {
+            for (var i = 0; i < 3; i++) {
+                if (healthDrops.children[i].alive == false) {
+                    healthDrops.children[i].revive();
+                    healthDrops.children[i].position.x = x;
+                    healthDrops.children[i].position.y = y;
+                    break;
+                }
+            }
+        }
     }
     function healPlayer(player, hNum) {
         hud.children[player.health].visible = true;
@@ -314,11 +389,18 @@ window.onload = function () {
         player.heal(1);
         hud.add(new Phaser.Sprite(game, (hud.children[0].width * (player.maxHealth - 1)) + (hud.children[0].width / 2), hud.children[0].height / 2, 'heart'));
     }
-    function bulletHitEnemy(enemy, bullet) {
-        bullet.kill();
-        enemy.kill();
-        enemyKillCount++;
-        dropHealth(enemy.position.x, enemy.position.y);
+    // -------------------------------------------------------------------------------------------- Kill Player
+    function killPlayer(player) {
+        var life = lives.getFirstAlive();
+        if (life) {
+            life.kill();
+            player.kill();
+            player.lives--;
+            player.reset(300, 300, 1);
+        }
+        if (player.lives < 1) {
+            player.kill();
+        }
     }
     //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████    ▄███████▄    ▄████████  ▄█     █▄  ███▄▄▄▄        
     //  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███   ███    ███   ███    ███ ███     ███ ███▀▀▀██▄      
@@ -345,40 +427,6 @@ window.onload = function () {
         enemies.add(enemy7);
         var enemy8 = new Enemy(1200, 600, 1, player, bossRoom, game);
         enemies.add(enemy8);
-    }
-    function killPlayer(player) {
-        var life = lives.getFirstAlive();
-        if (life) {
-            life.kill();
-            player.kill();
-            player.lives--;
-            player.reset(300, 300, 1);
-        }
-        if (player.lives < 1) {
-            player.kill();
-        }
-    }
-    function killBullet(bullet, other) {
-        bullet.kill();
-    }
-    function clearBullet(bullet, clear) {
-        clear.kill();
-    }
-    function killBulletGate(bullet, layer) {
-        layer.kill();
-    }
-    function dropHealth(x, y) {
-        var rand = game.rnd.integerInRange(1, 100);
-        if (rand > 97) {
-            for (var i = 0; i < 3; i++) {
-                if (healthDrops.children[i].alive == false) {
-                    healthDrops.children[i].revive();
-                    healthDrops.children[i].position.x = x;
-                    healthDrops.children[i].position.y = y;
-                    break;
-                }
-            }
-        }
     }
 };
 //▀█████████▄     ▄████████    ▄████████    ▄████████  ▄█     ▄████████    ▄████████ 
@@ -458,32 +506,349 @@ var Room = (function (_super) {
 //▄█████████▀   ▀██████▀   ▄████████▀   ▄████████▀  
 var Boss = (function (_super) {
     __extends(Boss, _super);
-    function Boss(xPos, yPos, game) {
+    function Boss(xPos, yPos, player, game) {
         var _this = _super.call(this, game, xPos, yPos, "boss") || this;
         _this.bossStageEnum = {
-            STEP_0: 0,
-            STEP_1: 1,
-            STEP_2: 2,
-            STEP_3: 3,
-            STEP_4: 4
+            STAGE_0: 0,
+            STAGE_1: 1,
+            STAGE_2: 2,
+            STAGE_3: 3,
+            STAGE_4: 4
         };
         _this.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(_this);
         _this.body.immovable = true;
         _this.body.height = _this.body.height * 0.9;
         _this.scale.setTo(2, 2);
-        game.add.existing(_this);
-        _this.bossStage = _this.bossStageEnum.STEP_0;
+        _this.bossStage = _this.bossStageEnum.STAGE_0;
         _this.maxHealth = 100;
         _this.health = 100;
-        _this.canDamage = true;
+        _this.canDamage = false;
+        _this.player = player;
+        _this.headsetL = game.add.weapon(100, 'bulletBlue');
+        _this.headsetR = game.add.weapon(100, 'bulletBlue');
+        _this.speakerL = game.add.weapon(100, 'bulletRed');
+        _this.speakerML = game.add.weapon(100, 'bulletGreen');
+        _this.speakerMR = game.add.weapon(100, 'bulletGreen');
+        _this.speakerR = game.add.weapon(100, 'bulletRed');
+        _this.headsetL.bullets.forEach(function (b) { b.scale.setTo(1.5, 1.5); }, _this);
+        _this.headsetR.bullets.forEach(function (b) { b.scale.setTo(1.5, 1.5); }, _this);
+        _this.speakerL.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
+        _this.speakerML.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
+        _this.speakerMR.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
+        _this.speakerR.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
+        _this.headsetL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.headsetL.bulletSpeed = 300;
+        _this.headsetL.fireRate = 0;
+        _this.headsetL.bulletAngleOffset = 90;
+        _this.headsetL.bulletAngleVariance = 3;
+        _this.headsetL.x = 940;
+        _this.headsetL.y = 120;
+        _this.fireTimerHL = 0;
+        _this.aimHL = false;
+        _this.headsetR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.headsetR.bulletSpeed = 300;
+        _this.headsetR.fireRate = 0;
+        _this.headsetR.bulletAngleOffset = 90;
+        _this.headsetR.bulletAngleVariance = 3;
+        _this.headsetR.x = 980;
+        _this.headsetR.y = 120;
+        _this.fireTimerHR = 0;
+        _this.aimHR = false;
+        _this.speakerL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.speakerL.bulletSpeed = 300;
+        _this.speakerL.fireRate = 0;
+        _this.speakerL.bulletAngleOffset = 90;
+        _this.speakerL.x = 740;
+        _this.speakerL.y = 240;
+        _this.fireTimerSL = 0;
+        _this.aimSL = false;
+        _this.speakerML.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.speakerML.bulletSpeed = 300;
+        _this.speakerML.fireRate = 0;
+        _this.speakerML.bulletAngleOffset = 90;
+        _this.speakerML.x = 830;
+        _this.speakerML.y = 224;
+        _this.fireTimerSML = 0;
+        _this.aimSML = false;
+        _this.speakerMR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.speakerMR.bulletSpeed = 300;
+        _this.speakerMR.fireRate = 0;
+        _this.speakerMR.bulletAngleOffset = 90;
+        _this.speakerMR.x = 1090;
+        _this.speakerMR.y = 224;
+        _this.fireTimerSMR = 0;
+        _this.aimSMR = false;
+        _this.speakerR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        _this.speakerR.bulletSpeed = 300;
+        _this.speakerR.fireRate = 0;
+        _this.speakerR.bulletAngleOffset = 90;
+        _this.speakerR.x = 1180;
+        _this.speakerR.y = 240;
+        _this.fireTimerSR = 0;
+        _this.aimSR = false;
+        _this.isCrosshatch = false;
+        _this.crosshatchFired = false;
+        _this.alternateCHL = false;
+        _this.alternateCHR = false;
+        _this.fireTimerCH = 0;
+        _this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
+        game.add.existing(_this);
         return _this;
     }
     Boss.prototype.update = function () {
-        if (this.bossStage == this.bossStageEnum.STEP_1) {
+        if (this.bossStage == this.bossStageEnum.STAGE_2) {
+            if (this.game.time.now > this.fireTimerHL) {
+                this.fireTimerHL = this.game.time.now + this.game.rnd.integerInRange(300, 750);
+                this.aimHL = true;
+            }
+            if (this.game.time.now > this.fireTimerHR) {
+                this.fireTimerHR = this.game.time.now + this.game.rnd.integerInRange(250, 1000);
+                this.aimHR = true;
+            }
+            if (this.game.time.now > this.fireTimerSL) {
+                this.fireTimerSL = this.game.time.now + this.game.rnd.integerInRange(1500, 3500);
+                this.aimSL = true;
+            }
+            if (this.game.time.now > this.fireTimerSR) {
+                this.fireTimerSR = this.game.time.now + this.game.rnd.integerInRange(1450, 3350);
+                this.aimSR = true;
+            }
+            if (this.game.time.now > this.fireTimerCH && !this.isCrosshatch) {
+                this.isCrosshatch = true;
+            }
+            if (!this.isCrosshatch) {
+                if (this.aimHL) {
+                    this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
+                    this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
+                    this.headsetL.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.prediction) * 57.2958;
+                    this.headsetL.fire();
+                    this.aimHL = false;
+                }
+                if (this.aimHR) {
+                    this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
+                    this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
+                    this.headsetR.fireAngle = this.game.physics.arcade.angleBetween(this.headsetR.fireFrom, this.prediction) * 57.2958;
+                    this.headsetR.fire();
+                    this.aimHR = false;
+                }
+                if (this.aimSL) {
+                    this.speakerL.fireAngle = 165;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.speakerL.fireAngle -= 15;
+                    this.speakerL.fire();
+                    this.game.time.events.add(750, this.bSecondShotL, this);
+                    this.aimSL = false;
+                }
+                if (this.aimSR) {
+                    this.speakerR.fireAngle = 165;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.speakerR.fireAngle -= 15;
+                    this.speakerR.fire();
+                    this.game.time.events.add(750, this.bSecondShotR, this);
+                    this.aimSR = false;
+                }
+            }
+            else {
+                this.aimHL = false;
+                this.aimHR = false;
+                this.aimSL = false;
+                this.aimSR = false;
+                if (!this.crosshatchFired) {
+                    this.game.time.events.add(2000, this.bSecondShotL, this);
+                    this.game.time.events.add(2000, this.bSecondShotR, this);
+                    this.game.time.events.add(2500, this.bSecondShotL, this);
+                    this.game.time.events.add(2500, this.bSecondShotR, this);
+                    this.game.time.events.add(3000, this.bSecondShotL, this);
+                    this.game.time.events.add(3000, this.bSecondShotR, this);
+                    this.game.time.events.add(3500, this.bSecondShotL, this);
+                    this.game.time.events.add(3500, this.bSecondShotR, this);
+                    this.game.time.events.add(4000, this.bSecondShotL, this);
+                    this.game.time.events.add(4000, this.bSecondShotR, this);
+                    this.game.time.events.add(4500, this.bSecondShotL, this);
+                    this.game.time.events.add(4500, this.bSecondShotR, this);
+                    this.game.time.events.add(5000, this.bSecondShotL, this);
+                    this.game.time.events.add(5000, this.bSecondShotR, this);
+                    this.game.time.events.add(5500, this.bSecondShotL, this);
+                    this.game.time.events.add(5500, this.bSecondShotR, this);
+                    this.game.time.events.add(6000, this.bSecondShotL, this);
+                    this.game.time.events.add(6000, this.bSecondShotR, this);
+                    this.game.time.events.add(6500, this.bSecondShotL, this);
+                    this.game.time.events.add(6500, this.bSecondShotR, this);
+                    this.game.time.events.add(7000, this.bSecondShotL, this);
+                    this.game.time.events.add(7000, this.bSecondShotR, this);
+                    this.game.time.events.add(7500, this.bSecondShotL, this);
+                    this.game.time.events.add(7500, this.bSecondShotR, this);
+                    this.game.time.events.add(8000, this.bSecondShotL, this);
+                    this.game.time.events.add(8000, this.bSecondShotR, this);
+                    this.game.time.events.add(8500, this.bSecondShotL, this);
+                    this.game.time.events.add(8500, this.bSecondShotR, this);
+                    this.game.time.events.add(11000, this.bEndCrosshatch, this);
+                    this.crosshatchFired = true;
+                }
+            }
         }
-        else if (this.bossStage == this.bossStageEnum.STEP_2) {
+    };
+    Boss.prototype.bSecondShotL = function () {
+        if (this.aimSL) {
+            this.speakerL.fireAngle = 172;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
         }
+        else {
+            if (!this.alternateCHL) {
+                this.speakerL.fireAngle = 165;
+                this.alternateCHL = true;
+            }
+            else {
+                this.speakerL.fireAngle = 172;
+                this.alternateCHL = false;
+                this.speakerL.fire();
+                this.speakerL.fireAngle -= 15;
+            }
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+            this.speakerL.fireAngle -= 15;
+            this.speakerL.fire();
+        }
+    };
+    Boss.prototype.bSecondShotR = function () {
+        if (this.aimSR) {
+            this.speakerR.fireAngle = 172;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+        }
+        else {
+            if (!this.alternateCHR) {
+                this.speakerR.fireAngle = 165;
+                this.alternateCHR = true;
+            }
+            else {
+                this.speakerR.fireAngle = 172;
+                this.alternateCHR = false;
+                this.speakerR.fire();
+                this.speakerR.fireAngle -= 15;
+            }
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+            this.speakerR.fireAngle -= 15;
+            this.speakerR.fire();
+        }
+    };
+    Boss.prototype.bEndCrosshatch = function () {
+        this.isCrosshatch = false;
+        this.crosshatchFired = false;
+        this.fireTimerCH = this.game.time.now + this.game.rnd.integerInRange(10000, 15000);
     };
     return Boss;
 }(Phaser.Sprite));
@@ -663,8 +1028,6 @@ var Player = (function (_super) {
     };
     Player.prototype.pUpdate = function (time, keyState) {
         if (this.alive) {
-            this.pVelocityX = 0;
-            this.pVelocityY = 0;
             if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying || this.lAttack.isPlaying || this.uAttack.isPlaying || this.dAttack.isPlaying || this.urAttack.isPlaying || this.ulAttack.isPlaying || this.drAttack.isPlaying || this.dlAttack.isPlaying)) {
                 this.aim = true;
             }
@@ -841,6 +1204,8 @@ var Player = (function (_super) {
             // -----------------------------------------------------
             this.body.velocity.y = this.pVelocityY * time;
             this.body.velocity.x = this.pVelocityX * time;
+            this.pVelocityX = 0;
+            this.pVelocityY = 0;
             this.aim = false;
         }
     };
@@ -1439,14 +1804,10 @@ var Enemy = (function (_super) {
                         var prediction = new Phaser.Rectangle(this.player.body.position.x, this.player.body.position.y, this.player.body.width, this.player.body.height);
                         prediction.x = prediction.x + (this.player.body.velocity.x * 1.2);
                         prediction.y = prediction.y + (this.player.body.velocity.y * 1.2);
-                        var fireDegree = this.game.physics.arcade.angleBetween(this.body, prediction);
-                        fireDegree = fireDegree * 57.2958;
-                        this.weapon.fireAngle = fireDegree;
+                        this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, prediction) * 57.2958;
                     }
                     else if (this.eType != this.enemyTypeEnum.LASER) {
-                        var fireDegree = this.game.physics.arcade.angleBetween(this.body, this.player.body);
-                        fireDegree = fireDegree * 57.2958;
-                        this.weapon.fireAngle = fireDegree;
+                        this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, this.player.body) * 57.2958;
                     }
                     if (this.eType == this.enemyTypeEnum.SHOTGUN) {
                         this.weapon.fire();

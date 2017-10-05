@@ -25,22 +25,23 @@ window.onload = function ()
 	let lives: Phaser.Group;
 	var healthDrops;
 	var hud;
+	var bossHud;
 	let pClearCircle: Phaser.Sprite;
 
 	var map;
 	var layer;
 
-    var laserGate1: Barrier;
-    var laserGate2: Barrier;
-    var laserGate3: Barrier;
-    var laserGate4: Barrier;
+	var laserGate1: Barrier;
+	var laserGate2: Barrier;
+	var laserGate3: Barrier;
+	var laserGate4: Barrier;
 
-    var boss: Boss;
-    var healthBar;
-    var healthBarCrop;
-    var bossHealthText;
+	var boss: Boss;
+	var healthBar;
+	var healthBarCrop;
+	var bossHealthText;
 
-    let enemyKillCount: number;
+	let enemyKillCount: number;
 
 	function preload()
 	{
@@ -61,14 +62,14 @@ window.onload = function ()
 		game.load.spritesheet('BossLaserH', 'assets/longLaser.png', 1536, 64, 6, 0, 0);
 
 		game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
-        game.load.image('boss', 'assets/Boss.png');
+		game.load.image('boss', 'assets/Boss.png');
 
 		game.load.image('bossHealth', 'assets/BossHealth.png');
 		game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
 	}
 
 	function create()
-    {
+	{
 		fullScreen();
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 		background = game.add.sprite(0, 0, 'background');
@@ -104,6 +105,21 @@ window.onload = function ()
 
 		createEnemies();
 
+		boss = new Boss(960, 225, player, game);
+
+		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
+		pClearCircle.anchor.setTo(0.5, 0.5);
+		game.physics.arcade.enable(pClearCircle);
+		pClearCircle.body.setCircle(player.body.width * 4);
+		pClearCircle.body.immovable = true;
+		pClearCircle.kill();
+
+		laserGate1 = new Barrier(832, 1410, 1, 1, "laserH", game);
+		laserGate2 = new Barrier(832, 1475, 1, 1, "laserH", game);
+		laserGate3 = new Barrier(832, 1540, 1, 1, "laserH", game);
+		laserGate4 = new Barrier(192, 350, 1, 1, "BossLaserH", game);
+		laserGate4.activate();
+
 		hud = game.add.group();
 		hud.fixedToCamera = true;
 		hud.enableBody = false;
@@ -115,30 +131,19 @@ window.onload = function ()
 			hud.children[i].position.set((hud.children[i].width * i + (i * 10)) + (hud.children[i].width / 2), hud.children[i].height / 2);
 		}
 
-		pClearCircle = game.add.sprite(player.body.position.x, player.body.position.y);
-		pClearCircle.anchor.setTo(0.5, 0.5);
-		game.physics.arcade.enable(pClearCircle);
-		pClearCircle.body.setCircle(player.body.width * 4);
-		pClearCircle.body.immovable = true;
-		pClearCircle.kill();
+		bossHud = game.add.group();
+		bossHud.fixedToCamera = true;
+		bossHud.enableBody = false;
 
-        laserGate1 = new Barrier(832, 1410, 1, 1, "laserH", game);
-		laserGate2 = new Barrier(832, 1475, 1, 1, "laserH", game);
-		laserGate3 = new Barrier(832, 1540, 1, 1, "laserH", game);
-        laserGate4 = new Barrier(192, 350, 1, 1, "BossLaserH", game);
-        laserGate4.activate();
+		bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
+		bossHud.children[0].scale.setTo(6.5, 2);
+		bossHud.children[0].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+		bossHud.children[0].alpha = 0;
 
-		boss = new Boss(1000, 225, game);
-
-		hud.add(new Phaser.Sprite(game, 0, 0, "bossHealthBG"));
-		hud.children[player.maxHealth].scale.setTo(6.5, 2);
-		hud.children[player.maxHealth].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
-		hud.children[player.maxHealth].alpha = 0;
-
-		hud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
-		hud.children[player.maxHealth + 1].scale.setTo(6.5, 2);
-		hud.children[player.maxHealth + 1].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
-		hud.children[player.maxHealth + 1].alpha = 0;
+		bossHud.add(new Phaser.Sprite(game, 0, 0, "bossHealth"));
+		bossHud.children[1].scale.setTo(6.5, 2);
+		bossHud.children[1].position.set(game.camera.width / 4, game.camera.height / 1.2, 5);
+		bossHud.children[1].alpha = 0;
 
 		var style = { font: "bold 32px Arial", fill: '#fff', align: "right", boundsAlignH: "right" };
 		bossHealthText = game.add.text(game.camera.width / 3.3, game.camera.height / 1.25, 'D3AD M30W', style);
@@ -146,7 +151,7 @@ window.onload = function ()
 		bossHealthText.fixedToCamera = true;
 		bossHealthText.alpha = 0;
 
-        enemyKillCount = 0;
+		enemyKillCount = 0;
 	}
 
 	function update()
@@ -162,7 +167,6 @@ window.onload = function ()
 		}, this);
 
 		game.physics.arcade.collide(player, layer);
-		game.physics.arcade.collide(player, boss, bossHitPlayer, null, this);
 		game.physics.arcade.collide(enemies, layer);
 		game.physics.arcade.collide(enemies, laserGate1);
 		game.physics.arcade.collide(enemies, laserGate4);
@@ -176,7 +180,8 @@ window.onload = function ()
 		//game.physics.arcade.collide(player.weapon.bullets, walls, killBullet);
 
 		game.physics.arcade.overlap(player, enemies, enemyHitPlayer);
-        game.physics.arcade.collide(enemies, enemies);
+		game.physics.arcade.collide(player, boss);
+		game.physics.arcade.collide(enemies, enemies);
 
 		game.physics.arcade.overlap(player.weapon.bullets, enemies, bulletHitEnemy, null, this);
 		for (var i = 0; i < enemies.children.length; i++)
@@ -188,8 +193,14 @@ window.onload = function ()
 			game.physics.arcade.collide(enemies.children[i].weapon.bullets, layer, killBullet);
 			game.physics.arcade.overlap(enemies.children[i].weapon.bullets, pClearCircle, clearBullet);
 
-			game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
-			game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
+			if (laserGate1.isActivated)
+			{
+				game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate1, killBulletGate);
+			}
+			if (laserGate4.isActivated)
+			{
+				game.physics.arcade.collide(enemies.children[i].weapon.bullets, laserGate4, killBulletGate);
+			}
 
 			if (player.alive)
 			{
@@ -199,7 +210,15 @@ window.onload = function ()
 					{
 						game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies.children[i].weapon.bullets, bulletHitSaber, null, this);
 					}
-                    game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss, saberHitBoss, null, this);
+					game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss, saberHitBoss, null, this);
+
+					if (boss.bossStage == boss.bossStageEnum.STAGE_2)
+					{
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.headsetL.bullets, bulletHitSaber);
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.headsetR.bullets, bulletHitSaber);
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerL.bullets, bulletHitSaber);
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerR.bullets, bulletHitSaber);
+					}
 				}
 			}
 		}
@@ -209,63 +228,77 @@ window.onload = function ()
 			game.physics.arcade.overlap(player.saberHitBoxes.children[j], enemies, saberHitEnemy, null, this);
 		}
 
-        if (laserGate1.isActivated)
-        {
-            game.physics.arcade.collide(player, laserGate1);
-        }
-        else
-        {
-            game.physics.arcade.overlap(player, laserGate1, activateGate, null, this);
-        }
+		if (laserGate1.isActivated)
+		{
+			game.physics.arcade.collide(player, laserGate1);
+		}
+		else
+		{
+			game.physics.arcade.overlap(player, laserGate1, activateGate, null, this);
+		}
 
+		if (laserGate2.isActivated)
+		{
+			game.physics.arcade.collide(player, laserGate2);
+		}
+		else
+		{
+			game.physics.arcade.overlap(player, laserGate2, activateGate, null, this);
+		}
 
-        if (laserGate2.isActivated)
-        {
-            game.physics.arcade.collide(player, laserGate2);
-        }
-        else
-        {
-            game.physics.arcade.overlap(player, laserGate2, activateGate, null, this);
-        }
+		if (laserGate3.isActivated)
+		{
+			game.physics.arcade.collide(player, laserGate3);
+		}
+		else
+		{
+			game.physics.arcade.overlap(player, laserGate3, activateGate, null, this);
+		}
 
-        if (laserGate3.isActivated)
-        {
-            game.physics.arcade.collide(player, laserGate3);
-        }
-        else
-        {
-            game.physics.arcade.overlap(player, laserGate3, activateGate, null, this);
-        }
+		if (laserGate4.isActivated)
+		{
+			game.physics.arcade.collide(player, laserGate4);
+		}
 
-        if (laserGate4.isActivated)
-        {
-            game.physics.arcade.collide(player, laserGate4);
-        }
+		laserGate1.update();
+		laserGate2.update();
+		laserGate3.update();
+		laserGate4.update();
 
-        laserGate1.update();
-        laserGate2.update();
-        laserGate3.update();
+		if (boss.bossStage == boss.bossStageEnum.STAGE_1)
+		{
+			if (enemyKillCount >= 8)
+			{
+				boss.bossStage = boss.bossStageEnum.STAGE_2;
+				boss.canDamage = true;
+				boss.fireTimerSL = game.time.now + game.rnd.integerInRange(2000, 4000);
+				boss.fireTimerSR = game.time.now + game.rnd.integerInRange(2500, 4500);
+				boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
+				laserGate4.deactivate();
+			}
+		}
+		else if (boss.bossStage == boss.bossStageEnum.STAGE_2)
+		{
+			if (boss.health <= 70)
+			{
+				boss.bossStage = boss.bossStageEnum.STAGE_3;
+				boss.canDamage = false;
+				laserGate4.activate();
+			}
+			game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
+			game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
+			game.physics.arcade.collide(boss.speakerL.bullets, layer, killBullet);
+			game.physics.arcade.collide(boss.speakerR.bullets, layer, killBullet);
 
-        laserGate4.update();
+			game.physics.arcade.collide(boss.headsetL.bullets, player, bulletHitPlayer);
+			game.physics.arcade.collide(boss.headsetR.bullets, player, bulletHitPlayer);
+			game.physics.arcade.collide(boss.speakerL.bullets, player, bulletHitPlayer);
+			game.physics.arcade.collide(boss.speakerR.bullets, player, bulletHitPlayer);
 
-        if (boss.bossStage == boss.bossStageEnum.STEP_0)
-        {
-            if (enemyKillCount >= 8)
-            {
-                boss.bossStage = boss.bossStageEnum.STEP_1;
-                laserGate4.deactivate();
-            }
-        }
-        else if (boss.bossStage == boss.bossStageEnum.STEP_1)
-        {
-            if (boss.health <= 70)
-            {
-                boss.bossStage = boss.bossStageEnum.STEP_2;
-                laserGate4.activate();
-            }
-        }
+			game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
+		}
 
-        boss.update();
+		boss.update();
 		//render();
 	}
 
@@ -294,47 +327,24 @@ window.onload = function ()
 		game.scale.setGameSize(1920, 1080);
 	}
 
-	function activateBossRoom(player, room: Room)
+	// -------------------------------------------------------------------------------------------- Enemy Gets Hit
+
+	function saberHitEnemy(saber, enemy: Enemy)
 	{
-		if (!bossRoom.active)
-		{
-			bossRoom.active = true;
-			hud.children[player.maxHealth].alpha = 1;
-			hud.children[player.maxHealth + 1].alpha = 1;
-			bossHealthText.alpha = 1;
-		}
-	}
-
-	function bulletHitSaber(saber, bullet: Phaser.Bullet)
-	{
-		bullet.body.velocity.x = -bullet.body.velocity.x;
-		bullet.body.velocity.y = -bullet.body.velocity.y;
-		player.weapon.bullets.add(bullet);
-		bullet.rotation += Math.PI;
-	}
-
-	function saberHitBoss(saber, temp: Boss)
-    {
-        if (boss.canDamage)
-        {
-            boss.health--;
-            hud.children[player.maxHealth + 1].scale.setTo( 6.5*(boss.health / boss.maxHealth), 2);
-            console.log(boss.health);
-
-			if (boss.health != 0)
-			{
-				bossInvuln();
-				game.time.events.add(300, bossInvuln, this);
-			}
-        }
-	}
-
-	function saberHitEnemy(saber, enemy: Enemy) // -----------------------------------------------------Enemy code
-	{
-        enemy.kill();
-        enemyKillCount++;
+		enemy.kill();
+		enemyKillCount++;
 		dropHealth(enemy.position.x, enemy.position.y);
 	}
+
+	function bulletHitEnemy(enemy: Enemy, bullet: Phaser.Bullet)
+	{
+		bullet.kill();
+		enemy.kill();
+		enemyKillCount++;
+		dropHealth(enemy.position.x, enemy.position.y);
+	}
+
+	// -------------------------------------------------------------------------------------------- Stuff Hits Player
 
 	function bulletHitPlayer(player: Player, bullet: Phaser.Bullet)
 	{
@@ -352,13 +362,25 @@ window.onload = function ()
 		damagePlayer(player, 1);
 	}
 
-    function activateGate(player: Player, laserGate: Barrier)
-    {
-        if (player.body.position.y < laserGate.position.y)
-        {
-            laserGate.activate();
-        }
+	function bulletHitSaber(saber, bullet: Phaser.Bullet)
+	{
+		bullet.body.velocity.x = -bullet.body.velocity.x;
+		bullet.body.velocity.y = -bullet.body.velocity.y;
+		player.weapon.bullets.add(bullet);
+		bullet.rotation += Math.PI;
 	}
+
+	// -------------------------------------------------------------------------------------------- Gate
+
+	function activateGate(player: Player, laserGate: Barrier)
+	{
+		if (player.body.position.y < laserGate.position.y)
+		{
+			laserGate.activate();
+		}
+	}
+
+	// -------------------------------------------------------------------------------------------- Player Damage
 
 	function damagePlayer(player: Player, dNum: number)
 	{
@@ -387,10 +409,56 @@ window.onload = function ()
 		player.canDamage = !player.canDamage;
 	}
 
-    function bossInvuln()
-    {
-        boss.canDamage = !boss.canDamage;
-    }
+	// -------------------------------------------------------------------------------------------- Boss Stuff
+
+	function activateBossRoom(player, room: Room)
+	{
+		if (!bossRoom.active)
+		{
+			bossRoom.active = true;
+			bossHud.children[0].alpha = 1;
+			bossHud.children[1].alpha = 1;
+			bossHealthText.alpha = 1;
+			boss.bossStage = boss.bossStageEnum.STAGE_1;
+		}
+	}
+
+	function bulletHitBoss(boss: Boss, bullet: Phaser.Bullet)
+	{
+		bullet.kill();
+		boss.damage(1);
+		bossHud.children[1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
+		console.log(boss.health);
+
+		if (boss.health != 0)
+		{
+			bossInvuln();
+			game.time.events.add(100, bossInvuln, this);
+		}
+	}
+
+	function saberHitBoss(saber, temp: Boss)
+	{
+		if (boss.canDamage)
+		{
+			boss.damage(1);
+			bossHud.children[1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
+			console.log(boss.health);
+
+			if (boss.health != 0)
+			{
+				bossInvuln();
+				game.time.events.add(300, bossInvuln, this);
+			}
+		}
+	}
+
+	function bossInvuln()
+	{
+		boss.canDamage = !boss.canDamage;
+	}
+
+	// -------------------------------------------------------------------------------------------- Player Clear When Hit
 
 	function playerClear()
 	{
@@ -403,6 +471,43 @@ window.onload = function ()
 	function endClear()
 	{
 		pClearCircle.kill();
+	}
+
+	// -------------------------------------------------------------------------------------------- Bullet Stuff
+
+	function killBullet(bullet: Phaser.Bullet, other)
+	{
+		bullet.kill();
+	}
+
+	function clearBullet(bullet: Phaser.Bullet, clear: Phaser.Sprite)
+	{
+		clear.kill();
+	}
+
+	function killBulletGate(bullet: Phaser.Bullet, layer)
+	{
+		layer.kill();
+	}
+
+	// -------------------------------------------------------------------------------------------- Player Health Stuff
+
+	function dropHealth(x: number, y: number)
+	{
+		let rand = game.rnd.integerInRange(1, 100);
+		if (rand > 97)
+		{
+			for (var i = 0; i < 3; i++)
+			{
+				if (healthDrops.children[i].alive == false)
+				{
+					healthDrops.children[i].revive();
+					healthDrops.children[i].position.x = x;
+					healthDrops.children[i].position.y = y;
+					break;
+				}
+			}
+		}
 	}
 
 	function healPlayer(player: Player, hNum: number)
@@ -427,12 +532,24 @@ window.onload = function ()
 		hud.add(new Phaser.Sprite(game, (hud.children[0].width * (player.maxHealth - 1)) + (hud.children[0].width / 2), hud.children[0].height / 2, 'heart'));
 	}
 
-	function bulletHitEnemy(enemy: Enemy, bullet: Phaser.Bullet) // -----------------------------------------------------Enemy code
+	// -------------------------------------------------------------------------------------------- Kill Player
+
+	function killPlayer(player: Player)
 	{
-		bullet.kill();
-		enemy.kill();
-        enemyKillCount++;
-		dropHealth(enemy.position.x, enemy.position.y);
+		var life = lives.getFirstAlive();
+
+		if (life)
+		{
+			life.kill();
+			player.kill();
+			player.lives--;
+			player.reset(300, 300, 1);
+		}
+
+		if (player.lives < 1)
+		{
+			player.kill();
+		}
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████    ▄███████▄    ▄████████  ▄█     █▄  ███▄▄▄▄        
@@ -470,58 +587,6 @@ window.onload = function ()
 		var enemy8 = new Enemy(1200, 600, 1, player, bossRoom, game);
 		enemies.add(enemy8);
 	}
-
-	function killPlayer(player: Player)
-	{
-		var life = lives.getFirstAlive();
-
-		if (life)
-		{
-			life.kill();
-			player.kill();
-			player.lives--;
-			player.reset(300, 300, 1);
-		}
-
-		if (player.lives < 1)
-		{
-			player.kill();
-		}
-	}
-
-	function killBullet(bullet: Phaser.Bullet, other)
-	{
-		bullet.kill();
-	}
-
-	function clearBullet(bullet: Phaser.Bullet, clear: Phaser.Sprite)
-	{
-		clear.kill();
-	}
-
-	function killBulletGate(bullet: Phaser.Bullet, layer)
-	{
-		layer.kill();
-	}
-
-	function dropHealth(x: number, y: number)
-	{
-		let rand = game.rnd.integerInRange(1, 100);
-		if (rand > 97)
-		{
-			for (var i = 0; i < 3; i++)
-			{
-				if (healthDrops.children[i].alive == false)
-				{
-					healthDrops.children[i].revive();
-					healthDrops.children[i].position.x = x;
-					healthDrops.children[i].position.y = y;
-					break;
-				}
-			}
-		}
-
-	}
 };
 
 //▀█████████▄     ▄████████    ▄████████    ▄████████  ▄█     ▄████████    ▄████████ 
@@ -536,7 +601,7 @@ window.onload = function ()
 
 class Barrier extends Phaser.Sprite 
 {
-    isActivated: boolean;
+	isActivated: boolean;
 	off: Phaser.Animation;
 	switch: Phaser.Animation;
 	on: Phaser.Animation;
@@ -546,46 +611,46 @@ class Barrier extends Phaser.Sprite
 		game.physics.arcade.enable(this);
 		this.body.immovable = true;
 		this.scale.setTo(width, height);
-        game.add.existing(this);
+		game.add.existing(this);
 
-        this.isActivated = false;
-        this.frame = 1;
+		this.isActivated = false;
+		this.frame = 1;
 		this.off = this.animations.add('off', [5], 15, true);
-		this.switch= this.animations.add('switch', [1, 2, 3, 4], 15, false);
+		this.switch = this.animations.add('switch', [1, 2, 3, 4], 15, false);
 		this.on = this.animations.add('on', [1, 2], 15, true);
-        this.play("off");
+		this.play("off");
 	}
 
-    activate()
-    {
-        this.isActivated = true;
-        this.play("switch");
-    }
+	activate()
+	{
+		this.isActivated = true;
+		this.play("switch");
+	}
 
-    deactivate()
-    {
-        this.isActivated = false;
-        this.play("switch");
-    }
+	deactivate()
+	{
+		this.isActivated = false;
+		this.play("switch");
+	}
 
-    update()
-    {
-        if (this.isActivated)
-        {
-            if (this.animations.currentAnim.isFinished)
-            {
-                this.play("on");
-            }
-        }
-        else if (!this.isActivated)
-        {
-            if (this.animations.currentAnim.isFinished)
-            {
-                this.play("off");
-            }
-        }
+	update()
+	{
+		if (this.isActivated)
+		{
+			if (this.animations.currentAnim.isFinished)
+			{
+				this.play("on");
+			}
+		}
+		else if (!this.isActivated)
+		{
+			if (this.animations.currentAnim.isFinished)
+			{
+				this.play("off");
+			}
+		}
 
-    }
+	}
 }
 
 //   ▄████████  ▄██████▄   ▄██████▄    ▄▄▄▄███▄▄▄▄   
@@ -619,47 +684,431 @@ class Room extends Phaser.Sprite
 //  ███    ██▄ ███    ███          ███          ███ 
 //  ███    ███ ███    ███    ▄█    ███    ▄█    ███ 
 //▄█████████▀   ▀██████▀   ▄████████▀   ▄████████▀  
-                                                  
+
 class Boss extends Phaser.Sprite 
 {
 	bossStageEnum =
 	{
-		STEP_0: 0,
-		STEP_1: 1,
-		STEP_2: 2,
-		STEP_3: 3,
-		STEP_4: 4
+		STAGE_0: 0,
+		STAGE_1: 1,
+		STAGE_2: 2,
+		STAGE_3: 3,
+		STAGE_4: 4
 	};
 
 	bossStage: number | string;
-    canDamage: boolean;
+	canDamage: boolean;
+	player: Player;
 
-    constructor(xPos: number, yPos: number, game: Phaser.Game)
-    {
+	headsetL: Phaser.Weapon;
+	headsetR: Phaser.Weapon;
+	speakerL: Phaser.Weapon;
+	speakerML: Phaser.Weapon;
+	speakerMR: Phaser.Weapon;
+	speakerR: Phaser.Weapon;
+
+	fireTimerHL: number;
+	fireTimerHR: number;
+	fireTimerSL: number;
+	fireTimerSML: number;
+	fireTimerSMR: number;
+	fireTimerSR: number;
+
+	aimHL: boolean;
+	aimHR: boolean;
+	aimSL: boolean;
+	aimSML: boolean;
+	aimSMR: boolean;
+	aimSR: boolean;
+
+	isCrosshatch: boolean;
+	crosshatchFired: boolean;
+	fireTimerCH: number;
+	alternateCHL: boolean;
+	alternateCHR: boolean;
+
+	prediction: Phaser.Rectangle;
+
+	constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
+	{
 		super(game, xPos, yPos, "boss");
+
 		this.anchor.setTo(0.5, 0.5);
-        game.physics.arcade.enable(this);
+		game.physics.arcade.enable(this);
 		this.body.immovable = true;
 		this.body.height = this.body.height * 0.9;
-        this.scale.setTo(2, 2);
-        game.add.existing(this);
-        this.bossStage = this.bossStageEnum.STEP_0;
-        this.maxHealth = 100;
-        this.health = 100;
-        this.canDamage = true;
-    }
+		this.scale.setTo(2, 2);
 
-    update()
-    {
-        if (this.bossStage == this.bossStageEnum.STEP_1)
-        {
+		this.bossStage = this.bossStageEnum.STAGE_0;
+		this.maxHealth = 100;
+		this.health = 100;
+		this.canDamage = false;
+		this.player = player;
 
-        }
-        else if (this.bossStage == this.bossStageEnum.STEP_2)
-        {
+		this.headsetL = game.add.weapon(100, 'bulletBlue');
+		this.headsetR = game.add.weapon(100, 'bulletBlue');
+		this.speakerL = game.add.weapon(100, 'bulletRed');
+		this.speakerML = game.add.weapon(100, 'bulletGreen');
+		this.speakerMR = game.add.weapon(100, 'bulletGreen');
+		this.speakerR = game.add.weapon(100, 'bulletRed');
 
-        }
-    }
+		this.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
+		this.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
+		this.speakerL.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+		this.speakerML.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+		this.speakerMR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+		this.speakerR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+
+		this.headsetL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.headsetL.bulletSpeed = 300
+		this.headsetL.fireRate = 0;
+		this.headsetL.bulletAngleOffset = 90;
+		this.headsetL.bulletAngleVariance = 3;
+		this.headsetL.x = 940;
+		this.headsetL.y = 120;
+		this.fireTimerHL = 0;
+		this.aimHL = false;
+
+		this.headsetR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.headsetR.bulletSpeed = 300
+		this.headsetR.fireRate = 0;
+		this.headsetR.bulletAngleOffset = 90;
+		this.headsetR.bulletAngleVariance = 3;
+		this.headsetR.x = 980;
+		this.headsetR.y = 120;
+		this.fireTimerHR = 0;
+		this.aimHR = false;
+
+		this.speakerL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.speakerL.bulletSpeed = 300
+		this.speakerL.fireRate = 0;
+		this.speakerL.bulletAngleOffset = 90;
+		this.speakerL.x = 740;
+		this.speakerL.y = 240;
+		this.fireTimerSL = 0;
+		this.aimSL = false;
+
+		this.speakerML.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.speakerML.bulletSpeed = 300
+		this.speakerML.fireRate = 0;
+		this.speakerML.bulletAngleOffset = 90;
+		this.speakerML.x = 830;
+		this.speakerML.y = 224;
+		this.fireTimerSML = 0;
+		this.aimSML = false;
+
+		this.speakerMR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.speakerMR.bulletSpeed = 300
+		this.speakerMR.fireRate = 0;
+		this.speakerMR.bulletAngleOffset = 90;
+		this.speakerMR.x = 1090;
+		this.speakerMR.y = 224;
+		this.fireTimerSMR = 0;
+		this.aimSMR = false;
+
+		this.speakerR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.speakerR.bulletSpeed = 300
+		this.speakerR.fireRate = 0;
+		this.speakerR.bulletAngleOffset = 90;
+		this.speakerR.x = 1180;
+		this.speakerR.y = 240;
+		this.fireTimerSR = 0;
+		this.aimSR = false;
+
+		this.isCrosshatch = false;
+		this.crosshatchFired = false;
+		this.alternateCHL = false;
+		this.alternateCHR = false;
+		this.fireTimerCH = 0;
+		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
+
+		game.add.existing(this);
+	}
+
+	update()
+	{
+		if (this.bossStage == this.bossStageEnum.STAGE_2)
+		{
+			if (this.game.time.now > this.fireTimerHL)
+			{
+				this.fireTimerHL = this.game.time.now + this.game.rnd.integerInRange(300, 750);
+				this.aimHL = true;
+			}
+			if (this.game.time.now > this.fireTimerHR)
+			{
+				this.fireTimerHR = this.game.time.now + this.game.rnd.integerInRange(250, 1000);
+				this.aimHR = true;
+			}
+			if (this.game.time.now > this.fireTimerSL)
+			{
+				this.fireTimerSL = this.game.time.now + this.game.rnd.integerInRange(1500, 3500);
+				this.aimSL = true;
+			}
+			if (this.game.time.now > this.fireTimerSR)
+			{
+				this.fireTimerSR = this.game.time.now + this.game.rnd.integerInRange(1450, 3350);
+				this.aimSR = true;
+			}
+			if (this.game.time.now > this.fireTimerCH && !this.isCrosshatch)
+			{
+				this.isCrosshatch = true;
+			}
+
+			if (!this.isCrosshatch)
+			{
+				if (this.aimHL)
+				{
+					this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
+					this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
+					this.headsetL.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.prediction) * 57.2958;
+					this.headsetL.fire();
+					this.aimHL = false;
+				}
+				if (this.aimHR)
+				{
+					this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.5);
+					this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
+					this.headsetR.fireAngle = this.game.physics.arcade.angleBetween(this.headsetR.fireFrom, this.prediction) * 57.2958;
+					this.headsetR.fire();
+					this.aimHR = false;
+				}
+				if (this.aimSL)
+				{
+					this.speakerL.fireAngle = 165;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.speakerL.fireAngle -= 15;
+					this.speakerL.fire();
+					this.game.time.events.add(750, this.bSecondShotL, this);
+					this.aimSL = false;
+				}
+				if (this.aimSR)
+				{
+					this.speakerR.fireAngle = 165;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.speakerR.fireAngle -= 15;
+					this.speakerR.fire();
+					this.game.time.events.add(750, this.bSecondShotR, this);
+					this.aimSR = false;
+				}
+			}
+			else
+			{
+				this.aimHL = false;
+				this.aimHR = false;
+				this.aimSL = false;
+				this.aimSR = false;
+
+				if (!this.crosshatchFired)
+				{
+					this.game.time.events.add(2000, this.bSecondShotL, this);
+					this.game.time.events.add(2000, this.bSecondShotR, this);
+					this.game.time.events.add(2500, this.bSecondShotL, this);
+					this.game.time.events.add(2500, this.bSecondShotR, this);
+					this.game.time.events.add(3000, this.bSecondShotL, this);
+					this.game.time.events.add(3000, this.bSecondShotR, this);
+					this.game.time.events.add(3500, this.bSecondShotL, this);
+					this.game.time.events.add(3500, this.bSecondShotR, this);
+					this.game.time.events.add(4000, this.bSecondShotL, this);
+					this.game.time.events.add(4000, this.bSecondShotR, this);
+					this.game.time.events.add(4500, this.bSecondShotL, this);
+					this.game.time.events.add(4500, this.bSecondShotR, this);
+					this.game.time.events.add(5000, this.bSecondShotL, this);
+					this.game.time.events.add(5000, this.bSecondShotR, this);
+					this.game.time.events.add(5500, this.bSecondShotL, this);
+					this.game.time.events.add(5500, this.bSecondShotR, this);
+					this.game.time.events.add(6000, this.bSecondShotL, this);
+					this.game.time.events.add(6000, this.bSecondShotR, this);
+					this.game.time.events.add(6500, this.bSecondShotL, this);
+					this.game.time.events.add(6500, this.bSecondShotR, this);
+					this.game.time.events.add(7000, this.bSecondShotL, this);
+					this.game.time.events.add(7000, this.bSecondShotR, this);
+					this.game.time.events.add(7500, this.bSecondShotL, this);
+					this.game.time.events.add(7500, this.bSecondShotR, this);
+					this.game.time.events.add(8000, this.bSecondShotL, this);
+					this.game.time.events.add(8000, this.bSecondShotR, this);
+					this.game.time.events.add(8500, this.bSecondShotL, this);
+					this.game.time.events.add(8500, this.bSecondShotR, this);
+					this.game.time.events.add(11000, this.bEndCrosshatch, this);
+					this.crosshatchFired = true;
+				}
+			}
+		}
+	}
+
+	bSecondShotL()
+	{
+		if (this.aimSL)
+		{
+			this.speakerL.fireAngle = 172;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+		}
+		else
+		{
+			if (!this.alternateCHL)
+			{
+				this.speakerL.fireAngle = 165;
+				this.alternateCHL = true;
+			}
+			else
+			{
+				this.speakerL.fireAngle = 172;
+				this.alternateCHL = false;
+				this.speakerL.fire();
+				this.speakerL.fireAngle -= 15;
+			}
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+			this.speakerL.fireAngle -= 15;
+			this.speakerL.fire();
+		}
+	}
+
+	bSecondShotR()
+	{
+		if (this.aimSR)
+		{
+			this.speakerR.fireAngle = 172;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+		}
+		else
+		{
+			if (!this.alternateCHR)
+			{
+				this.speakerR.fireAngle = 165;
+				this.alternateCHR = true;
+			}
+			else
+			{
+				this.speakerR.fireAngle = 172;
+				this.alternateCHR = false;
+				this.speakerR.fire();
+				this.speakerR.fireAngle -= 15;
+			}
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+			this.speakerR.fireAngle -= 15;
+			this.speakerR.fire();
+		}
+	}
+
+	bEndCrosshatch()
+	{
+		this.isCrosshatch = false;
+		this.crosshatchFired = false;
+		this.fireTimerCH = this.game.time.now + this.game.rnd.integerInRange(10000, 15000);
+	}
 }
 
 //   ▄███████▄  ▄█          ▄████████ ▄██   ▄      ▄████████    ▄████████ 
@@ -915,9 +1364,6 @@ class Player extends Phaser.Sprite
 	{
 		if (this.alive)
 		{
-			this.pVelocityX = 0;
-			this.pVelocityY = 0;
-
 			if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && !(this.rAttack.isPlaying || this.lAttack.isPlaying || this.uAttack.isPlaying || this.dAttack.isPlaying || this.urAttack.isPlaying || this.ulAttack.isPlaying || this.drAttack.isPlaying || this.dlAttack.isPlaying))
 			{
 				this.aim = true;
@@ -1154,6 +1600,8 @@ class Player extends Phaser.Sprite
 
 			this.body.velocity.y = this.pVelocityY * time;
 			this.body.velocity.x = this.pVelocityX * time;
+			this.pVelocityX = 0;
+			this.pVelocityY = 0;
 
 			this.aim = false;
 		}
@@ -1234,21 +1682,21 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.eVelocityX = 0;
 		this.eVelocityY = 0;
 
-        this.fireTimer = this.game.time.now + game.rnd.integerInRange(1000, 6000);
+		this.fireTimer = this.game.time.now + game.rnd.integerInRange(1000, 6000);
 
 		if (this.eType == this.enemyTypeEnum.LASER)
 		{
 			this.weapon = game.add.weapon(200, 'laser');
-        }
-        else if (this.eType == this.enemyTypeEnum.BASE)
+		}
+		else if (this.eType == this.enemyTypeEnum.BASE)
 		{
 			this.weapon = game.add.weapon(100, 'bulletBlue');
-        }
-        else if (this.eType == this.enemyTypeEnum.SHOTGUN)
+		}
+		else if (this.eType == this.enemyTypeEnum.SHOTGUN)
 		{
 			this.weapon = game.add.weapon(100, 'bulletRed');
 		}
-        else 
+		else 
 		{
 			this.weapon = game.add.weapon(100, 'bulletGreen');
 		}
@@ -1256,22 +1704,22 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		this.weapon.bullets.forEach((b: Phaser.Bullet) =>
 		{
 
-            if (this.eType == this.enemyTypeEnum.LASER)
-            {
-			    b.scale.setTo(2, 2);
-            }
-            else if (this.eType == this.enemyTypeEnum.BASE)
-            {
-			    b.scale.setTo(1.5, 1.5);
-            }
-            else if (this.eType == this.enemyTypeEnum.SHOTGUN)
-            {
-			    b.scale.setTo(2, 2);
-            }
-            else 
-            {
-			    b.scale.setTo(1.5, 1.5);
-            }
+			if (this.eType == this.enemyTypeEnum.LASER)
+			{
+				b.scale.setTo(2, 2);
+			}
+			else if (this.eType == this.enemyTypeEnum.BASE)
+			{
+				b.scale.setTo(1.5, 1.5);
+			}
+			else if (this.eType == this.enemyTypeEnum.SHOTGUN)
+			{
+				b.scale.setTo(2, 2);
+			}
+			else 
+			{
+				b.scale.setTo(1.5, 1.5);
+			}
 		}, this);
 		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 		this.weapon.bulletSpeed = 300
@@ -1308,14 +1756,14 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		game.add.existing(this);
 	}
 
-//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
-//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███ ███  
-//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███        ███    ███ ███▌ 
-// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███        ███    ███ ███▌ 
-//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ▀███████████ ███▌ 
-//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███        ███    ███ ███  
-//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███        ███    ███ ███  
-//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀         ███    █▀  █▀   
+	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
+	//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███ ███  
+	//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███        ███    ███ ███▌ 
+	// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███        ███    ███ ███▌ 
+	//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ▀███████████ ███▌ 
+	//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███        ███    ███ ███  
+	//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███        ███    ███ ███  
+	//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀         ███    █▀  █▀   
 
 	ePathfinding(time: number)
 	{
@@ -1873,14 +2321,14 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 		}
 	}
 
-//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄        ███    █▄     ▄███████▄ ████████▄     ▄████████     ███        ▄████████ 
-//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄      ███    ███   ███    ███ ███   ▀███   ███    ███ ▀█████████▄   ███    ███ 
-//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███      ███    ███   ███    ███ ███    ███   ███    ███    ▀███▀▀██   ███    █▀  
-// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███      ███    ███   ███    ███ ███    ███   ███    ███     ███   ▀  ▄███▄▄▄     
-//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ███    ███ ▀█████████▀  ███    ███ ▀███████████     ███     ▀▀███▀▀▀     
-//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███      ███    ███   ███        ███    ███   ███    ███     ███       ███    █▄  
-//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███      ███    ███   ███        ███   ▄███   ███    ███     ███       ███    ███ 
-//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀       ████████▀   ▄████▀      ████████▀    ███    █▀     ▄████▀     ██████████ 
+	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄        ███    █▄     ▄███████▄ ████████▄     ▄████████     ███        ▄████████ 
+	//  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄      ███    ███   ███    ███ ███   ▀███   ███    ███ ▀█████████▄   ███    ███ 
+	//  ███    █▀  ███   ███   ███    █▀  ███   ███   ███ ███▄▄▄███      ███    ███   ███    ███ ███    ███   ███    ███    ▀███▀▀██   ███    █▀  
+	// ▄███▄▄▄     ███   ███  ▄███▄▄▄     ███   ███   ███ ▀▀▀▀▀▀███      ███    ███   ███    ███ ███    ███   ███    ███     ███   ▀  ▄███▄▄▄     
+	//▀▀███▀▀▀     ███   ███ ▀▀███▀▀▀     ███   ███   ███ ▄██   ███      ███    ███ ▀█████████▀  ███    ███ ▀███████████     ███     ▀▀███▀▀▀     
+	//  ███    █▄  ███   ███   ███    █▄  ███   ███   ███ ███   ███      ███    ███   ███        ███    ███   ███    ███     ███       ███    █▄  
+	//  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███      ███    ███   ███        ███   ▄███   ███    ███     ███       ███    ███ 
+	//  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀       ████████▀   ▄████▀      ████████▀    ███    █▀     ▄████▀     ██████████ 
 
 	eUpdate(time: number)
 	{
@@ -1969,15 +2417,11 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						var prediction = new Phaser.Rectangle(this.player.body.position.x, this.player.body.position.y, this.player.body.width, this.player.body.height);
 						prediction.x = prediction.x + (this.player.body.velocity.x * 1.2);
 						prediction.y = prediction.y + (this.player.body.velocity.y * 1.2);
-						var fireDegree = this.game.physics.arcade.angleBetween(this.body, prediction);
-						fireDegree = fireDegree * 57.2958;
-						this.weapon.fireAngle = fireDegree;
+						this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, prediction) * 57.2958;
 					}
 					else if (this.eType != this.enemyTypeEnum.LASER)
 					{
-						var fireDegree = this.game.physics.arcade.angleBetween(this.body, this.player.body);
-						fireDegree = fireDegree * 57.2958;
-						this.weapon.fireAngle = fireDegree;
+						this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, this.player.body) * 57.2958;
 					}
 
 					if (this.eType == this.enemyTypeEnum.SHOTGUN)
