@@ -1703,6 +1703,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 	};
 
     enemyDeath: Phaser.Sound;
+    laser: Phaser.Sound;
 
 	constructor(xPos: number, yPos: number, enemyType: number, player: Player, room: Room, game: Phaser.Game)
 	{
@@ -1813,6 +1814,7 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
         game.add.existing(this);
 
         this.enemyDeath = this.game.add.audio('enemyDeath');
+        this.laser = this.game.add.audio('laser');
 	}
 
 	//   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
@@ -2477,6 +2479,8 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 						prediction.x = prediction.x + (this.player.body.velocity.x * 1.2);
 						prediction.y = prediction.y + (this.player.body.velocity.y * 1.2);
 						this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, prediction) * 57.2958;
+
+                        this.laser.play();
 					}
 					else if (this.eType != this.enemyTypeEnum.LASER)
 					{
