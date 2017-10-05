@@ -51,6 +51,10 @@ window.onload = function ()
 	var healthPickup;
 	var playerHit;
 
+    var intro;
+    var introSprite;
+
+    let introPlaying: boolean;
 	function preload()
 	{
 		game.stage.backgroundColor = '#eee';
@@ -94,12 +98,15 @@ window.onload = function ()
 		game.load.audio('bulletShotgun', 'assets/audio/BulletShotgun.mp3');
 
 		game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
+
+        game.load.video('intro', 'assets/Intro.webm');
 	}
 
 	function create()
 	{
+
+
 		loop = game.add.audio('loop', 1, true);
-		loop.play();
 
 		drop = game.add.audio('drop', 1, true);
 
@@ -198,7 +205,14 @@ window.onload = function ()
 		bossHealthText.fixedToCamera = true;
 		bossHealthText.alpha = 0;
 
-		enemyKillCount = 0;
+        enemyKillCount = 0;
+
+        intro = game.add.video('intro');
+        introSprite = intro.addToWorld(0, 0, 0, 0, 1, 1);
+        introSprite.fixedToCamera = true;
+        intro.play();
+        introPlaying = true;
+        intro.onComplete.add(introEnd, this);
 	}
 
 	function update()
@@ -283,6 +297,17 @@ window.onload = function ()
 		}
 		else
 		{
+				if (this.aimLT)
+				{
+					if (!this.fireBreak)
+					{
+						this.fireBreak = true;
+						this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
+						this.game.time.events.add(1000, this.bFireDelay, this);
+                        this.laser.play();
+					}
+                    this.laptop.fire();
+				}
 			game.physics.arcade.overlap(player, laserGate1, activateGate, null, this);
 		}
 
@@ -325,6 +350,7 @@ window.onload = function ()
 				boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
 				laserGate4.deactivate();
 				boss.taunt();
+		        game.world.setBounds(0, 0, 1920, 1500);
 			}
 		}
 		else if (boss.bossStage == boss.bossStageEnum.STAGE_2)
@@ -353,8 +379,22 @@ window.onload = function ()
 		}
 
 		boss.update();
+
+        if (keyState.isDown(Phaser.KeyCode.SPACEBAR) && introPlaying)
+        {
+            introEnd();
+        }
 		//render();
 	}
+
+    function introEnd()
+    {
+        introSprite.kill();
+        intro.stop();
+
+        loop.play();
+        introPlaying = false;
+    }
 
 	function render()
 	{
@@ -487,7 +527,7 @@ window.onload = function ()
 			bossHud.children[0].alpha = 1;
 			bossHud.children[1].alpha = 1;
 			bossHealthText.alpha = 1;
-			boss.bossStage = boss.bossStageEnum.STAGE_1;
+            boss.bossStage = boss.bossStageEnum.STAGE_1;
 		}
 	}
 
