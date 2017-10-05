@@ -30,15 +30,22 @@ window.onload = function ()
 
 	var map;
 	var layer;
-	var bossRoomLCorner: Phaser.Sprite;
-	var bossRoomRCorner: Phaser.Sprite;
+	let bossRoomLCorner: Phaser.Sprite;
+	let bossRoomRCorner: Phaser.Sprite;
 
-	var laserGate1: Barrier;
-	var laserGate2: Barrier;
-	var laserGate3: Barrier;
-	var laserGate4: Barrier;
+	let turret1: Turret;
+	let turret2: Turret;
+	let turret3: Turret;
+	let turret4: Turret;
+	let turret5: Turret;
+	let turret6: Turret;
 
-	var boss: Boss;
+	let laserGate1: Barrier;
+	let laserGate2: Barrier;
+	let laserGate3: Barrier;
+	let laserGate4: Barrier;
+
+	let boss: Boss;
 	var healthBar;
 	var healthBarCrop;
 	var bossHealthText;
@@ -60,6 +67,9 @@ window.onload = function ()
 		game.load.image('bulletRed', 'assets/BulletRed.png');
 		game.load.image('bulletBlue', 'assets/BulletBlue.png');
 		game.load.image('laser', 'assets/Laser.png');
+		game.load.image('laserGreen', 'assets/laserGreen.png');
+		game.load.image('laserBlue', 'assets/laserBlue.png');
+		game.load.image('laserPurple', 'assets/laserPurple.png');
 
 		game.load.tilemap('map', 'assets/BossRoom.csv', null, Phaser.Tilemap.CSV);
 		game.load.image('background', 'assets/BossRoom.png');
@@ -145,6 +155,19 @@ window.onload = function ()
 			healthDrops.children[i].scale.setTo(1.5, 1.5);
 			healthDrops.children[i].kill();
 		}
+
+		turret1 = new Turret(415, 608, player, 'laser', game);
+		turret2 = new Turret(415, 864, player, 'laserGreen', game);
+		turret3 = new Turret(415, 1120, player, 'laserBlue', game);
+		turret4 = new Turret(1503, 608, player, 'laserBlue', game);
+		turret5 = new Turret(1503, 864, player, 'laser', game);
+		turret6 = new Turret(1503, 1120, player, 'laserGreen', game);
+		turret1.kill();
+		turret2.kill();
+		turret3.kill();
+		turret4.kill();
+		turret5.kill();
+		turret6.kill();
 
 		enemies = game.add.group();
 		enemies.enableBody = true;
@@ -268,6 +291,15 @@ window.onload = function ()
 						game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerL.bullets, bulletHitSaber);
 						game.physics.arcade.overlap(player.saberHitBoxes.children[j], boss.speakerR.bullets, bulletHitSaber);
 					}
+					else if (boss.bossStage == boss.bossStageEnum.STAGE_3)
+					{
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], turret1, saberHitTurret);
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], turret2, saberHitTurret);
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], turret3, saberHitTurret);
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], turret4, saberHitTurret);
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], turret5, saberHitTurret);
+						game.physics.arcade.overlap(player.saberHitBoxes.children[j], turret6, saberHitTurret);
+					}
 				}
 			}
 		}
@@ -336,6 +368,34 @@ window.onload = function ()
 				laserGate4.activate();
 				loop.stop();
 				drop.play();
+
+				turret1.revive();
+				turret2.revive();
+				turret3.revive();
+				turret4.revive();
+				turret5.revive();
+				turret6.revive();
+
+				turret1.animations.play('activate');
+				turret2.animations.play('activate');
+				turret3.animations.play('activate');
+				turret4.animations.play('activate');
+				turret5.animations.play('activate');
+				turret6.animations.play('activate');
+
+				turret1.canDamage = true;
+				turret2.canDamage = true;
+				turret3.canDamage = true;
+				turret4.canDamage = true;
+				turret5.canDamage = true;
+				turret6.canDamage = true;
+
+				turret1.active = true;
+				turret2.active = true;
+				turret3.active = true;
+				turret4.active = true;
+				turret5.active = true;
+				turret6.active = true;
 			}
 			game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
 			game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
@@ -350,6 +410,54 @@ window.onload = function ()
 			game.physics.arcade.overlap(boss.laptop.bullets, player, bulletHitPlayer);
 
 			game.physics.arcade.overlap(player.weapon.bullets, boss, bulletHitBoss);
+		}
+		else if (boss.bossStage == boss.bossStageEnum.STAGE_3)
+		{
+			game.physics.arcade.collide(player, turret1, enemyHitPlayer);
+			game.physics.arcade.collide(player, turret2, enemyHitPlayer);
+			game.physics.arcade.collide(player, turret3, enemyHitPlayer);
+			game.physics.arcade.collide(player, turret4, enemyHitPlayer);
+			game.physics.arcade.collide(player, turret5, enemyHitPlayer);
+			game.physics.arcade.collide(player, turret6, enemyHitPlayer);
+
+			game.physics.arcade.collide(turret1.weapon.bullets, layer, killBullet);
+			game.physics.arcade.collide(turret2.weapon.bullets, layer, killBullet);
+			game.physics.arcade.collide(turret3.weapon.bullets, layer, killBullet);
+			game.physics.arcade.collide(turret4.weapon.bullets, layer, killBullet);
+			game.physics.arcade.collide(turret5.weapon.bullets, layer, killBullet);
+			game.physics.arcade.collide(turret6.weapon.bullets, layer, killBullet);
+
+			game.physics.arcade.overlap(turret1.weapon.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(turret2.weapon.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(turret3.weapon.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(turret4.weapon.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(turret5.weapon.bullets, player, bulletHitPlayer);
+			game.physics.arcade.overlap(turret6.weapon.bullets, player, bulletHitPlayer);
+
+			game.physics.arcade.collide(turret1.weapon.bullets, laserGate4, killBulletGate);
+			game.physics.arcade.collide(turret2.weapon.bullets, laserGate4, killBulletGate);
+			game.physics.arcade.collide(turret3.weapon.bullets, laserGate4, killBulletGate);
+			game.physics.arcade.collide(turret4.weapon.bullets, laserGate4, killBulletGate);
+			game.physics.arcade.collide(turret5.weapon.bullets, laserGate4, killBulletGate);
+			game.physics.arcade.collide(turret6.weapon.bullets, laserGate4, killBulletGate);
+
+			turret1.tUpdate();
+			turret2.tUpdate();
+			turret3.tUpdate();
+			turret4.tUpdate();
+			turret5.tUpdate();
+			turret6.tUpdate();
+
+			if (!turret1.alive && !turret2.alive && !turret3.alive && !turret4.alive && !turret5.alive && !turret6.alive)
+			{
+				laserGate4.deactivate();
+				boss.canDamage = true;
+				boss.bossStage = boss.bossStageEnum.STAGE_4;
+			}
+		}
+		else if (boss.bossStage == boss.bossStageEnum.STAGE_4)
+		{
+
 		}
 
 		boss.update();
@@ -392,6 +500,26 @@ window.onload = function ()
 		enemy.kill();
 		enemyKillCount++;
 		dropHealth(enemy.position.x, enemy.position.y);
+	}
+
+	function saberHitTurret(saber, enemy: Enemy)
+	{
+		if (enemy.alive)
+		{
+			enemy.eDeath();
+		}
+		enemy.kill();
+		enemyKillCount++;
+		for (var i = 0; i < 3; i++)
+		{
+			if (healthDrops.children[i].alive == false)
+			{
+				healthDrops.children[i].revive();
+				healthDrops.children[i].position.x = enemy.body.position.x;
+				healthDrops.children[i].position.y = enemy.body.position.y;
+				break;
+			}
+		}
 	}
 
 	function bulletHitEnemy(enemy: Enemy, bullet)
@@ -493,15 +621,18 @@ window.onload = function ()
 
 	function bulletHitBoss(boss: Boss, bullet: Phaser.Bullet)
 	{
-		bullet.kill();
-		boss.damage(1);
-		bossHud.children[1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
-		console.log(boss.health);
-
-		if (boss.health != 0)
+		if (boss.canDamage)
 		{
-			bossInvuln();
-			game.time.events.add(100, bossInvuln, this);
+			bullet.kill();
+			boss.damage(2);
+			bossHud.children[1].scale.setTo(6.5 * (boss.health / boss.maxHealth), 2);
+			console.log(boss.health);
+
+			if (boss.health != 0)
+			{
+				bossInvuln();
+				game.time.events.add(100, bossInvuln, this);
+			}
 		}
 	}
 
@@ -820,7 +951,7 @@ class Boss extends Phaser.Sprite
 		this.speakerML = game.add.weapon(100, 'bulletGreen');
 		this.speakerMR = game.add.weapon(100, 'bulletGreen');
 		this.speakerR = game.add.weapon(100, 'bulletRed');
-		this.laptop = game.add.weapon(300, 'laser');
+		this.laptop = game.add.weapon(300, 'laserPurple');
 
 		this.headsetL.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
 		this.headsetR.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(1.5, 1.5); }, this);
@@ -961,6 +1092,10 @@ class Boss extends Phaser.Sprite
 							this.playerStill = true;
 						}
 					}
+					else
+					{
+						this.playerStill = false;
+					}
 				}
 			}
 			if (this.game.time.now > this.fireTimerCH && !this.isCrosshatch)
@@ -1093,7 +1228,7 @@ class Boss extends Phaser.Sprite
 				{
 					this.fireBreak = true;
 					this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
-					this.game.time.events.add(1000, this.bFireDelay, this);
+					this.game.time.events.add(750, this.bFireDelay, this);
 					this.laser.play();
 				}
 				this.laptop.fire();
@@ -1339,7 +1474,7 @@ class Player extends Phaser.Sprite
 		this.game.physics.enable(this, Phaser.Physics.ARCADE);
 		this.body.setSize(18, 28, 51, 57);
 		this.body.collideWorldBounds = true;
-		this.maxHealth = 5;
+		this.maxHealth = 10;
 		this.health = this.maxHealth;
 		this.canDamage = true;
 
@@ -2705,8 +2840,134 @@ class Enemy extends Phaser.Sprite // -------------------------------------------
 
 class Turret extends Phaser.Sprite
 {
-	constructor(xPos: number, yPos: number, player: Player, game: Phaser.Game)
+	active: boolean;
+	canDamage: boolean;
+	player: Player;
+	tType: number;
+
+	activate: Phaser.Animation;
+
+	weapon: Phaser.Weapon;
+
+	fireTimer: number;
+	aim: boolean;
+	fireBreak: boolean;
+
+	prediction: Phaser.Rectangle;
+
+	laser: Phaser.Sound;
+	enemyDeath: Phaser.Sound;
+
+	constructor(xPos: number, yPos: number, player: Player, laserColor: string, game: Phaser.Game)
 	{
-		super(game, xPos, yPos, 'turret', 0);
+		super(game, xPos, yPos, 'turret', 8);
+
+		this.activate = this.animations.add('activate', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 30);
+
+		this.anchor.setTo(0.5, 0.5);
+		game.physics.arcade.enable(this);
+		this.body.immovable = true;
+		this.body.setSize(this.body.width / 1.2, this.body.height / 1.3, 12, 16);
+
+		this.maxHealth = 1;
+		this.health = 1;
+		this.canDamage = false;
+		this.player = player;
+		game.add.existing(this);
+
+		if (laserColor == 'laser')
+		{
+			this.tType = 0;
+		}
+		else if (laserColor == 'laserGreen')
+		{
+			this.tType = 1;
+		}
+		else
+		{
+			this.tType = 2;
+		}
+
+		this.weapon = game.add.weapon(300, laserColor);
+
+		this.weapon.bullets.forEach((b: Phaser.Bullet) => { b.scale.setTo(2, 2); }, this);
+		this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+		this.weapon.bulletSpeed = 500;
+		this.weapon.fireRate = 0;
+		this.weapon.bulletAngleOffset = 90;
+		this.weapon.x = this.body.x;
+		this.weapon.y = this.body.y - (this.body.height / 2);
+		this.fireTimer = 0;
+		this.aim = false;
+
+		this.fireBreak = false;
+		this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
+
+		this.laser = this.game.add.audio('laser');
+		this.enemyDeath = this.game.add.audio('enemyDeath');
+	}
+
+	tUpdate()
+	{
+		if (this.active && this.alive)
+		{
+			if (this.game.time.now > this.fireTimer)
+			{
+				if (!this.fireBreak)
+				{
+					this.aim = true;
+				}
+			}
+
+			if (this.aim)
+			{
+				if (!this.fireBreak)
+				{
+					this.fireBreak = true;
+					if (this.tType == 0)
+					{
+						this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.weapon.fireFrom, this.player.body) * 57.2958;
+					}
+					else if (this.tType == 1)
+					{
+						this.prediction.x = this.player.body.position.x + this.player.body.velocity.x;
+						this.prediction.y = this.player.body.position.y + this.player.body.velocity.y;
+						this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.weapon.fireFrom, this.prediction) * 57.2958;
+					}
+					else
+					{
+						this.prediction.x = this.player.body.position.x + (this.player.body.velocity.x * 0.2);
+						this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.2);
+						this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.weapon.fireFrom, this.prediction) * 57.2958;
+					}
+					this.game.time.events.add(2000, this.tFireDelay, this);
+					this.laser.play();
+				}
+				this.weapon.fire();
+			}
+		}
+	}
+
+	tFireDelay()
+	{
+		if (this.tType == 0)
+		{
+			this.fireTimer = this.game.time.now + this.game.rnd.integerInRange(750, 1250);
+		}
+		else if (this.tType == 1)
+		{
+			this.fireTimer = this.game.time.now + this.game.rnd.integerInRange(1000, 1500);
+		}
+		else
+		{
+			this.fireTimer = this.game.time.now + this.game.rnd.integerInRange(500, 1500);
+		}
+		this.fireBreak = false;
+		this.aim = false;
+	}
+
+	eDeath()
+	{
+		this.enemyDeath.play();
 	}
 }
