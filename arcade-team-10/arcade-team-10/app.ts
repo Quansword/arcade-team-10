@@ -734,6 +734,10 @@ window.onload = function ()
 				bossInvuln();
 				game.time.events.add(100, bossInvuln, this);
 			}
+			else
+			{
+				boss.kill();
+			}
 		}
 	}
 
@@ -749,6 +753,10 @@ window.onload = function ()
 			{
 				bossInvuln();
 				game.time.events.add(300, bossInvuln, this);
+			}
+			else
+			{
+				boss.kill();
 			}
 		}
 	}
