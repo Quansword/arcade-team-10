@@ -45,7 +45,10 @@ window.onload = function () {
     var healthBarCrop;
     var bossHealthText;
     var enemyKillCount;
-    var music;
+    var loop;
+    var drop;
+    var healthPickup;
+    var playerHit;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
@@ -62,15 +65,28 @@ window.onload = function () {
         game.load.image('boss', 'assets/Boss.png');
         game.load.image('bossHealth', 'assets/BossHealth.png');
         game.load.image('bossHealthBG', 'assets/BossHealthBG.png');
-        game.load.audio('music', 'assets/audio/Ricochet.mp3');
+        game.load.audio('loop', 'assets/audio/Loop.wav');
+        game.load.audio('drop', 'assets/audio/Drop.wav');
         game.load.audio('slash', 'assets/audio/Slash.wav');
         game.load.audio('laserOn', 'assets/audio/LaserOn.wav');
         game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
         game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
+        game.load.audio('playerDeath', 'assets/audio/PlayerDeath.mp3');
+        game.load.audio('playerHit', 'assets/audio/PlayerHit.mp3');
+        game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
+        game.load.audio('laser', 'assets/audio/Laser.wav');
+        game.load.audio('bulletBasic', 'assets/audio/BulletBasic.mp3');
+        game.load.audio('bulletRapid', 'assets/audio/BulletRapid.mp3');
+        game.load.audio('bulletShotgun', 'assets/audio/BulletShotgun.mp3');
+        game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
     }
     function create() {
-        music = game.add.audio('music', 1, true);
-        music.play();
+        loop = game.add.audio('loop', 1, true);
+        loop.play();
+        drop = game.add.audio('drop', 1, true);
+        healthPickup = game.add.audio('healthPickup');
+        playerHit = game.add.audio('playerHit', 3);
+        playerHit.allowMultiple = true;
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
         background = game.add.sprite(0, 0, 'background');
@@ -232,6 +248,7 @@ window.onload = function () {
                 boss.fireTimerSR = game.time.now + game.rnd.integerInRange(2500, 4500);
                 boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
                 laserGate4.deactivate();
+                boss.taunt();
             }
         }
         else if (boss.bossStage == boss.bossStageEnum.STAGE_2) {
@@ -277,11 +294,15 @@ window.onload = function () {
     }
     // -------------------------------------------------------------------------------------------- Enemy Gets Hit
     function saberHitEnemy(saber, enemy) {
+        if (enemy.alive) {
+            enemy.eDeath();
+        }
         enemy.kill();
         enemyKillCount++;
         dropHealth(enemy.position.x, enemy.position.y);
     }
     function bulletHitEnemy(enemy, bullet) {
+        bullet.eDeath();
         bullet.kill();
         enemy.kill();
         enemyKillCount++;
@@ -320,8 +341,14 @@ window.onload = function () {
                 playerVisible();
                 game.time.events.repeat(200, 3, playerVisible, this);
                 game.time.events.add(1000, playerInvuln, this);
+                playerHit.play();
             }
-            playerClear();
+            if (player.health < 1) {
+                player.pDeath();
+            }
+            else {
+                playerClear();
+            }
         }
     }
     function playerVisible() {
@@ -406,25 +433,13 @@ window.onload = function () {
         if (player.health != player.maxHealth) {
             healPlayer(player, 1);
             healthDrop.kill();
+            healthPickup.play();
         }
     }
     function increaseHealth(player) {
         player.maxHealth += 1;
         player.heal(1);
         hud.add(new Phaser.Sprite(game, (hud.children[0].width * (player.maxHealth - 1)) + (hud.children[0].width / 2), hud.children[0].height / 2, 'heart'));
-    }
-    // -------------------------------------------------------------------------------------------- Kill Player
-    function killPlayer(player) {
-        var life = lives.getFirstAlive();
-        if (life) {
-            life.kill();
-            player.kill();
-            player.lives--;
-            player.reset(300, 300, 1);
-        }
-        if (player.lives < 1) {
-            player.kill();
-        }
     }
     //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████    ▄███████▄    ▄████████  ▄█     █▄  ███▄▄▄▄        
     //  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███   ███    ███   ███    ███ ███     ███ ███▀▀▀██▄      
@@ -634,8 +649,14 @@ var Boss = (function (_super) {
         _this.playerStill = false;
         _this.fireTimerCH = 0;
         _this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
+        _this.taunt1 = game.add.audio("taunt1", 3);
         return _this;
     }
+    Boss.prototype.taunt = function () {
+        if (this.bossStage == this.bossStageEnum.STAGE_2) {
+            this.taunt1.play();
+        }
+    };
     Boss.prototype.update = function () {
         if (this.bossStage == this.bossStageEnum.STAGE_2) {
             if (this.game.time.now > this.fireTimerHL) {
@@ -978,8 +999,12 @@ var Player = (function (_super) {
         _this.createSaberHitBoxes();
         _this.slash = _this.game.add.audio('slash');
         _this.slash.allowMultiple = true;
+        _this.death = _this.game.add.audio('playerDeath');
         return _this;
     }
+    Player.prototype.pDeath = function () {
+        this.death.play();
+    };
     Player.prototype.createSaberHitBoxes = function () {
         this.saberHitBoxes = this.game.add.physicsGroup();
         this.addChild(this.saberHitBoxes);
@@ -1385,6 +1410,13 @@ var Enemy = (function (_super) {
         _this.room = room;
         _this.player = player;
         game.add.existing(_this);
+        _this.enemyDeath = _this.game.add.audio('enemyDeath');
+        _this.laser = _this.game.add.audio('laser');
+        _this.bulletBasic = _this.game.add.audio('bulletBasic', 1.5);
+        _this.bulletRapid = _this.game.add.audio('bulletRapid', 0.15);
+        _this.bulletRapid.allowMultiple = true;
+        _this.bulletShotgun = _this.game.add.audio('bulletShotgun');
+        _this.bulletShotgun.allowMultiple = true;
         return _this;
     }
     //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
@@ -1884,11 +1916,13 @@ var Enemy = (function (_super) {
                         prediction.x = prediction.x + (this.player.body.velocity.x * 1.2);
                         prediction.y = prediction.y + (this.player.body.velocity.y * 1.2);
                         this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, prediction) * 57.2958;
+                        this.laser.play();
                     }
                     else if (this.eType != this.enemyTypeEnum.LASER) {
                         this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, this.player.body) * 57.2958;
                     }
                     if (this.eType == this.enemyTypeEnum.SHOTGUN) {
+                        this.bulletShotgun.play();
                         this.weapon.fire();
                         this.weapon.fireAngle -= 30;
                         this.weapon.fire();
@@ -1910,12 +1944,14 @@ var Enemy = (function (_super) {
                     }
                     else if (this.eType == this.enemyTypeEnum.RAPID) {
                         this.weapon.fire();
+                        this.bulletRapid.play();
                         if (!this.fireBreak) {
                             this.fireBreak = true;
                             this.game.time.events.add(6000, this.eFireDelay, this);
                         }
                     }
                     else {
+                        this.bulletBasic.play();
                         this.weapon.fire();
                     }
                     this.eAim = false;
@@ -1927,6 +1963,7 @@ var Enemy = (function (_super) {
         }
     };
     Enemy.prototype.eSecondShot = function () {
+        this.bulletShotgun.play();
         this.weapon.fireAngle = this.secondShot;
         this.weapon.fire();
         this.weapon.fireAngle -= 15;
@@ -1946,6 +1983,9 @@ var Enemy = (function (_super) {
             this.fireTimer = this.game.time.now + 2000;
         }
         this.fireBreak = false;
+    };
+    Enemy.prototype.eDeath = function () {
+        this.enemyDeath.play();
     };
     return Enemy;
 }(Phaser.Sprite // -----------------------------------------------------Enemy code
