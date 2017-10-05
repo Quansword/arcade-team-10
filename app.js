@@ -77,7 +77,7 @@ window.onload = function () {
         game.load.spritesheet('laserH', 'assets/LaserH.png', 256, 64, 6, 0, 0);
         game.load.spritesheet('BossLaserH', 'assets/longLaser.png', 1536, 64, 6, 0, 0);
         game.load.spritesheet('eSprite', 'assets/EnemySpriteSheet.png', 32, 53, 4, 0, 2);
-        game.load.image('boss', 'assets/Boss.png');
+        game.load.spritesheet('boss', 'assets/BossSpriteSheet.png', 258, 114, 8, 0, 2);
         game.load.spritesheet('turret', 'assets/laserTurret.png', 128, 128, 9, 0, 2);
         game.load.spritesheet('clear', 'assets/clear.png', 128, 128, 4, 0, 2);
         game.load.image('bossHealth', 'assets/BossHealth.png');
@@ -364,6 +364,7 @@ window.onload = function () {
                 boss.speakerL.bullets.forEach(function (b) { b.kill(); }, this);
                 boss.speakerR.bullets.forEach(function (b) { b.kill(); }, this);
                 boss.laptop.bullets.forEach(function (b) { b.kill(); }, this);
+                boss.animations.play('bob');
             }
             game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
             game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
@@ -433,6 +434,8 @@ window.onload = function () {
                 boss.fireTimerBS = game.time.now + game.rnd.integerInRange(7000, 10000);
                 laserGate4.deactivate();
                 boss.taunt();
+                boss.animations.stop('bob');
+                boss.frame = 0;
             }
         }
         boss.update();
@@ -754,7 +757,7 @@ var Room = (function (_super) {
 var Boss = (function (_super) {
     __extends(Boss, _super);
     function Boss(xPos, yPos, player, game) {
-        var _this = _super.call(this, game, xPos, yPos, "boss") || this;
+        var _this = _super.call(this, game, xPos, yPos, "boss", 0) || this;
         _this.bossStageEnum = {
             STAGE_0: 0,
             STAGE_1: 1,
@@ -762,6 +765,9 @@ var Boss = (function (_super) {
             STAGE_3: 3,
             STAGE_4: 4
         };
+        _this.animations.add('scratch', [6, 7], 4);
+        _this.animations.add('crosshatch', [2, 3], 10);
+        _this.animations.add('bob', [4, 5], 4, true);
         _this.anchor.setTo(0.5, 0.5);
         game.physics.arcade.enable(_this);
         _this.body.immovable = true;
@@ -1165,6 +1171,7 @@ var Boss = (function (_super) {
                 this.speakerL.fire();
             }
             this.bulletShotgun.play();
+            this.animations.play('crosshatch');
         }
     };
     Boss.prototype.bSecondShotR = function () {
@@ -1227,6 +1234,7 @@ var Boss = (function (_super) {
                 this.speakerR.fire();
             }
             this.bulletShotgun.play();
+            this.animations.play('crosshatch');
         }
     };
     Boss.prototype.bEndCrosshatch = function () {
@@ -1264,6 +1272,7 @@ var Boss = (function (_super) {
             b.body.velocity.x = -b.body.velocity.x;
         }, this);
         this.shake.play();
+        this.animations.play('scratch');
     };
     return Boss;
 }(Phaser.Sprite));
