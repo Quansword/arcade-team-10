@@ -6,16 +6,11 @@
 //  ███    ███   ███    ███ ███   ███   ███   ███    █▄  
 //  ███    ███   ███    ███ ███   ███   ███   ███    ███ 
 //  ████████▀    ███    █▀   ▀█   ███   █▀    ██████████ 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 window.onload = function () {
     //  Note that this html file is set to pull down Phaser 2.5.0 from the JS Delivr CDN.
     //  Although it will work fine with this tutorial, it's almost certainly not the most current version.
@@ -48,6 +43,7 @@ window.onload = function () {
     var loop;
     var drop;
     var healthPickup;
+    var playerHit;
     function preload() {
         game.stage.backgroundColor = '#eee';
         game.load.spritesheet('pSprite', 'assets/PlayerSpritesheet.png', 156, 128, 54, 0, 2);
@@ -71,15 +67,21 @@ window.onload = function () {
         game.load.audio('laserOff', 'assets/audio/LaserOff.wav');
         game.load.audio('enemyDeath', 'assets/audio/EnemyDeath.wav');
         game.load.audio('playerDeath', 'assets/audio/PlayerDeath.mp3');
+        game.load.audio('playerHit', 'assets/audio/PlayerHit.mp3');
         game.load.audio('healthPickup', 'assets/audio/HealthPickup.wav');
         game.load.audio('laser', 'assets/audio/Laser.wav');
         game.load.audio('bulletBasic', 'assets/audio/BulletBasic.mp3');
+        game.load.audio('bulletRapid', 'assets/audio/BulletRapid.mp3');
+        game.load.audio('bulletShotgun', 'assets/audio/BulletShotgun.mp3');
+        game.load.audio('taunt1', 'assets/audio/Taunt1.wav');
     }
     function create() {
         loop = game.add.audio('loop', 1, true);
         loop.play();
         drop = game.add.audio('drop', 1, true);
         healthPickup = game.add.audio('healthPickup');
+        playerHit = game.add.audio('playerHit', 3);
+        playerHit.allowMultiple = true;
         fullScreen();
         game.physics.startSystem(Phaser.Physics.ARCADE);
         background = game.add.sprite(0, 0, 'background');
@@ -241,6 +243,7 @@ window.onload = function () {
                 boss.fireTimerSR = game.time.now + game.rnd.integerInRange(2500, 4500);
                 boss.fireTimerCH = game.time.now + game.rnd.integerInRange(10000, 15000);
                 laserGate4.deactivate();
+                boss.taunt();
             }
         }
         else if (boss.bossStage == boss.bossStageEnum.STAGE_2) {
@@ -248,6 +251,8 @@ window.onload = function () {
                 boss.bossStage = boss.bossStageEnum.STAGE_3;
                 boss.canDamage = false;
                 laserGate4.activate();
+                loop.stop();
+                drop.play();
             }
             game.physics.arcade.collide(boss.headsetL.bullets, layer, killBullet);
             game.physics.arcade.collide(boss.headsetR.bullets, layer, killBullet);
@@ -333,6 +338,7 @@ window.onload = function () {
                 playerVisible();
                 game.time.events.repeat(200, 3, playerVisible, this);
                 game.time.events.add(1000, playerInvuln, this);
+                playerHit.play();
             }
             if (player.health < 1) {
                 player.pDeath();
@@ -471,20 +477,19 @@ window.onload = function () {
 var Barrier = (function (_super) {
     __extends(Barrier, _super);
     function Barrier(xPos, yPos, width, height, key, game) {
-        var _this = _super.call(this, game, xPos, yPos, key) || this;
-        game.physics.arcade.enable(_this);
-        _this.body.immovable = true;
-        _this.scale.setTo(width, height);
-        game.add.existing(_this);
-        _this.isActivated = false;
-        _this.frame = 1;
-        _this.off = _this.animations.add('off', [5], 15, true);
-        _this.switch = _this.animations.add('switch', [1, 2, 3, 4], 15, false);
-        _this.on = _this.animations.add('on', [1, 2], 15, true);
-        _this.play("off");
-        _this.laserOn = _this.game.add.audio('laserOn');
-        _this.laserOff = _this.game.add.audio('laserOff');
-        return _this;
+        _super.call(this, game, xPos, yPos, key);
+        game.physics.arcade.enable(this);
+        this.body.immovable = true;
+        this.scale.setTo(width, height);
+        game.add.existing(this);
+        this.isActivated = false;
+        this.frame = 1;
+        this.off = this.animations.add('off', [5], 15, true);
+        this.switch = this.animations.add('switch', [1, 2, 3, 4], 15, false);
+        this.on = this.animations.add('on', [1, 2], 15, true);
+        this.play("off");
+        this.laserOn = this.game.add.audio('laserOn');
+        this.laserOff = this.game.add.audio('laserOff');
     }
     Barrier.prototype.activate = function () {
         this.isActivated = true;
@@ -522,11 +527,10 @@ var Barrier = (function (_super) {
 var Room = (function (_super) {
     __extends(Room, _super);
     function Room(x, y, width, height, game) {
-        var _this = _super.call(this, game, x, y) || this;
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(width, height);
-        _this.active = false;
-        return _this;
+        _super.call(this, game, x, y);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.setSize(width, height);
+        this.active = false;
     }
     return Room;
 }(Phaser.Sprite));
@@ -541,107 +545,117 @@ var Room = (function (_super) {
 var Boss = (function (_super) {
     __extends(Boss, _super);
     function Boss(xPos, yPos, player, game) {
-        var _this = _super.call(this, game, xPos, yPos, "boss") || this;
-        _this.bossStageEnum = {
+        _super.call(this, game, xPos, yPos, "boss");
+        this.bossStageEnum = {
             STAGE_0: 0,
             STAGE_1: 1,
             STAGE_2: 2,
             STAGE_3: 3,
             STAGE_4: 4
         };
-        _this.anchor.setTo(0.5, 0.5);
-        game.physics.arcade.enable(_this);
-        _this.body.immovable = true;
-        _this.scale.setTo(2.2, 2.2);
-        _this.body.setSize(_this.body.width * 1.2, _this.body.height, -(_this.body.width * 0.1), -2);
-        _this.bossStage = _this.bossStageEnum.STAGE_0;
-        _this.maxHealth = 100;
-        _this.health = 100;
-        _this.canDamage = false;
-        _this.player = player;
-        game.add.existing(_this);
-        _this.headsetL = game.add.weapon(100, 'bulletBlue');
-        _this.headsetR = game.add.weapon(100, 'bulletBlue');
-        _this.speakerL = game.add.weapon(100, 'bulletRed');
-        _this.speakerML = game.add.weapon(100, 'bulletGreen');
-        _this.speakerMR = game.add.weapon(100, 'bulletGreen');
-        _this.speakerR = game.add.weapon(100, 'bulletRed');
-        _this.laptop = game.add.weapon(300, 'laser');
-        _this.headsetL.bullets.forEach(function (b) { b.scale.setTo(1.5, 1.5); }, _this);
-        _this.headsetR.bullets.forEach(function (b) { b.scale.setTo(1.5, 1.5); }, _this);
-        _this.speakerL.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
-        _this.speakerML.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
-        _this.speakerMR.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
-        _this.speakerR.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
-        _this.laptop.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, _this);
-        _this.headsetL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.headsetL.bulletSpeed = 300;
-        _this.headsetL.fireRate = 0;
-        _this.headsetL.bulletAngleOffset = 90;
-        _this.headsetL.bulletAngleVariance = 3;
-        _this.headsetL.x = 940;
-        _this.headsetL.y = 120;
-        _this.fireTimerHL = 0;
-        _this.aimHL = false;
-        _this.headsetR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.headsetR.bulletSpeed = 300;
-        _this.headsetR.fireRate = 0;
-        _this.headsetR.bulletAngleOffset = 90;
-        _this.headsetR.bulletAngleVariance = 3;
-        _this.headsetR.x = 980;
-        _this.headsetR.y = 120;
-        _this.fireTimerHR = 0;
-        _this.aimHR = false;
-        _this.speakerL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.speakerL.bulletSpeed = 300;
-        _this.speakerL.fireRate = 0;
-        _this.speakerL.bulletAngleOffset = 90;
-        _this.speakerL.x = 740;
-        _this.speakerL.y = 240;
-        _this.fireTimerSL = 0;
-        _this.aimSL = false;
-        _this.speakerML.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.speakerML.bulletSpeed = 300;
-        _this.speakerML.fireRate = 0;
-        _this.speakerML.bulletAngleOffset = 90;
-        _this.speakerML.x = 830;
-        _this.speakerML.y = 224;
-        _this.fireTimerSML = 0;
-        _this.aimSML = false;
-        _this.speakerMR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.speakerMR.bulletSpeed = 300;
-        _this.speakerMR.fireRate = 0;
-        _this.speakerMR.bulletAngleOffset = 90;
-        _this.speakerMR.x = 1090;
-        _this.speakerMR.y = 224;
-        _this.fireTimerSMR = 0;
-        _this.aimSMR = false;
-        _this.speakerR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.speakerR.bulletSpeed = 300;
-        _this.speakerR.fireRate = 0;
-        _this.speakerR.bulletAngleOffset = 90;
-        _this.speakerR.x = 1180;
-        _this.speakerR.y = 240;
-        _this.fireTimerSR = 0;
-        _this.aimSR = false;
-        _this.laptop.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.laptop.bulletSpeed = 500;
-        _this.laptop.fireRate = 0;
-        _this.laptop.bulletAngleOffset = 90;
-        _this.laptop.x = 960;
-        _this.laptop.y = 195;
-        _this.fireTimerLT = 0;
-        _this.aimLT = false;
-        _this.isCrosshatch = false;
-        _this.crosshatchFired = false;
-        _this.alternateCHL = false;
-        _this.alternateCHR = false;
-        _this.fireBreak = false;
-        _this.playerStill = false;
-        _this.fireTimerCH = 0;
-        _this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
-        return _this;
+        this.anchor.setTo(0.5, 0.5);
+        game.physics.arcade.enable(this);
+        this.body.immovable = true;
+        this.scale.setTo(2.2, 2.2);
+        this.body.setSize(this.body.width * 1.2, this.body.height, -(this.body.width * 0.1), -2);
+        this.bossStage = this.bossStageEnum.STAGE_0;
+        this.maxHealth = 100;
+        this.health = 100;
+        this.canDamage = false;
+        this.player = player;
+        game.add.existing(this);
+        this.headsetL = game.add.weapon(100, 'bulletBlue');
+        this.headsetR = game.add.weapon(100, 'bulletBlue');
+        this.speakerL = game.add.weapon(100, 'bulletRed');
+        this.speakerML = game.add.weapon(100, 'bulletGreen');
+        this.speakerMR = game.add.weapon(100, 'bulletGreen');
+        this.speakerR = game.add.weapon(100, 'bulletRed');
+        this.laptop = game.add.weapon(300, 'laser');
+        this.headsetL.bullets.forEach(function (b) { b.scale.setTo(1.5, 1.5); }, this);
+        this.headsetR.bullets.forEach(function (b) { b.scale.setTo(1.5, 1.5); }, this);
+        this.speakerL.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, this);
+        this.speakerML.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, this);
+        this.speakerMR.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, this);
+        this.speakerR.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, this);
+        this.laptop.bullets.forEach(function (b) { b.scale.setTo(2, 2); }, this);
+        this.headsetL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.headsetL.bulletSpeed = 300;
+        this.headsetL.fireRate = 0;
+        this.headsetL.bulletAngleOffset = 90;
+        this.headsetL.bulletAngleVariance = 3;
+        this.headsetL.x = 940;
+        this.headsetL.y = 120;
+        this.fireTimerHL = 0;
+        this.aimHL = false;
+        this.headsetR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.headsetR.bulletSpeed = 300;
+        this.headsetR.fireRate = 0;
+        this.headsetR.bulletAngleOffset = 90;
+        this.headsetR.bulletAngleVariance = 3;
+        this.headsetR.x = 980;
+        this.headsetR.y = 120;
+        this.fireTimerHR = 0;
+        this.aimHR = false;
+        this.speakerL.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.speakerL.bulletSpeed = 300;
+        this.speakerL.fireRate = 0;
+        this.speakerL.bulletAngleOffset = 90;
+        this.speakerL.x = 740;
+        this.speakerL.y = 240;
+        this.fireTimerSL = 0;
+        this.aimSL = false;
+        this.speakerML.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.speakerML.bulletSpeed = 300;
+        this.speakerML.fireRate = 0;
+        this.speakerML.bulletAngleOffset = 90;
+        this.speakerML.x = 830;
+        this.speakerML.y = 224;
+        this.fireTimerSML = 0;
+        this.aimSML = false;
+        this.speakerMR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.speakerMR.bulletSpeed = 300;
+        this.speakerMR.fireRate = 0;
+        this.speakerMR.bulletAngleOffset = 90;
+        this.speakerMR.x = 1090;
+        this.speakerMR.y = 224;
+        this.fireTimerSMR = 0;
+        this.aimSMR = false;
+        this.speakerR.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.speakerR.bulletSpeed = 300;
+        this.speakerR.fireRate = 0;
+        this.speakerR.bulletAngleOffset = 90;
+        this.speakerR.x = 1180;
+        this.speakerR.y = 240;
+        this.fireTimerSR = 0;
+        this.aimSR = false;
+        this.laptop.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.laptop.bulletSpeed = 500;
+        this.laptop.fireRate = 0;
+        this.laptop.bulletAngleOffset = 90;
+        this.laptop.x = 960;
+        this.laptop.y = 195;
+        this.fireTimerLT = 0;
+        this.aimLT = false;
+        this.isCrosshatch = false;
+        this.crosshatchFired = false;
+        this.alternateCHL = false;
+        this.alternateCHR = false;
+        this.fireBreak = false;
+        this.playerStill = false;
+        this.fireTimerCH = 0;
+        this.prediction = new Phaser.Rectangle(0, 0, player.body.width, player.body.height);
+        this.taunt1 = game.add.audio("taunt1", 3);
+        this.laser = this.game.add.audio('laser');
+        this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
+        this.bulletBasic.allowMultiple = true;
+        this.bulletShotgun = this.game.add.audio('bulletShotgun');
+        this.bulletShotgun.allowMultiple = true;
     }
+    Boss.prototype.taunt = function () {
+        if (this.bossStage == this.bossStageEnum.STAGE_2) {
+            this.taunt1.play();
+        }
+    };
     Boss.prototype.update = function () {
         if (this.bossStage == this.bossStageEnum.STAGE_2) {
             if (this.game.time.now > this.fireTimerHL) {
@@ -683,6 +697,7 @@ var Boss = (function (_super) {
                     this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
                     this.headsetL.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.prediction) * 57.2958;
                     this.headsetL.fire();
+                    this.bulletBasic.play();
                     this.aimHL = false;
                 }
                 if (this.aimHR) {
@@ -690,6 +705,7 @@ var Boss = (function (_super) {
                     this.prediction.y = this.player.body.position.y + (this.player.body.velocity.y * 0.5);
                     this.headsetR.fireAngle = this.game.physics.arcade.angleBetween(this.headsetR.fireFrom, this.prediction) * 57.2958;
                     this.headsetR.fire();
+                    this.bulletBasic.play();
                     this.aimHR = false;
                 }
                 if (this.aimSL) {
@@ -716,6 +732,7 @@ var Boss = (function (_super) {
                     this.speakerL.fireAngle -= 15;
                     this.speakerL.fire();
                     this.game.time.events.add(750, this.bSecondShotL, this);
+                    this.bulletShotgun.play();
                     this.aimSL = false;
                 }
                 if (this.aimSR) {
@@ -742,15 +759,8 @@ var Boss = (function (_super) {
                     this.speakerR.fireAngle -= 15;
                     this.speakerR.fire();
                     this.game.time.events.add(750, this.bSecondShotR, this);
+                    this.bulletShotgun.play();
                     this.aimSR = false;
-                }
-                if (this.aimLT) {
-                    if (!this.fireBreak) {
-                        this.fireBreak = true;
-                        this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
-                        this.game.time.events.add(1000, this.bFireDelay, this);
-                    }
-                    this.laptop.fire();
                 }
             }
             else {
@@ -790,6 +800,15 @@ var Boss = (function (_super) {
                     this.game.time.events.add(11000, this.bEndCrosshatch, this);
                     this.crosshatchFired = true;
                 }
+            }
+            if (this.aimLT) {
+                if (!this.fireBreak) {
+                    this.fireBreak = true;
+                    this.laptop.fireAngle = this.game.physics.arcade.angleBetween(this.headsetL.fireFrom, this.player.body) * 57.2958;
+                    this.game.time.events.add(1000, this.bFireDelay, this);
+                    this.laser.play();
+                }
+                this.laptop.fire();
             }
         }
     };
@@ -854,6 +873,7 @@ var Boss = (function (_super) {
                 this.speakerL.fireAngle -= 15;
                 this.speakerL.fire();
             }
+            this.bulletShotgun.play();
         }
     };
     Boss.prototype.bSecondShotR = function () {
@@ -915,6 +935,7 @@ var Boss = (function (_super) {
                 this.speakerR.fireAngle -= 15;
                 this.speakerR.fire();
             }
+            this.bulletShotgun.play();
         }
     };
     Boss.prototype.bEndCrosshatch = function () {
@@ -940,8 +961,8 @@ var Boss = (function (_super) {
 var Player = (function (_super) {
     __extends(Player, _super);
     function Player(xPos, yPos, game) {
-        var _this = _super.call(this, game, xPos, yPos, 'pSprite') || this;
-        _this.pDirEnum = {
+        _super.call(this, game, xPos, yPos, 'pSprite');
+        this.pDirEnum = {
             RIGHT: 0,
             LEFT: 1,
             UPRIGHT: 2,
@@ -951,42 +972,41 @@ var Player = (function (_super) {
             DOWNRIGHT: 6,
             DOWNLEFT: 7
         };
-        _this.rAttack = _this.animations.add('rAttack', [6, 7, 8, 9, 10, 11], 25);
-        _this.lAttack = _this.animations.add('lAttack', [12, 13, 14, 15, 16, 17], 25);
-        _this.uAttack = _this.animations.add('uAttack', [18, 19, 20, 21, 22, 23], 25);
-        _this.dAttack = _this.animations.add('dAttack', [24, 25, 26, 27, 28, 29], 25);
-        _this.urAttack = _this.animations.add('urAttack', [30, 31, 32, 33, 34, 35], 25);
-        _this.ulAttack = _this.animations.add('ulAttack', [36, 37, 38, 39, 40, 41], 25);
-        _this.drAttack = _this.animations.add('drAttack', [42, 43, 44, 45, 46, 47], 25);
-        _this.dlAttack = _this.animations.add('dlAttack', [48, 49, 50, 51, 52, 53], 25);
-        _this.attacked = false;
-        _this.frame = _this.pDirEnum.RIGHT;
-        _this.newPFrame = _this.frame;
-        _this.smoothed = false;
-        _this.exists = true;
-        _this.anchor.setTo(0.5, 0.5);
-        _this.scale.setTo(2.25, 2.25);
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.setSize(18, 28, 51, 57);
-        _this.body.collideWorldBounds = true;
-        _this.maxHealth = 5;
-        _this.health = _this.maxHealth;
-        _this.canDamage = true;
-        _this.aim = false;
-        _this.pVelocityX = 0;
-        _this.pVelocityY = 0;
-        _this.pSpeed = 250;
-        _this.weapon = game.add.weapon();
-        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 350;
-        _this.weapon.autofire = false;
-        _this.weapon.bulletAngleOffset = 90;
-        _this.lives = 1;
-        _this.createSaberHitBoxes();
-        _this.slash = _this.game.add.audio('slash');
-        _this.slash.allowMultiple = true;
-        _this.death = _this.game.add.audio('playerDeath');
-        return _this;
+        this.rAttack = this.animations.add('rAttack', [6, 7, 8, 9, 10, 11], 25);
+        this.lAttack = this.animations.add('lAttack', [12, 13, 14, 15, 16, 17], 25);
+        this.uAttack = this.animations.add('uAttack', [18, 19, 20, 21, 22, 23], 25);
+        this.dAttack = this.animations.add('dAttack', [24, 25, 26, 27, 28, 29], 25);
+        this.urAttack = this.animations.add('urAttack', [30, 31, 32, 33, 34, 35], 25);
+        this.ulAttack = this.animations.add('ulAttack', [36, 37, 38, 39, 40, 41], 25);
+        this.drAttack = this.animations.add('drAttack', [42, 43, 44, 45, 46, 47], 25);
+        this.dlAttack = this.animations.add('dlAttack', [48, 49, 50, 51, 52, 53], 25);
+        this.attacked = false;
+        this.frame = this.pDirEnum.RIGHT;
+        this.newPFrame = this.frame;
+        this.smoothed = false;
+        this.exists = true;
+        this.anchor.setTo(0.5, 0.5);
+        this.scale.setTo(2.25, 2.25);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.setSize(18, 28, 51, 57);
+        this.body.collideWorldBounds = true;
+        this.maxHealth = 5;
+        this.health = this.maxHealth;
+        this.canDamage = true;
+        this.aim = false;
+        this.pVelocityX = 0;
+        this.pVelocityY = 0;
+        this.pSpeed = 250;
+        this.weapon = game.add.weapon();
+        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.weapon.bulletSpeed = 350;
+        this.weapon.autofire = false;
+        this.weapon.bulletAngleOffset = 90;
+        this.lives = 1;
+        this.createSaberHitBoxes();
+        this.slash = this.game.add.audio('slash');
+        this.slash.allowMultiple = true;
+        this.death = this.game.add.audio('playerDeath');
     }
     Player.prototype.pDeath = function () {
         this.death.play();
@@ -1310,52 +1330,53 @@ var Player = (function (_super) {
 //  ███    ███ ███   ███   ███    ███ ███   ███   ███ ███   ███ 
 //  ██████████  ▀█   █▀    ██████████  ▀█   ███   █▀   ▀█████▀ 
 var Enemy = (function (_super) {
-    __extends(Enemy, _super); // -----------------------------------------------------Enemy code
+    __extends(Enemy, _super);
     function Enemy(xPos, yPos, enemyType, player, room, game) {
-        var _this = _super.call(this, game, xPos, yPos, 'eSprite') || this;
-        _this.enemyTypeEnum = {
+        var _this = this;
+        _super.call(this, game, xPos, yPos, 'eSprite');
+        this.enemyTypeEnum = {
             BASE: 0,
             RAPID: 1,
             SHOTGUN: 2,
             LASER: 3
         };
-        _this.eType = enemyType;
-        if (_this.eType == _this.enemyTypeEnum.RAPID) {
-            _this.frame = 1;
+        this.eType = enemyType;
+        if (this.eType == this.enemyTypeEnum.RAPID) {
+            this.frame = 1;
         }
-        else if (_this.eType == _this.enemyTypeEnum.LASER) {
-            _this.frame = 3;
+        else if (this.eType == this.enemyTypeEnum.LASER) {
+            this.frame = 3;
         }
-        else if (_this.eType == _this.enemyTypeEnum.SHOTGUN) {
-            _this.frame = 2;
+        else if (this.eType == this.enemyTypeEnum.SHOTGUN) {
+            this.frame = 2;
         }
-        _this.smoothed = false;
-        _this.exists = true;
-        _this.anchor.setTo(0.5, 0.5);
-        _this.scale.setTo(2.2, 2.2);
-        _this.game.physics.enable(_this, Phaser.Physics.ARCADE);
-        _this.body.collideWorldBounds = true;
-        _this.body.setSize(28, 49, 2, 2);
-        _this.maxHealth = 1;
-        _this.eAim = false;
-        _this.aim = false;
-        _this.fireBreak = false;
-        _this.eVelocityX = 0;
-        _this.eVelocityY = 0;
-        _this.fireTimer = _this.game.time.now + game.rnd.integerInRange(1000, 6000);
-        if (_this.eType == _this.enemyTypeEnum.LASER) {
-            _this.weapon = game.add.weapon(200, 'laser');
+        this.smoothed = false;
+        this.exists = true;
+        this.anchor.setTo(0.5, 0.5);
+        this.scale.setTo(2.2, 2.2);
+        this.game.physics.enable(this, Phaser.Physics.ARCADE);
+        this.body.collideWorldBounds = true;
+        this.body.setSize(28, 49, 2, 2);
+        this.maxHealth = 1;
+        this.eAim = false;
+        this.aim = false;
+        this.fireBreak = false;
+        this.eVelocityX = 0;
+        this.eVelocityY = 0;
+        this.fireTimer = this.game.time.now + game.rnd.integerInRange(1000, 6000);
+        if (this.eType == this.enemyTypeEnum.LASER) {
+            this.weapon = game.add.weapon(200, 'laser');
         }
-        else if (_this.eType == _this.enemyTypeEnum.BASE) {
-            _this.weapon = game.add.weapon(100, 'bulletBlue');
+        else if (this.eType == this.enemyTypeEnum.BASE) {
+            this.weapon = game.add.weapon(100, 'bulletBlue');
         }
-        else if (_this.eType == _this.enemyTypeEnum.SHOTGUN) {
-            _this.weapon = game.add.weapon(100, 'bulletRed');
+        else if (this.eType == this.enemyTypeEnum.SHOTGUN) {
+            this.weapon = game.add.weapon(100, 'bulletRed');
         }
         else {
-            _this.weapon = game.add.weapon(100, 'bulletGreen');
+            this.weapon = game.add.weapon(100, 'bulletGreen');
         }
-        _this.weapon.bullets.forEach(function (b) {
+        this.weapon.bullets.forEach(function (b) {
             if (_this.eType == _this.enemyTypeEnum.LASER) {
                 b.scale.setTo(2, 2);
             }
@@ -1368,39 +1389,41 @@ var Enemy = (function (_super) {
             else {
                 b.scale.setTo(1.5, 1.5);
             }
-        }, _this);
-        _this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-        _this.weapon.bulletSpeed = 300;
-        _this.weapon.fireRate = 500;
-        _this.weapon.bulletAngleOffset = 90;
-        _this.secondShot = 0;
-        if (_this.eType == _this.enemyTypeEnum.BASE) {
-            _this.weapon.fireRate = 2000;
-            _this.weapon.bulletAngleVariance = 10;
-            _this.eSpeed = 125;
+        }, this);
+        this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+        this.weapon.bulletSpeed = 300;
+        this.weapon.fireRate = 500;
+        this.weapon.bulletAngleOffset = 90;
+        this.secondShot = 0;
+        if (this.eType == this.enemyTypeEnum.BASE) {
+            this.weapon.fireRate = 2000;
+            this.weapon.bulletAngleVariance = 10;
+            this.eSpeed = 125;
         }
-        else if (_this.eType == _this.enemyTypeEnum.RAPID) {
-            _this.weapon.fireRate = 400;
-            _this.weapon.bulletAngleVariance = 10;
-            _this.eSpeed = 200;
+        else if (this.eType == this.enemyTypeEnum.RAPID) {
+            this.weapon.fireRate = 400;
+            this.weapon.bulletAngleVariance = 10;
+            this.eSpeed = 200;
         }
-        else if (_this.eType == _this.enemyTypeEnum.LASER) {
-            _this.weapon.bulletSpeed = 500;
-            _this.weapon.fireRate = 10;
-            _this.eSpeed = 75;
+        else if (this.eType == this.enemyTypeEnum.LASER) {
+            this.weapon.bulletSpeed = 500;
+            this.weapon.fireRate = 10;
+            this.eSpeed = 75;
         }
         else {
-            _this.weapon.fireRate = 0;
-            _this.eSpeed = 100;
+            this.weapon.fireRate = 0;
+            this.eSpeed = 100;
         }
-        _this.room = room;
-        _this.player = player;
-        game.add.existing(_this);
-        _this.enemyDeath = _this.game.add.audio('enemyDeath');
-        _this.laser = _this.game.add.audio('laser');
-        _this.bulletBasic = _this.game.add.audio('bulletBasic');
-        _this.bulletBasic.allowMultiple = true;
-        return _this;
+        this.room = room;
+        this.player = player;
+        game.add.existing(this);
+        this.enemyDeath = this.game.add.audio('enemyDeath');
+        this.laser = this.game.add.audio('laser');
+        this.bulletBasic = this.game.add.audio('bulletBasic', 1.5);
+        this.bulletRapid = this.game.add.audio('bulletRapid', 0.15);
+        this.bulletRapid.allowMultiple = true;
+        this.bulletShotgun = this.game.add.audio('bulletShotgun');
+        this.bulletShotgun.allowMultiple = true;
     }
     //   ▄████████ ███▄▄▄▄      ▄████████   ▄▄▄▄███▄▄▄▄   ▄██   ▄           ▄████████  ▄█  
     //  ███    ███ ███▀▀▀██▄   ███    ███ ▄██▀▀▀███▀▀▀██▄ ███   ██▄        ███    ███ ███  
@@ -1905,6 +1928,7 @@ var Enemy = (function (_super) {
                         this.weapon.fireAngle = this.game.physics.arcade.angleBetween(this.body, this.player.body) * 57.2958;
                     }
                     if (this.eType == this.enemyTypeEnum.SHOTGUN) {
+                        this.bulletShotgun.play();
                         this.weapon.fire();
                         this.weapon.fireAngle -= 30;
                         this.weapon.fire();
@@ -1926,6 +1950,7 @@ var Enemy = (function (_super) {
                     }
                     else if (this.eType == this.enemyTypeEnum.RAPID) {
                         this.weapon.fire();
+                        this.bulletRapid.play();
                         if (!this.fireBreak) {
                             this.fireBreak = true;
                             this.game.time.events.add(6000, this.eFireDelay, this);
@@ -1944,6 +1969,7 @@ var Enemy = (function (_super) {
         }
     };
     Enemy.prototype.eSecondShot = function () {
+        this.bulletShotgun.play();
         this.weapon.fireAngle = this.secondShot;
         this.weapon.fire();
         this.weapon.fireAngle -= 15;
@@ -1968,6 +1994,5 @@ var Enemy = (function (_super) {
         this.enemyDeath.play();
     };
     return Enemy;
-}(Phaser.Sprite // -----------------------------------------------------Enemy code
-));
+}(Phaser.Sprite));
 //# sourceMappingURL=app.js.map
